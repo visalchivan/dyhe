@@ -35,7 +35,7 @@ function getItem(
 }
 
 const items: MenuItem[] = [
-  getItem("Home", "/", <HomeOutlined />),
+  getItem("Home", "/dashboard", <HomeOutlined />),
   getItem("Packages", "/packages", <GiftOutlined />),
   getItem("Scan Package", "/scan", <ScanOutlined />),
   getItem("Merchants", "/merchants", <ShopOutlined />),
@@ -48,7 +48,7 @@ const items: MenuItem[] = [
 
 // Breadcrumb mapping
 const breadcrumbMap: Record<string, string[]> = {
-  "/": ["Home"],
+  "/dashboard": ["Home"],
   "/packages": ["Home", "Packages"],
   "/scan-package": ["Home", "Scan Package"],
   "/merchants": ["Home", "Merchants"],
@@ -70,7 +70,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathname = usePathname();
 
   const {
-    token: { colorBgContainer, borderRadiusLG },
+    token: { colorBgContainer },
   } = theme.useToken();
 
   // Update selected key and breadcrumb when pathname changes
