@@ -49,7 +49,7 @@ export default function MerchantsPage() {
   };
 
   return (
-    <div>
+    <div style={{ padding: 16 }}>
       <MerchantsTable
         onCreateMerchant={handleCreateMerchant}
         onEditMerchant={handleEditMerchant}

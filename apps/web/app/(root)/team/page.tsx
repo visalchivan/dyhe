@@ -65,7 +65,7 @@ export default function TeamPage() {
   };
 
   return (
-    <div>
+    <div style={{ padding: 16 }}>
       <TeamTable
         onCreateUser={handleCreateUser}
         onEditUser={handleEditUser}

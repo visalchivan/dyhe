@@ -179,7 +179,6 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </Header>
         <Content style={{ margin: "0" }}>
           <Breadcrumb style={{ margin: "16px 16px" }} items={breadcrumbItems} />
-
           {children}
         </Content>
         <Footer style={{ textAlign: "center" }}>

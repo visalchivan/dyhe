@@ -1,7 +1,7 @@
 import React from "react";
 
 const SettingsPage = () => {
-  return <div>SettingsPage</div>;
+  return <div style={{ padding: 16 }}>SettingsPage</div>;
 };
 
 export default SettingsPage;

@@ -47,7 +47,7 @@ export default function DriversPage() {
   };
 
   return (
-    <div>
+    <div style={{ padding: 16 }}>
       <DriversTable
         onCreateDriver={handleCreateDriver}
         onEditDriver={handleEditDriver}
