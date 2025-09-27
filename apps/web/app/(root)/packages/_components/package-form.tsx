@@ -1,0 +1,241 @@
+"use client";
+
+import React from "react";
+import {
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Button,
+  Space,
+  Row,
+  Col,
+} from "antd";
+import {
+  CreatePackageDto,
+  UpdatePackageDto,
+  Package,
+} from "../../../../lib/api/packages";
+import { useMerchants } from "../../../../hooks/useMerchants";
+import { useDrivers } from "../../../../hooks/useDrivers";
+
+const { Option } = Select;
+
+interface PackageFormProps {
+  packageData?: Package;
+  onSubmit: (values: CreatePackageDto | UpdatePackageDto) => void;
+  loading?: boolean;
+  onCancel: () => void;
+}
+
+const statusOptions = [
+  { value: "RECEIVED", label: "Received" },
+  { value: "PREPARING", label: "Preparing" },
+  { value: "READY", label: "Ready" },
+  { value: "DELIVERING", label: "Delivering" },
+  { value: "DELIVERED", label: "Delivered" },
+  { value: "CANCELLED", label: "Cancelled" },
+  { value: "RETURNED", label: "Returned" },
+];
+
+export const PackageForm: React.FC<PackageFormProps> = ({
+  packageData,
+  onSubmit,
+  loading = false,
+  onCancel,
+}) => {
+  const [form] = Form.useForm();
+  const { data: merchantsData } = useMerchants({ limit: 100 });
+  const { data: driversData } = useDrivers({ limit: 100 });
+
+  React.useEffect(() => {
+    if (packageData) {
+      form.setFieldsValue(packageData);
+    } else {
+      form.resetFields();
+    }
+  }, [packageData, form]);
+
+  const handleSubmit = (values: CreatePackageDto | UpdatePackageDto) => {
+    onSubmit(values);
+  };
+
+  return (
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={handleSubmit}
+      initialValues={{
+        status: "RECEIVED",
+        codAmount: 0,
+        deliveryFee: 0,
+      }}
+    >
+      <Row gutter={16}>
+        <Col span={12}>
+          <Form.Item
+            name="name"
+            label="Package Name"
+            rules={[
+              { required: true, message: "Please enter package name" },
+              { min: 2, message: "Name must be at least 2 characters" },
+            ]}
+          >
+            <Input placeholder="Enter package name" />
+          </Form.Item>
+        </Col>
+        <Col span={12}>
+          <Form.Item
+            name="customerName"
+            label="Customer Name"
+            rules={[
+              { required: true, message: "Please enter customer name" },
+              { min: 2, message: "Name must be at least 2 characters" },
+            ]}
+          >
+            <Input placeholder="Enter customer name" />
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Row gutter={16}>
+        <Col span={12}>
+          <Form.Item
+            name="customerPhone"
+            label="Phone Number"
+            rules={[
+              { required: true, message: "Please enter phone number" },
+              {
+                pattern: /^[+]?[0-9\s-()]+$/,
+                message: "Please enter a valid phone number",
+              },
+            ]}
+          >
+            <Input placeholder="Enter phone number" />
+          </Form.Item>
+        </Col>
+        <Col span={12}>
+          <Form.Item
+            name="status"
+            label="Status"
+            rules={[{ required: true, message: "Please select status" }]}
+          >
+            <Select placeholder="Select status">
+              {statusOptions.map((status) => (
+                <Option key={status.value} value={status.value}>
+                  {status.label}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Form.Item
+        name="customerAddress"
+        label="Customer Address"
+        rules={[
+          { required: true, message: "Please enter customer address" },
+          { min: 10, message: "Address must be at least 10 characters" },
+        ]}
+      >
+        <Input.TextArea
+          rows={3}
+          placeholder="Enter detailed customer address"
+        />
+      </Form.Item>
+
+      <Row gutter={16}>
+        <Col span={12}>
+          <Form.Item
+            name="codAmount"
+            label="COD Amount ($)"
+            rules={[
+              { required: true, message: "Please enter COD amount" },
+              {
+                type: "number",
+                min: 0,
+                message: "COD amount must be positive",
+              },
+            ]}
+          >
+            <InputNumber
+              style={{ width: "100%" }}
+              placeholder="Enter COD amount"
+              precision={2}
+              min={0}
+            />
+          </Form.Item>
+        </Col>
+        <Col span={12}>
+          <Form.Item
+            name="deliveryFee"
+            label="Delivery Fee ($)"
+            rules={[
+              { required: true, message: "Please enter delivery fee" },
+              {
+                type: "number",
+                min: 0,
+                message: "Delivery fee must be positive",
+              },
+            ]}
+          >
+            <InputNumber
+              style={{ width: "100%" }}
+              placeholder="Enter delivery fee"
+              precision={2}
+              min={0}
+            />
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Row gutter={16}>
+        <Col span={12}>
+          <Form.Item
+            name="merchantId"
+            label="Merchant"
+            rules={[{ required: true, message: "Please select merchant" }]}
+          >
+            <Select
+              placeholder="Select merchant"
+              showSearch
+              optionFilterProp="children"
+            >
+              {merchantsData?.merchants.map((merchant) => (
+                <Option key={merchant.id} value={merchant.id}>
+                  {merchant.name} ({merchant.email})
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Col>
+        <Col span={12}>
+          <Form.Item name="driverId" label="Driver (Optional)">
+            <Select
+              placeholder="Select driver"
+              allowClear
+              showSearch
+              optionFilterProp="children"
+            >
+              {driversData?.drivers.map((driver) => (
+                <Option key={driver.id} value={driver.id}>
+                  {driver.name} ({driver.email})
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
+        <Space>
+          <Button onClick={onCancel}>Cancel</Button>
+          <Button type="primary" htmlType="submit" loading={loading}>
+            {packageData ? "Update" : "Create"}
+          </Button>
+        </Space>
+      </Form.Item>
+    </Form>
+  );
+};

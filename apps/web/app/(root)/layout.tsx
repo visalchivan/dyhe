@@ -17,7 +17,6 @@ import {
   Layout,
   Menu,
   theme,
-  Button,
   Dropdown,
   Avatar,
   Space,
@@ -54,7 +53,6 @@ const items: MenuItem[] = [
   getItem("Merchants", "/merchants", <ShopOutlined />),
   getItem("Drivers", "/drivers", <CarOutlined />),
   getItem("Team", "/team", <TeamOutlined />),
-  getItem("Customers", "/customers", <UserOutlined />),
   getItem("Reports", "/reports", <BarChartOutlined />),
   getItem("Settings", "/settings", <SettingOutlined />),
 ];
@@ -63,11 +61,10 @@ const items: MenuItem[] = [
 const breadcrumbMap: Record<string, string[]> = {
   "/dashboard": ["Home"],
   "/packages": ["Home", "Packages"],
-  "/scan-package": ["Home", "Scan Package"],
+  "/scan": ["Home", "Scan Package"],
   "/merchants": ["Home", "Merchants"],
   "/drivers": ["Home", "Drivers"],
   "/team": ["Home", "Team"],
-  "/customers": ["Home", "Customers"],
   "/reports": ["Home", "Reports"],
   "/settings": ["Home", "Settings"],
 };
