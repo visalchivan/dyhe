@@ -1,77 +1,58 @@
-import React, { useState } from "react";
-import { Button, Form, Input, Modal, Radio } from "antd";
+"use client";
 
-interface Values {
-  title?: string;
-  description?: string;
-  modifier?: string;
+import React from "react";
+import { Drawer, Typography } from "antd";
+import { MerchantForm } from "./merchant-form";
+import {
+  CreateMerchantDto,
+  UpdateMerchantDto,
+} from "../../../../lib/api/merchants";
+import { useCreateMerchant } from "../../../../hooks/useMerchants";
+
+const { Title } = Typography;
+
+interface CreateMerchantModalProps {
+  visible: boolean;
+  onClose: () => void;
 }
 
-const CreateModal: React.FC = () => {
-  const [form] = Form.useForm();
-  const [formValues, setFormValues] = useState<Values>();
-  const [open, setOpen] = useState(false);
+export const CreateMerchantModal: React.FC<CreateMerchantModalProps> = ({
+  visible,
+  onClose,
+}) => {
+  const createMerchantMutation = useCreateMerchant();
 
-  const onCreate = (values: Values) => {
-    console.log("Received values of form: ", values);
-    setFormValues(values);
-    setOpen(false);
+  const handleSubmit = async (values: CreateMerchantDto) => {
+    try {
+      await createMerchantMutation.mutateAsync(values);
+      onClose();
+    } catch {
+      // Error is handled by the mutation
+    }
   };
 
   return (
-    <>
-      <Button type="primary" onClick={() => setOpen(true)}>
-        New Merchant
-      </Button>
-      <pre>{JSON.stringify(formValues, null, 2)}</pre>
-      <Modal
-        open={open}
-        title="Create a new merchant"
-        okText="Create"
-        cancelText="Cancel"
-        okButtonProps={{ autoFocus: true, htmlType: "submit" }}
-        onCancel={() => setOpen(false)}
-        destroyOnHidden
-        modalRender={(dom) => (
-          <Form
-            layout="vertical"
-            form={form}
-            name="form_in_modal"
-            initialValues={{ modifier: "public" }}
-            clearOnDestroy
-            onFinish={(values) => onCreate(values)}
-          >
-            {dom}
-          </Form>
-        )}
-      >
-        <Form.Item
-          name="title"
-          label="Title"
-          rules={[
-            {
-              required: true,
-              message: "Please input the title of merchant!",
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item name="description" label="Description">
-          <Input type="textarea" />
-        </Form.Item>
-        <Form.Item
-          name="modifier"
-          className="merchant-create-form_last-form-item"
-        >
-          <Radio.Group>
-            <Radio value="public">Public</Radio>
-            <Radio value="private">Private</Radio>
-          </Radio.Group>
-        </Form.Item>
-      </Modal>
-    </>
+    <Drawer
+      title={
+        <Title level={4} style={{ margin: 0 }}>
+          Create New Merchant
+        </Title>
+      }
+      width={800}
+      open={visible}
+      onClose={onClose}
+      destroyOnClose
+      closable
+    >
+      <MerchantForm
+        onSubmit={
+          handleSubmit as (
+            values: CreateMerchantDto | UpdateMerchantDto
+          ) => void
+        }
+        loading={createMerchantMutation.isPending}
+        onCancel={onClose}
+      />
+    </Drawer>
   );
 };
-
-export default CreateModal;

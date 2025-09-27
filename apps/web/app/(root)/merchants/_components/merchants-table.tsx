@@ -1,92 +1,230 @@
 "use client";
 
-import React from "react";
-import { Space, Table, Tag } from "antd";
-import type { TableProps } from "antd";
+import React, { useState } from "react";
+import {
+  Table,
+  Button,
+  Space,
+  Tag,
+  Tooltip,
+  Input,
+  Row,
+  Col,
+  Typography,
+  Popconfirm,
+} from "antd";
+import {
+  PlusOutlined,
+  EditOutlined,
+  EyeOutlined,
+  DeleteOutlined,
+  SearchOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
+import { Merchant } from "../../../../lib/api/merchants";
+import {
+  useMerchants,
+  useDeleteMerchant,
+} from "../../../../hooks/useMerchants";
+import { ColumnType } from "antd/es/table";
 
-interface DataType {
-  key: string;
-  name: string;
-  age: number;
-  address: string;
-  tags: string[];
+const { Title } = Typography;
+const { Search } = Input;
+
+interface MerchantsTableProps {
+  onCreateMerchant: () => void;
+  onEditMerchant: (merchant: Merchant) => void;
+  onViewMerchant: (merchant: Merchant) => void;
 }
 
-const columns: TableProps<DataType>["columns"] = [
-  {
-    title: "Name",
-    dataIndex: "name",
-    key: "name",
-    render: (text) => <a>{text}</a>,
-  },
-  {
-    title: "Age",
-    dataIndex: "age",
-    key: "age",
-  },
-  {
-    title: "Address",
-    dataIndex: "address",
-    key: "address",
-  },
-  {
-    title: "Tags",
-    key: "tags",
-    dataIndex: "tags",
-    render: (_, { tags }) => (
-      <>
-        {tags.map((tag) => {
-          let color = tag.length > 5 ? "geekblue" : "green";
-          if (tag === "loser") {
-            color = "volcano";
-          }
-          return (
-            <Tag color={color} key={tag}>
-              {tag.toUpperCase()}
-            </Tag>
-          );
-        })}
-      </>
-    ),
-  },
-  {
-    title: "Action",
-    key: "action",
-    render: (_, record) => (
-      <Space size="middle">
-        <a>Invite {record.name}</a>
-        <a>Delete</a>
-      </Space>
-    ),
-  },
-];
+export const MerchantsTable: React.FC<MerchantsTableProps> = ({
+  onCreateMerchant,
+  onEditMerchant,
+  onViewMerchant,
+}) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchText, setSearchText] = useState("");
 
-const data: DataType[] = [
-  {
-    key: "1",
-    name: "John Brown",
-    age: 32,
-    address: "New York No. 1 Lake Park",
-    tags: ["nice", "developer"],
-  },
-  {
-    key: "2",
-    name: "Jim Green",
-    age: 42,
-    address: "London No. 1 Lake Park",
-    tags: ["loser"],
-  },
-  {
-    key: "3",
-    name: "Joe Black",
-    age: 32,
-    address: "Sydney No. 1 Lake Park",
-    tags: ["cool", "teacher"],
-  },
-];
+  const { data, isLoading, refetch } = useMerchants({
+    page: currentPage,
+    limit: pageSize,
+    search: searchText || undefined,
+  });
 
-const MerchantsTable: React.FC = () => (
-  <Table<DataType> columns={columns} dataSource={data} />
-);
+  const deleteMerchantMutation = useDeleteMerchant();
 
-export default MerchantsTable;
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteMerchantMutation.mutateAsync(id);
+    } catch {
+      // Error is handled by the mutation
+    }
+  };
+
+  const handleSearch = (value: string) => {
+    setSearchText(value);
+    setCurrentPage(1);
+  };
+
+  const handleRefresh = () => {
+    refetch();
+  };
+
+  const columns = [
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+      sorter: (a: Merchant, b: Merchant) => a.name.localeCompare(b.name),
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+    },
+    {
+      title: "Phone",
+      dataIndex: "phone",
+      key: "phone",
+    },
+    {
+      title: "Delivery Fee",
+      dataIndex: "deliverFee",
+      key: "deliverFee",
+      render: (fee: number | string) => `$${Number(fee).toFixed(2)}`,
+      sorter: (a: Merchant, b: Merchant) => a.deliverFee - b.deliverFee,
+    },
+    {
+      title: "Bank",
+      dataIndex: "bank",
+      key: "bank",
+      render: (bank: string) => <Tag color="blue">{bank}</Tag>,
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status: string) => {
+        const color =
+          status === "ACTIVE"
+            ? "green"
+            : status === "INACTIVE"
+              ? "orange"
+              : "red";
+        return <Tag color={color}>{status}</Tag>;
+      },
+      filters: [
+        { text: "Active", value: "ACTIVE" },
+        { text: "Inactive", value: "INACTIVE" },
+        { text: "Suspended", value: "SUSPENDED" },
+      ],
+      onFilter: (value: string, record: Merchant) => record.status === value,
+    },
+    {
+      title: "Created",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (date: string) => new Date(date).toLocaleDateString(),
+      sorter: (a: Merchant, b: Merchant) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_: unknown, record: Merchant) => (
+        <Space size="small">
+          <Tooltip title="View Details">
+            <Button
+              type="text"
+              icon={<EyeOutlined />}
+              onClick={() => onViewMerchant(record)}
+            />
+          </Tooltip>
+          <Tooltip title="Edit">
+            <Button
+              type="text"
+              icon={<EditOutlined />}
+              onClick={() => onEditMerchant(record)}
+            />
+          </Tooltip>
+          <Tooltip title="Delete">
+            <Popconfirm
+              title="Delete Merchant"
+              description="Are you sure you want to delete this merchant? This action cannot be undone."
+              onConfirm={() => handleDelete(record.id)}
+              okText="Yes"
+              cancelText="No"
+              okType="danger"
+            >
+              <Button
+                type="text"
+                danger
+                icon={<DeleteOutlined />}
+                loading={deleteMerchantMutation.isPending}
+              />
+            </Popconfirm>
+          </Tooltip>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <div>
+      <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
+        <Col>
+          <Title level={4} style={{ margin: 0 }}>
+            Merchants
+          </Title>
+        </Col>
+        <Col>
+          <Space>
+            <Search
+              placeholder="Search merchants..."
+              allowClear
+              onSearch={handleSearch}
+              style={{ width: 300 }}
+              prefix={<SearchOutlined />}
+            />
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={handleRefresh}
+              loading={isLoading}
+            >
+              Refresh
+            </Button>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={onCreateMerchant}
+            >
+              Add Merchant
+            </Button>
+          </Space>
+        </Col>
+      </Row>
+
+      <Table
+        columns={columns as ColumnType<Merchant>[]}
+        dataSource={data?.merchants || []}
+        loading={isLoading}
+        rowKey="id"
+        pagination={{
+          current: currentPage,
+          pageSize: pageSize,
+          total: data?.pagination.total || 0,
+          showSizeChanger: true,
+          showQuickJumper: true,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} merchants`,
+          onChange: (page, size) => {
+            setCurrentPage(page);
+            setPageSize(size || 10);
+          },
+        }}
+        scroll={{ x: 800 }}
+      />
+    </div>
+  );
+};

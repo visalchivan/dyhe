@@ -1,43 +1,78 @@
 "use client";
-import React from "react";
-import MerchantsTable from "./_components/merchants-table";
-import { Button, Flex, Input, Select, Space } from "antd";
 
-const { Search } = Input;
-const MerchantsPage = () => {
+import React, { useState } from "react";
+import { MerchantsTable } from "./_components/merchants-table";
+import { CreateMerchantModal } from "./_components/create-modal";
+import { EditMerchantModal } from "./_components/edit-modal";
+import { MerchantDrawer } from "./_components/merchant-drawer";
+import { Merchant } from "../../../lib/api/merchants";
+
+export default function MerchantsPage() {
+  const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [viewDrawerVisible, setViewDrawerVisible] = useState(false);
+  const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(
+    null
+  );
+
+  const handleCreateMerchant = () => {
+    setCreateModalVisible(true);
+  };
+
+  const handleEditMerchant = (merchant: Merchant) => {
+    setSelectedMerchant(merchant);
+    setEditModalVisible(true);
+  };
+
+  const handleViewMerchant = (merchant: Merchant) => {
+    setSelectedMerchant(merchant);
+    setViewDrawerVisible(true);
+  };
+
+  const handleCloseCreateModal = () => {
+    setCreateModalVisible(false);
+  };
+
+  const handleCloseEditModal = () => {
+    setEditModalVisible(false);
+    setSelectedMerchant(null);
+  };
+
+  const handleCloseViewDrawer = () => {
+    setViewDrawerVisible(false);
+    setSelectedMerchant(null);
+  };
+
+  const handleEditFromView = () => {
+    setViewDrawerVisible(false);
+    setEditModalVisible(true);
+  };
+
   return (
     <div>
-      <header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          padding: 16,
-        }}
-      >
-        <h2 style={{ margin: 0 }}>Merchants</h2>
-      </header>
-      <Flex style={{ padding: 16 }} justify="space-between">
-        <Space>
-          <Search
-            placeholder="input search text"
-            onSearch={() => {}}
-            style={{ width: 200 }}
-          />
-          <Select
-            options={[{ label: "Package 1", value: "package1" }]}
-            style={{ width: 200 }}
-          />
-        </Space>
-        <Space>
-          <Button>Import Merchant</Button>
-          <Button type="primary">Create Merchant</Button>
-        </Space>
-      </Flex>
-      <div style={{ padding: 16 }}>
-        <MerchantsTable />
-      </div>
+      <MerchantsTable
+        onCreateMerchant={handleCreateMerchant}
+        onEditMerchant={handleEditMerchant}
+        onViewMerchant={handleViewMerchant}
+      />
+
+      <CreateMerchantModal
+        visible={createModalVisible}
+        onClose={handleCloseCreateModal}
+      />
+
+      <EditMerchantModal
+        merchant={selectedMerchant}
+        visible={editModalVisible}
+        onClose={handleCloseEditModal}
+      />
+
+      <MerchantDrawer
+        merchant={selectedMerchant}
+        visible={viewDrawerVisible}
+        onClose={handleCloseViewDrawer}
+        onEdit={handleEditFromView}
+      />
     </div>
   );
-};
-
-export default MerchantsPage;
+}
