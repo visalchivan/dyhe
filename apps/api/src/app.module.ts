@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MerchantModule } from './modules/merchant/merchant.module';
 import { DriverModule } from './modules/driver/driver.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { PackagesModule } from './modules/packages/packages.module';
 import { UsersModule } from './modules/users/users.module';
 import { CustomersModule } from './modules/customers/customers.module';
@@ -18,6 +19,7 @@ import { CustomersModule } from './modules/customers/customers.module';
     AuthModule,
     MerchantModule,
     DriverModule,
+    DashboardModule,
     PackagesModule,
     UsersModule,
     CustomersModule,
