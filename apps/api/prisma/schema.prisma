@@ -1,0 +1,145 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  USER
+  DRIVER
+  MERCHANT
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+enum PackageStatus {
+  RECEIVED
+  PREPARING
+  READY
+  DELIVERING
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum DriverStatus {
+  ACTIVE
+  INACTIVE
+  ON_DUTY
+  OFF_DUTY
+  ON_BREAK
+  OFF_BREAK
+  ON_TRIP
+  OFF_TRIP
+}
+
+enum Bank {
+  ABA
+  ACELEDA
+  WING
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  name      String
+  email     String   @unique
+  phone     String
+  status Status @default(ACTIVE)
+  gender Gender @default(MALE)
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Driver {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?   @unique
+  phone     String
+  deliverFee Decimal  @default(0) @map("delivery_fee")
+  driverStatus DriverStatus @default(ACTIVE)
+  bank        Bank     @default(ABA)
+  bankAccountNumber String   @unique @map("bank_account_number")
+  bankAccountName String   @unique @map("bank_account_name")
+  latitude Float?   @map("latitude")
+  longitude Float?   @map("longitude")
+  status Status @default(ACTIVE)
+  createdAt DateTime @default(now()) @map("created_at") 
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  packages Package[]
+
+  @@map("drivers")
+}
+
+model Merchant {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String
+  email     String?   @unique
+  deliverFee Decimal  @default(0) @map("delivery_fee")
+  bank        Bank     @default(ABA)
+  bankAccountNumber String   @unique @map("bank_account_number")
+  bankAccountName String   @unique @map("bank_account_name")
+  address    String  
+  googleMapsUrl String?   @map("google_maps_url")
+  latitude Float?   @map("latitude")
+  longitude Float?   @map("longitude")
+  status Status @default(ACTIVE)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  packages Package[]
+
+  @@map("merchants")
+}
+
+model Package {
+  id        String   @id @default(uuid())
+  packageNumber String   @unique @map("package_number")
+  name      String
+  price Decimal  @default(0) 
+  codAmount Decimal  @default(0) @map("cod_amount")
+  deliveryFee Decimal  @default(0) @map("delivery_fee")
+  status PackageStatus @default(RECEIVED)
+  customerName String
+  customerPhone String
+  customerAddress String
+  customerLatitude Float?   @map("customer_latitude")
+  customerLongitude Float?   @map("customer_longitude")
+  customerGoogleMapsUrl String?   @map("customer_google_maps_url")
+
+  merchantId String
+  merchant Merchant @relation(fields: [merchantId], references: [id])
+
+  driverId String?
+  driver Driver? @relation(fields: [driverId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  @@map("packages")
+}

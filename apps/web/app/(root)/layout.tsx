@@ -8,15 +8,28 @@ import {
   ShopOutlined,
   CarOutlined,
   TeamOutlined,
-  UserOutlined,
   BarChartOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import { Breadcrumb, Layout, Menu, theme } from "antd";
+import {
+  Breadcrumb,
+  Layout,
+  Menu,
+  theme,
+  Button,
+  Dropdown,
+  Avatar,
+  Space,
+  Typography,
+} from "antd";
+import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import Image from "next/image";
+import { useAuth } from "../../contexts/AuthContext";
+import { useLogout } from "../../hooks/useAuth";
 
 const { Header, Content, Footer, Sider } = Layout;
+const { Text } = Typography;
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -68,6 +81,8 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const router = useRouter();
   const pathname = usePathname();
+  const { user } = useAuth();
+  const logoutMutation = useLogout();
 
   const {
     token: { colorBgContainer },
@@ -85,6 +100,26 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     setSelectedKey(key);
     router.push(key);
   };
+
+  // Handle logout
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
+
+  // User dropdown menu
+  const userMenuItems = [
+    {
+      key: "profile",
+      label: "Profile",
+      icon: <UserOutlined />,
+    },
+    {
+      key: "logout",
+      label: "Logout",
+      icon: <LogoutOutlined />,
+      onClick: handleLogout,
+    },
+  ];
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -112,7 +147,39 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         />
       </Sider>
       <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }} />
+        <Header
+          style={{
+            padding: "0 24px",
+            background: colorBgContainer,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            borderBottom: "1px solid #f0f0f0",
+          }}
+        >
+          <div>
+            <Text strong style={{ fontSize: "18px" }}>
+              DYHE Platform
+            </Text>
+          </div>
+
+          <Space>
+            <Text type="secondary">Welcome, {user?.name || "User"}</Text>
+            <Dropdown
+              menu={{ items: userMenuItems }}
+              placement="bottomRight"
+              arrow
+            >
+              <Avatar
+                style={{
+                  backgroundColor: "#1890ff",
+                  cursor: "pointer",
+                }}
+                icon={<UserOutlined />}
+              />
+            </Dropdown>
+          </Space>
+        </Header>
         <Content style={{ margin: "0" }}>
           <Breadcrumb style={{ margin: "16px 16px" }} items={breadcrumbItems} />
 

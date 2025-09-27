@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import "@ant-design/v5-patch-for-react-19";
 import AntdProvider from "./antd-provider";
+import { AuthProvider } from "../contexts/AuthContext";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -26,7 +27,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <AntdProvider>{children}</AntdProvider>
+        <AuthProvider>
+          <AntdProvider>{children}</AntdProvider>
+        </AuthProvider>
       </body>
     </html>
   );
