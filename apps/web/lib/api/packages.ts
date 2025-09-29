@@ -39,17 +39,16 @@ export interface CreatePackageDto {
 }
 
 export interface PackageDataDto {
-  name: string;
+  name?: string; // Auto-generated, optional in input
   customerName: string;
   customerPhone: string;
   customerAddress: string;
-  codAmount: number;
-  deliveryFee: number;
+  codAmount?: number; // Optional
+  deliveryFee?: number; // Optional
 }
 
 export interface BulkCreatePackagesDto {
   merchantId: string;
-  driverId?: string;
   status?: string;
   packages: PackageDataDto[];
 }

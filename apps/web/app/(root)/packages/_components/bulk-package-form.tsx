@@ -14,6 +14,7 @@ import {
   Typography,
   Divider,
   Table,
+  notification,
 } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import {
@@ -21,26 +22,15 @@ import {
   PackageDataDto,
 } from "../../../../lib/api/packages";
 import { useMerchants } from "../../../../hooks/useMerchants";
-import { useDrivers } from "../../../../hooks/useDrivers";
 
 const { Option } = Select;
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 interface BulkPackageFormProps {
   onSubmit: (values: BulkCreatePackagesDto) => void;
   loading?: boolean;
   onCancel: () => void;
 }
-
-const statusOptions = [
-  { value: "RECEIVED", label: "Received" },
-  { value: "PREPARING", label: "Preparing" },
-  { value: "READY", label: "Ready" },
-  { value: "DELIVERING", label: "Delivering" },
-  { value: "DELIVERED", label: "Delivered" },
-  { value: "CANCELLED", label: "Cancelled" },
-  { value: "RETURNED", label: "Returned" },
-];
 
 export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
   onSubmit,
@@ -50,28 +40,25 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
   const [form] = Form.useForm();
   const [packages, setPackages] = useState<PackageDataDto[]>([
     {
-      name: "",
       customerName: "",
       customerPhone: "",
       customerAddress: "",
-      codAmount: 0,
-      deliveryFee: 0,
+      codAmount: 0, // Optional
+      deliveryFee: 0, // Optional
     },
   ]);
 
   const { data: merchantsData } = useMerchants({ limit: 100 });
-  const { data: driversData } = useDrivers({ limit: 100 });
 
   const addPackage = () => {
     setPackages([
       ...packages,
       {
-        name: "",
         customerName: "",
         customerPhone: "",
         customerAddress: "",
-        codAmount: 0,
-        deliveryFee: 0,
+        codAmount: 0, // Optional
+        deliveryFee: 0, // Optional
       },
     ]);
   };
@@ -85,7 +72,7 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
   const updatePackage = (
     index: number,
     field: keyof PackageDataDto,
-    value: any
+    value: string | number
   ) => {
     const updatedPackages = packages.map((pkg, i) =>
       i === index ? { ...pkg, [field]: value } : pkg
@@ -93,19 +80,40 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
     setPackages(updatedPackages);
   };
 
-  const handleSubmit = (values: any) => {
+  const handleSubmit = (values: { merchantId: string; status: string }) => {
+    // Filter out packages with empty required fields (only customer details required)
+    const validPackages = packages.filter(
+      (pkg) =>
+        pkg.customerName.trim() !== "" &&
+        pkg.customerPhone.trim() !== "" &&
+        pkg.customerAddress.trim() !== ""
+    );
+
+    if (validPackages.length === 0) {
+      notification.error({
+        message: "No Valid Packages",
+        description:
+          "Please fill in all required fields for at least one package.",
+      });
+      return;
+    }
+
     const bulkData: BulkCreatePackagesDto = {
       merchantId: values.merchantId,
-      driverId: values.driverId,
       status: values.status,
-      packages: packages,
+      packages: validPackages,
     };
+
+    console.log(
+      "Frontend sending bulk data:",
+      JSON.stringify(bulkData, null, 2)
+    );
     onSubmit(bulkData);
   };
 
   const packageColumns = [
     {
-      title: "Customer Name",
+      title: "Customer Name *",
       dataIndex: "customerName",
       key: "customerName",
       render: (value: string, record: PackageDataDto, index: number) => (
@@ -117,7 +125,7 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
       ),
     },
     {
-      title: "Customer Phone",
+      title: "Customer Phone *",
       dataIndex: "customerPhone",
       key: "customerPhone",
       render: (value: string, record: PackageDataDto, index: number) => (
@@ -131,7 +139,7 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
       ),
     },
     {
-      title: "Customer Address",
+      title: "Customer Address *",
       dataIndex: "customerAddress",
       key: "customerAddress",
       render: (value: string, record: PackageDataDto, index: number) => (
@@ -145,13 +153,13 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
       ),
     },
     {
-      title: "COD Amount",
+      title: "COD Amount (Optional)",
       dataIndex: "codAmount",
       key: "codAmount",
       render: (value: number, record: PackageDataDto, index: number) => (
         <InputNumber
           value={value}
-          placeholder="COD amount"
+          placeholder="COD amount (optional)"
           precision={2}
           min={0}
           style={{ width: "100%" }}
@@ -160,13 +168,13 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
       ),
     },
     {
-      title: "Delivery Fee",
+      title: "Delivery Fee (Optional)",
       dataIndex: "deliveryFee",
       key: "deliveryFee",
       render: (value: number, record: PackageDataDto, index: number) => (
         <InputNumber
           value={value}
-          placeholder="Delivery fee"
+          placeholder="Delivery fee (optional)"
           precision={2}
           min={0}
           style={{ width: "100%" }}
@@ -177,7 +185,7 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
     {
       title: "Actions",
       key: "actions",
-      render: (_: any, record: PackageDataDto, index: number) => (
+      render: (_: unknown, record: PackageDataDto, index: number) => (
         <Button
           type="text"
           danger
@@ -195,7 +203,7 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
       layout="vertical"
       onFinish={handleSubmit}
       initialValues={{
-        status: "RECEIVED",
+        status: "READY",
       }}
     >
       <Card style={{ marginBottom: 16 }}>
@@ -220,36 +228,10 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
               </Select>
             </Form.Item>
           </Col>
-          <Col span={12}>
-            <Form.Item name="driverId" label="Driver (Optional)">
-              <Select
-                placeholder="Select driver"
-                allowClear
-                showSearch
-                optionFilterProp="children"
-              >
-                {driversData?.drivers.map((driver) => (
-                  <Option key={driver.id} value={driver.id}>
-                    {driver.name} ({driver.email})
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
         </Row>
 
-        <Form.Item
-          name="status"
-          label="Status"
-          rules={[{ required: true, message: "Please select status" }]}
-        >
-          <Select placeholder="Select status">
-            {statusOptions.map((status) => (
-              <Option key={status.value} value={status.value}>
-                {status.label}
-              </Option>
-            ))}
-          </Select>
+        <Form.Item name="status" style={{ display: "none" }}>
+          <Input />
         </Form.Item>
       </Card>
 

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePackageDto } from './dto/create-package.dto';
 import { BulkCreatePackagesDto } from './dto/bulk-create-packages.dto';
@@ -45,12 +49,13 @@ export class PackagesService {
     const packageData = await this.prisma.package.create({
       data: {
         packageNumber,
-        name: createPackageDto.name,
+        name: `Package ${packageNumber}`, // Auto-generate name from package number
+        price: createPackageDto.codAmount || 0, // Using codAmount as price, default to 0
         customerName: createPackageDto.customerName,
         customerPhone: createPackageDto.customerPhone,
         customerAddress: createPackageDto.customerAddress,
-        codAmount: createPackageDto.codAmount,
-        deliveryFee: createPackageDto.deliveryFee,
+        codAmount: createPackageDto.codAmount || 0,
+        deliveryFee: createPackageDto.deliveryFee || 0,
         status: createPackageDto.status || PackageStatus.RECEIVED,
         merchant: {
           connect: { id: createPackageDto.merchantId },
@@ -83,6 +88,8 @@ export class PackagesService {
   }
 
   async bulkCreate(bulkCreateDto: BulkCreatePackagesDto) {
+    console.log('Service received:', JSON.stringify(bulkCreateDto, null, 2));
+
     // Verify merchant exists
     const merchant = await this.prisma.merchant.findUnique({
       where: { id: bulkCreateDto.merchantId },
@@ -94,15 +101,20 @@ export class PackagesService {
       );
     }
 
-    // Verify driver exists if provided
-    if (bulkCreateDto.driverId) {
-      const driver = await this.prisma.driver.findUnique({
-        where: { id: bulkCreateDto.driverId },
-      });
+    // Validate packages array
+    if (!bulkCreateDto.packages || bulkCreateDto.packages.length === 0) {
+      throw new BadRequestException('At least one package is required');
+    }
 
-      if (!driver) {
-        throw new NotFoundException(
-          `Driver with ID ${bulkCreateDto.driverId} not found`,
+    // Validate each package has required fields
+    for (const packageData of bulkCreateDto.packages) {
+      if (
+        !packageData.customerName ||
+        !packageData.customerPhone ||
+        !packageData.customerAddress
+      ) {
+        throw new BadRequestException(
+          'Each package must have customer name, phone, and address',
         );
       }
     }
@@ -117,21 +129,17 @@ export class PackagesService {
         const createdPackage = await prisma.package.create({
           data: {
             packageNumber,
-            name: packageData.name,
+            name: `Package ${packageNumber}`, // Auto-generate name from package number
+            price: packageData.codAmount || 0, // Using codAmount as price, default to 0
             customerName: packageData.customerName,
             customerPhone: packageData.customerPhone,
             customerAddress: packageData.customerAddress,
-            codAmount: packageData.codAmount,
-            deliveryFee: packageData.deliveryFee,
+            codAmount: packageData.codAmount || 0,
+            deliveryFee: packageData.deliveryFee || 0,
             status: bulkCreateDto.status || PackageStatus.RECEIVED,
             merchant: {
               connect: { id: bulkCreateDto.merchantId },
             },
-            ...(bulkCreateDto.driverId && {
-              driver: {
-                connect: { id: bulkCreateDto.driverId },
-              },
-            }),
           },
           include: {
             merchant: {

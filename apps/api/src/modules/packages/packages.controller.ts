@@ -28,6 +28,12 @@ export class PackagesController {
 
   @Post('bulk')
   bulkCreate(@Body() bulkCreateDto: BulkCreatePackagesDto) {
+    console.log(
+      'Received bulk create request:',
+      JSON.stringify(bulkCreateDto, null, 2),
+    );
+    console.log('Packages array length:', bulkCreateDto.packages?.length);
+    console.log('First package:', bulkCreateDto.packages?.[0]);
     return this.packagesService.bulkCreate(bulkCreateDto);
   }
 

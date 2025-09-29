@@ -17,7 +17,6 @@ import {
   Package,
 } from "../../../../lib/api/packages";
 import { useMerchants } from "../../../../hooks/useMerchants";
-import { useDrivers } from "../../../../hooks/useDrivers";
 
 const { Option } = Select;
 
@@ -46,7 +45,6 @@ export const PackageForm: React.FC<PackageFormProps> = ({
 }) => {
   const [form] = Form.useForm();
   const { data: merchantsData } = useMerchants({ limit: 100 });
-  const { data: driversData } = useDrivers({ limit: 100 });
 
   React.useEffect(() => {
     if (packageData) {
@@ -205,22 +203,6 @@ export const PackageForm: React.FC<PackageFormProps> = ({
               {merchantsData?.merchants.map((merchant) => (
                 <Option key={merchant.id} value={merchant.id}>
                   {merchant.name} ({merchant.email})
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item name="driverId" label="Driver (Optional)">
-            <Select
-              placeholder="Select driver"
-              allowClear
-              showSearch
-              optionFilterProp="children"
-            >
-              {driversData?.drivers.map((driver) => (
-                <Option key={driver.id} value={driver.id}>
-                  {driver.name} ({driver.email})
                 </Option>
               ))}
             </Select>

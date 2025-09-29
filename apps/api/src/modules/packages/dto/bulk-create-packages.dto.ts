@@ -13,8 +13,9 @@ import { Type } from 'class-transformer';
 import { PackageStatus } from 'generated/client';
 
 export class PackageDataDto {
+  @IsOptional()
   @IsString()
-  name: string;
+  name?: string; // Auto-generated, optional in input
 
   @IsString()
   customerName: string;
@@ -25,22 +26,18 @@ export class PackageDataDto {
   @IsString()
   customerAddress: string;
 
+  @IsOptional()
   @IsNumber()
-  @IsPositive()
-  codAmount: number;
+  codAmount?: number; // Optional
 
+  @IsOptional()
   @IsNumber()
-  @IsPositive()
-  deliveryFee: number;
+  deliveryFee?: number; // Optional
 }
 
 export class BulkCreatePackagesDto {
   @IsString()
   merchantId: string;
-
-  @IsOptional()
-  @IsString()
-  driverId?: string;
 
   @IsOptional()
   @IsEnum(PackageStatus)
@@ -49,7 +46,5 @@ export class BulkCreatePackagesDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => PackageDataDto)
-  @Min(1, { message: 'At least one package is required' })
-  @Max(100, { message: 'Cannot create more than 100 packages at once' })
   packages: PackageDataDto[];
 }
