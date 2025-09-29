@@ -13,6 +13,7 @@ import {
 import { PackagesService } from './packages.service';
 import { CreatePackageDto } from './dto/create-package.dto';
 import { BulkCreatePackagesDto } from './dto/bulk-create-packages.dto';
+import { BulkAssignPackagesDto } from './dto/bulk-assign-packages.dto';
 import { UpdatePackageDto } from './dto/update-package.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
@@ -35,6 +36,15 @@ export class PackagesController {
     console.log('Packages array length:', bulkCreateDto.packages?.length);
     console.log('First package:', bulkCreateDto.packages?.[0]);
     return this.packagesService.bulkCreate(bulkCreateDto);
+  }
+
+  @Post('bulk-assign')
+  bulkAssign(@Body() bulkAssignDto: BulkAssignPackagesDto) {
+    console.log(
+      'Received bulk assign request:',
+      JSON.stringify(bulkAssignDto, null, 2),
+    );
+    return this.packagesService.bulkAssign(bulkAssignDto);
   }
 
   @Get()

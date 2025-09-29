@@ -53,7 +53,9 @@ export interface BulkCreatePackagesDto {
   packages: PackageDataDto[];
 }
 
-export interface UpdatePackageDto extends Partial<CreatePackageDto> {}
+export interface UpdatePackageDto extends Partial<CreatePackageDto> {
+  id?: string;
+}
 
 export interface PackageListResponse {
   packages: Package[];
@@ -66,6 +68,18 @@ export interface PackageListResponse {
 }
 
 export interface BulkCreateResponse {
+  message: string;
+  packages: Package[];
+  count: number;
+}
+
+export interface BulkAssignPackagesDto {
+  driverId: string;
+  packageNumbers: string[];
+  status?: string;
+}
+
+export interface BulkAssignResponse {
   message: string;
   packages: Package[];
   count: number;
@@ -99,6 +113,14 @@ export const packagesApi = {
     data: BulkCreatePackagesDto
   ): Promise<BulkCreateResponse> => {
     const response = await api.post("/packages/bulk", data);
+    return response.data;
+  },
+
+  // Bulk assign packages to driver
+  bulkAssignPackages: async (
+    data: BulkAssignPackagesDto
+  ): Promise<BulkAssignResponse> => {
+    const response = await api.post("/packages/bulk-assign", data);
     return response.data;
   },
 

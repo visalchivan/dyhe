@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePackageDto } from './dto/create-package.dto';
 import { BulkCreatePackagesDto } from './dto/bulk-create-packages.dto';
+import { BulkAssignPackagesDto } from './dto/bulk-assign-packages.dto';
 import { UpdatePackageDto } from './dto/update-package.dto';
 import { PackageStatus } from 'generated/client';
 
@@ -359,5 +360,87 @@ export class PackagesService {
     });
 
     return { message: 'Package deleted successfully' };
+  }
+
+  async bulkAssign(bulkAssignDto: BulkAssignPackagesDto) {
+    console.log(
+      'Service received bulk assign:',
+      JSON.stringify(bulkAssignDto, null, 2),
+    );
+
+    // Verify driver exists
+    const driver = await this.prisma.driver.findUnique({
+      where: { id: bulkAssignDto.driverId },
+    });
+
+    if (!driver) {
+      throw new NotFoundException(
+        `Driver with ID ${bulkAssignDto.driverId} not found`,
+      );
+    }
+
+    // Verify all packages exist and are available for assignment
+    const packages = await this.prisma.package.findMany({
+      where: {
+        packageNumber: { in: bulkAssignDto.packageNumbers },
+      },
+    });
+
+    if (packages.length !== bulkAssignDto.packageNumbers.length) {
+      const foundNumbers = packages.map((p) => p.packageNumber);
+      const missingNumbers = bulkAssignDto.packageNumbers.filter(
+        (num) => !foundNumbers.includes(num),
+      );
+      throw new BadRequestException(
+        `Packages not found: ${missingNumbers.join(', ')}`,
+      );
+    }
+
+    // Check if packages are already assigned to other drivers
+    const alreadyAssigned = packages.filter(
+      (p) => p.driverId && p.driverId !== bulkAssignDto.driverId,
+    );
+    if (alreadyAssigned.length > 0) {
+      throw new BadRequestException(
+        `Some packages are already assigned to other drivers: ${alreadyAssigned.map((p) => p.packageNumber).join(', ')}`,
+      );
+    }
+
+    // Update packages in a transaction
+    const updatedPackages = await this.prisma.$transaction(async (prisma) => {
+      const updatePromises = bulkAssignDto.packageNumbers.map((packageNumber) =>
+        prisma.package.update({
+          where: { packageNumber },
+          data: {
+            driverId: bulkAssignDto.driverId,
+            status: bulkAssignDto.status || PackageStatus.READY,
+          },
+          include: {
+            merchant: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+            driver: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        }),
+      );
+
+      return Promise.all(updatePromises);
+    });
+
+    return {
+      message: `Successfully assigned ${updatedPackages.length} packages to driver`,
+      packages: updatedPackages,
+      count: updatedPackages.length,
+    };
   }
 }
