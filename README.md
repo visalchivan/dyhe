@@ -1,135 +1,106 @@
-# Turborepo starter
+# DYHE Platform
 
-This Turborepo starter is maintained by the Turborepo core team.
+Monorepo for DYHE delivery platform.
 
-## Using this example
+- `apps/api`: NestJS + Prisma API
+- `apps/web`: Next.js dashboard (client-side PDF label printing)
+- `packages/*`: Shared configs and UI
 
-Run the following command:
+## Requirements
 
-```sh
-npx create-turbo@latest
+- Node 18+
+- pnpm 9 (corepack: `corepack enable && corepack prepare pnpm@9 --activate`)
+- Docker (for containerized runs)
+
+## Getting Started (local)
+
+```bash
+pnpm install
+pnpm dev
 ```
 
-## What's inside?
+- Web: http://localhost:3000
+- API: http://localhost:8000
 
-This Turborepo includes the following packages/apps:
+## Environment
 
-### Apps and Packages
+- API uses Prisma. Set `DATABASE_URL` when running outside Docker
+- Web uses `NEXT_PUBLIC_API_URL` for API base URL (defaults to `http://localhost:8000`)
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+## Scripts
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+Root (via turbo):
 
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+```bash
+pnpm dev           # run all dev servers
+pnpm build         # build all
+pnpm lint          # lint all
+pnpm check-types   # typecheck all
 ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+API:
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+```bash
+cd apps/api
+pnpm dev
+pnpm build
+pnpm start:prod
+pnpm db:generate   # prisma generate
+pnpm db:migrate    # prisma migrate dev
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+Web:
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+```bash
+cd apps/web
+pnpm dev
+pnpm build
+pnpm start
 ```
 
-### Remote Caching
+## Docker (local & VPS)
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+We provide a compose stack for Postgres + API + Web.
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+```bash
+docker compose build
+docker compose up -d
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+- Web: http://localhost:3000
+- API: http://localhost:8000
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+API runs `prisma migrate deploy` on startup. Edit `docker-compose.yml` to set secrets like `JWT_SECRET`.
+
+More details: see `DEPLOY_DOCKER.md`.
+
+## PDF Label Printing (Thermal printer friendly)
+
+The app generates 4x6in PDF labels client-side (jsPDF) and opens them in a new tab for printing via macOS system dialog. This avoids thermal printers outputting raw bytes from HTML.
+
+- From the Packages table: use the printer icon → PDF opens → print
+- From `/packages/print`: single or bulk → generate PDFs → print
+- Printer setup: choose paper size 4" x 6" and appropriate scaling per your device
+
+## Tech Stack
+
+- Web: Next.js 15, React 19, Ant Design 5, React Query
+- API: NestJS 11, Prisma 6, PostgreSQL 16
+- Monorepo: Turborepo, pnpm workspaces
+
+## Repo Structure
 
 ```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+apps/
+  api/
+  web/
+packages/
+  eslint-config/
+  typescript-config/
+  ui/
 ```
 
-## Useful Links
+## Notes
 
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+- Prefer pnpm for package management.
+- For production, set strong secrets and consider a reverse proxy (Caddy/Nginx) for TLS.
