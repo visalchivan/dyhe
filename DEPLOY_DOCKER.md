@@ -49,6 +49,14 @@ docker compose up -d
 
 The API container runs Prisma migrations at startup via `apps/api/entrypoint.sh` (`prisma migrate deploy`).
 
+### Client-side PDF Label Printing (Mac friendly)
+
+- Labels are generated as 4x6in PDFs in the browser (jsPDF)
+- From Packages list or Print page, click Generate PDF Label
+- The PDF opens in a new tab; use the Mac system print dialog
+- Set paper size to 4" x 6" and fit/actual size as your printer requires
+- Works reliably with thermal printers that mis-handle raw HTML
+
 ### Logs and Status
 
 ```

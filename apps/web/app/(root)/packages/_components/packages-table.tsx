@@ -28,6 +28,10 @@ import { usePackages, useDeletePackage } from "../../../../hooks/usePackages";
 import { ColumnType } from "antd/es/table";
 import Link from "next/link";
 import { generateQRCode } from "../../../../lib/utils/qrcode";
+import {
+  createLabelPdf,
+  openPdfInNewTab,
+} from "../../../../lib/utils/pdfLabel";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -68,220 +72,23 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
     [deletePackageMutation]
   );
 
-  const generatePrintContent = useCallback(
-    (packageData: Package, qrCodeUrl: string) => {
-      return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Package Label - ${packageData.packageNumber}</title>
-          <style>
-            @page {
-              size: 4in 6in;
-              margin: 0.2in;
-            }
-            body {
-              font-family: Arial, sans-serif;
-              margin: 0;
-              padding: 0;
-              font-size: 12px;
-              line-height: 1.2;
-            }
-            .label {
-              width: 100%;
-              height: 100vh;
-              border: 2px solid #000;
-              padding: 8px;
-              box-sizing: border-box;
-              display: flex;
-              flex-direction: column;
-            }
-            .header {
-              text-align: center;
-              border-bottom: 2px solid #000;
-              padding-bottom: 8px;
-              margin-bottom: 8px;
-            }
-            .company-name {
-              font-size: 16px;
-              font-weight: bold;
-              margin-bottom: 4px;
-            }
-            .company-address {
-              font-size: 10px;
-              color: #666;
-            }
-            .content {
-              flex: 1;
-              display: flex;
-              flex-direction: column;
-              gap: 6px;
-            }
-            .row {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-            }
-            .label-text {
-              font-weight: bold;
-              font-size: 10px;
-            }
-            .value {
-              font-size: 11px;
-            }
-            .qr-section {
-              text-align: center;
-              margin-top: 8px;
-              padding-top: 8px;
-              border-top: 1px solid #ccc;
-            }
-            .qr-code {
-              width: 100px;
-              height: 100px;
-              margin: 0 auto 4px;
-            }
-            .qr-code img {
-              width: 100%;
-              height: 100%;
-              display: block;
-            }
-            .tracking-number {
-              font-size: 14px;
-              font-weight: bold;
-              text-align: center;
-              margin-top: 4px;
-            }
-            .footer {
-              text-align: center;
-              font-size: 8px;
-              color: #666;
-              margin-top: 8px;
-              padding-top: 4px;
-              border-top: 1px solid #ccc;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="label">
-            <div class="header">
-              <div class="company-name">DYHE DELIVERY</div>
-              <div class="company-address">
-                #123, Street 456, Phnom Penh, Cambodia<br>
-                Tel: +855 12 345 678 | Email: info@dyhe.com
-              </div>
-            </div>
-            
-            <div class="content">
-              <div class="row">
-                <span class="label-text">FROM:</span>
-                <span class="value">${packageData.merchant.name}</span>
-              </div>
-              
-              <div class="row">
-                <span class="label-text">TO:</span>
-                <span class="value">${packageData.customerName}</span>
-              </div>
-              
-              <div class="row">
-                <span class="label-text">PHONE:</span>
-                <span class="value">${packageData.customerPhone}</span>
-              </div>
-              
-              <div class="row">
-                <span class="label-text">ADDRESS:</span>
-                <span class="value">${packageData.customerAddress}</span>
-              </div>
-              
-              <div class="row">
-                <span class="label-text">PACKAGE:</span>
-                <span class="value">${packageData.name}</span>
-              </div>
-              
-              <div class="row">
-                <span class="label-text">COD:</span>
-                <span class="value">$${packageData.codAmount}</span>
-              </div>
-              
-              <div class="row">
-                <span class="label-text">DATE:</span>
-                <span class="value">${new Date().toLocaleDateString()}</span>
-              </div>
-            </div>
-            
-            <div class="qr-section">
-              <div class="qr-code">
-                <img src="${qrCodeUrl}" alt="QR Code">
-              </div>
-              <div class="tracking-number">${packageData.packageNumber}</div>
-            </div>
-            
-            <div class="footer">
-              Scan QR code for tracking | www.dyhe.com
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
-    },
-    []
-  );
-
-  const handlePrintLabel = useCallback(
-    async (packageData: Package) => {
-      try {
-        // Generate QR code
-        const qrCodeUrl = await generateQRCode(packageData.packageNumber, {
-          width: 200,
-          margin: 1,
-        });
-
-        // Create iframe for better thermal printer compatibility
-        const iframe = document.createElement("iframe");
-        iframe.style.position = "absolute";
-        iframe.style.width = "0";
-        iframe.style.height = "0";
-        iframe.style.border = "none";
-        document.body.appendChild(iframe);
-
-        const iframeDoc = iframe.contentWindow?.document;
-        if (!iframeDoc) return;
-
-        // Generate the print content with QR code
-        const printContent = generatePrintContent(packageData, qrCodeUrl);
-
-        iframeDoc.open();
-        iframeDoc.write(printContent);
-        iframeDoc.close();
-
-        // Wait for images to load
-        const images = iframeDoc.images;
-        const imageLoadPromises = Array.from(images).map((img) => {
-          if (img.complete) return Promise.resolve();
-          return new Promise((resolve) => {
-            img.onload = resolve;
-            img.onerror = resolve;
-          });
-        });
-
-        await Promise.all(imageLoadPromises);
-
-        // Extra delay for rendering
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // Print using iframe
-        iframe.contentWindow?.focus();
-        iframe.contentWindow?.print();
-
-        // Clean up after printing
-        setTimeout(() => {
-          document.body.removeChild(iframe);
-        }, 1000);
-      } catch (error) {
-        console.error("Error printing label:", error);
-      }
-    },
-    [generatePrintContent]
-  );
+  const handlePrintLabel = useCallback(async (packageData: Package) => {
+    try {
+      const doc = await createLabelPdf({
+        id: packageData.id,
+        packageNumber: packageData.packageNumber,
+        name: packageData.name,
+        customerName: packageData.customerName,
+        customerPhone: packageData.customerPhone,
+        customerAddress: packageData.customerAddress,
+        codAmount: packageData.codAmount,
+        merchant: { name: packageData.merchant.name },
+      });
+      await openPdfInNewTab(doc);
+    } catch (error) {
+      console.error("Error creating PDF label:", error);
+    }
+  }, []);
 
   const handleSearch = (value: string) => {
     setSearchText(value);
@@ -435,7 +242,7 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
                   onClick={() => onViewPackage(record)}
                 />
               </Tooltip>
-              <Tooltip title="Print Label">
+              <Tooltip title="Print Label (PDF)">
                 <Button
                   type="text"
                   icon={<PrinterOutlined />}

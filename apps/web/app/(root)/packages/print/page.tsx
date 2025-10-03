@@ -23,7 +23,11 @@ import {
 } from "@ant-design/icons";
 import { PackageLabel } from "./_components/package-label";
 import { usePackages } from "../../../../hooks/usePackages";
-import { generateQRCode } from "../../../../lib/utils/qrcode";
+import {
+  createLabelPdf,
+  createBulkLabelsPdf,
+  openPdfInNewTab,
+} from "../../../../lib/utils/pdfLabel";
 // import { useMerchants } from "../../../../hooks/useMerchants";
 
 const { Title, Text } = Typography;
@@ -60,57 +64,19 @@ const PackagePrintPage = () => {
         return;
       }
 
-      // Generate QR code
-      const qrCodeUrl = await generateQRCode(packageToPrint.packageNumber, {
-        width: 200,
-        margin: 1,
+      const doc = await createLabelPdf({
+        id: packageToPrint.id,
+        packageNumber: packageToPrint.packageNumber,
+        name: packageToPrint.name,
+        customerName: packageToPrint.customerName,
+        customerPhone: packageToPrint.customerPhone,
+        customerAddress: packageToPrint.customerAddress,
+        codAmount: packageToPrint.codAmount,
+        merchant: { name: packageToPrint.merchant.name },
       });
 
-      // Create iframe for better thermal printer compatibility
-      const iframe = document.createElement("iframe");
-      iframe.style.position = "absolute";
-      iframe.style.width = "0";
-      iframe.style.height = "0";
-      iframe.style.border = "none";
-      document.body.appendChild(iframe);
-
-      const iframeDoc = iframe.contentWindow?.document;
-      if (!iframeDoc) {
-        setIsPrinting(false);
-        return;
-      }
-
-      // Generate the print content with QR code
-      const printContent = generatePrintContent(packageToPrint, qrCodeUrl);
-
-      iframeDoc.open();
-      iframeDoc.write(printContent);
-      iframeDoc.close();
-
-      // Wait for images to load
-      const images = iframeDoc.images;
-      const imageLoadPromises = Array.from(images).map((img) => {
-        if (img.complete) return Promise.resolve();
-        return new Promise((resolve) => {
-          img.onload = resolve;
-          img.onerror = resolve;
-        });
-      });
-
-      await Promise.all(imageLoadPromises);
-
-      // Extra delay for rendering
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Print using iframe
-      iframe.contentWindow?.focus();
-      iframe.contentWindow?.print();
-
-      // Clean up after printing
-      setTimeout(() => {
-        document.body.removeChild(iframe);
-        setIsPrinting(false);
-      }, 1000);
+      await openPdfInNewTab(doc);
+      setIsPrinting(false);
     } catch (error) {
       console.error("Error printing label:", error);
       setIsPrinting(false);
@@ -134,62 +100,21 @@ const PackagePrintPage = () => {
         return;
       }
 
-      // Generate QR codes for all packages
-      const packagesWithQR = await Promise.all(
-        packagesToPrint.map(async (pkg: any) => {
-          const qrCodeUrl = await generateQRCode(pkg.packageNumber, {
-            width: 200,
-            margin: 1,
-          });
-          return { pkg, qrCodeUrl };
-        })
+      const doc = await createBulkLabelsPdf(
+        packagesToPrint.map((p: any) => ({
+          id: p.id,
+          packageNumber: p.packageNumber,
+          name: p.name,
+          customerName: p.customerName,
+          customerPhone: p.customerPhone,
+          customerAddress: p.customerAddress,
+          codAmount: p.codAmount,
+          merchant: { name: p.merchant.name },
+        }))
       );
 
-      // Create iframe for better thermal printer compatibility
-      const iframe = document.createElement("iframe");
-      iframe.style.position = "absolute";
-      iframe.style.width = "0";
-      iframe.style.height = "0";
-      iframe.style.border = "none";
-      document.body.appendChild(iframe);
-
-      const iframeDoc = iframe.contentWindow?.document;
-      if (!iframeDoc) {
-        setIsBulkPrinting(false);
-        return;
-      }
-
-      // Generate bulk print content
-      const printContent = generateBulkPrintContent(packagesWithQR);
-
-      iframeDoc.open();
-      iframeDoc.write(printContent);
-      iframeDoc.close();
-
-      // Wait for images to load
-      const images = iframeDoc.images;
-      const imageLoadPromises = Array.from(images).map((img) => {
-        if (img.complete) return Promise.resolve();
-        return new Promise((resolve) => {
-          img.onload = resolve;
-          img.onerror = resolve;
-        });
-      });
-
-      await Promise.all(imageLoadPromises);
-
-      // Extra delay for rendering
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Print using iframe
-      iframe.contentWindow?.focus();
-      iframe.contentWindow?.print();
-
-      // Clean up after printing
-      setTimeout(() => {
-        document.body.removeChild(iframe);
-        setIsBulkPrinting(false);
-      }, 1000);
+      await openPdfInNewTab(doc);
+      setIsBulkPrinting(false);
     } catch (error) {
       console.error("Bulk print failed:", error);
       setIsBulkPrinting(false);
@@ -218,325 +143,7 @@ const PackagePrintPage = () => {
     setSelectedPackages(selectedPackages.filter((id) => id !== packageId));
   };
 
-  const generatePrintContent = (packageData: any, qrCodeUrl: string) => {
-    return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Package Label - ${packageData.packageNumber}</title>
-          <style>
-            @page {
-              size: 4in 6in;
-              margin: 0.2in;
-            }
-            body {
-              font-family: Arial, sans-serif;
-              margin: 0;
-              padding: 0;
-              font-size: 12px;
-              line-height: 1.2;
-            }
-            .label {
-              width: 100%;
-              height: 100vh;
-              border: 2px solid #000;
-              padding: 8px;
-              box-sizing: border-box;
-              display: flex;
-              flex-direction: column;
-            }
-            .header {
-              text-align: center;
-              border-bottom: 2px solid #000;
-              padding-bottom: 8px;
-              margin-bottom: 8px;
-            }
-            .company-name {
-              font-size: 16px;
-              font-weight: bold;
-              margin-bottom: 4px;
-            }
-            .company-address {
-              font-size: 10px;
-              color: #666;
-            }
-            .content {
-              flex: 1;
-              display: flex;
-              flex-direction: column;
-              gap: 6px;
-            }
-            .row {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-            }
-            .label-text {
-              font-weight: bold;
-              font-size: 10px;
-            }
-            .value {
-              font-size: 11px;
-            }
-            .qr-section {
-              text-align: center;
-              margin-top: 8px;
-              padding-top: 8px;
-              border-top: 1px solid #ccc;
-            }
-            .qr-code {
-              width: 100px;
-              height: 100px;
-              margin: 0 auto 4px;
-            }
-            .qr-code img {
-              width: 100%;
-              height: 100%;
-              display: block;
-            }
-            .tracking-number {
-              font-size: 14px;
-              font-weight: bold;
-              text-align: center;
-              margin-top: 4px;
-            }
-            .footer {
-              text-align: center;
-              font-size: 8px;
-              color: #666;
-              margin-top: 8px;
-              padding-top: 4px;
-              border-top: 1px solid #ccc;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="label">
-            <div class="header">
-              <div class="company-name">DYHE DELIVERY</div>
-              <div class="company-address">
-                #123, Street 456, Phnom Penh, Cambodia<br>
-                Tel: +855 12 345 678 | Email: info@dyhe.com
-              </div>
-            </div>
-            
-            <div class="content">
-              <div class="row">
-                <span class="label-text">FROM:</span>
-                <span class="value">${packageData.merchant.name}</span>
-              </div>
-              
-              <div class="row">
-                <span class="label-text">TO:</span>
-                <span class="value">${packageData.customerName}</span>
-              </div>
-              
-              <div class="row">
-                <span class="label-text">PHONE:</span>
-                <span class="value">${packageData.customerPhone}</span>
-              </div>
-              
-              <div class="row">
-                <span class="label-text">ADDRESS:</span>
-                <span class="value">${packageData.customerAddress}</span>
-              </div>
-              
-              <div class="row">
-                <span class="label-text">PACKAGE:</span>
-                <span class="value">${packageData.name}</span>
-              </div>
-              
-              <div class="row">
-                <span class="label-text">COD:</span>
-                <span class="value">$${packageData.codAmount}</span>
-              </div>
-              
-              <div class="row">
-                <span class="label-text">DATE:</span>
-                <span class="value">${new Date().toLocaleDateString()}</span>
-              </div>
-            </div>
-            
-            <div class="qr-section">
-              <div class="qr-code">
-                <img src="${qrCodeUrl}" alt="QR Code">
-              </div>
-              <div class="tracking-number">${packageData.packageNumber}</div>
-            </div>
-            
-            <div class="footer">
-              Scan QR code for tracking | www.dyhe.com
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
-  };
-
-  const generateBulkPrintContent = (
-    packagesWithQR: { pkg: any; qrCodeUrl: string }[]
-  ) => {
-    const labelsHTML = packagesWithQR
-      .map(
-        ({ pkg: packageData, qrCodeUrl }, index) => `
-      <div class="label" style="page-break-after: ${index < packagesWithQR.length - 1 ? "always" : "auto"};">
-        <div class="header">
-          <div class="company-name">DYHE DELIVERY</div>
-          <div class="company-address">
-            #123, Street 456, Phnom Penh, Cambodia<br>
-            Tel: +855 12 345 678 | Email: info@dyhe.com
-          </div>
-        </div>
-        
-        <div class="content">
-          <div class="row">
-            <span class="label-text">FROM:</span>
-            <span class="value">${packageData.merchant.name}</span>
-          </div>
-          
-          <div class="row">
-            <span class="label-text">TO:</span>
-            <span class="value">${packageData.customerName}</span>
-          </div>
-          
-          <div class="row">
-            <span class="label-text">PHONE:</span>
-            <span class="value">${packageData.customerPhone}</span>
-          </div>
-          
-          <div class="row">
-            <span class="label-text">ADDRESS:</span>
-            <span class="value">${packageData.customerAddress}</span>
-          </div>
-          
-          <div class="row">
-            <span class="label-text">PACKAGE:</span>
-            <span class="value">${packageData.name}</span>
-          </div>
-          
-          <div class="row">
-            <span class="label-text">COD:</span>
-            <span class="value">$${packageData.codAmount}</span>
-          </div>
-          
-          <div class="row">
-            <span class="label-text">DATE:</span>
-            <span class="value">${new Date().toLocaleDateString()}</span>
-          </div>
-        </div>
-        
-        <div class="qr-section">
-          <div class="qr-code">
-            <img src="${qrCodeUrl}" alt="QR Code">
-          </div>
-          <div class="tracking-number">${packageData.packageNumber}</div>
-        </div>
-        
-        <div class="footer">
-          Scan QR code for tracking | www.dyhe.com
-        </div>
-      </div>
-    `
-      )
-      .join("");
-
-    return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Bulk Package Labels - ${packagesWithQR.length} packages</title>
-          <style>
-            @page {
-              size: 4in 6in;
-              margin: 0.2in;
-            }
-            body {
-              font-family: Arial, sans-serif;
-              margin: 0;
-              padding: 0;
-              font-size: 12px;
-              line-height: 1.2;
-            }
-            .label {
-              width: 100%;
-              height: 100vh;
-              border: 2px solid #000;
-              padding: 8px;
-              box-sizing: border-box;
-              display: flex;
-              flex-direction: column;
-            }
-            .header {
-              text-align: center;
-              border-bottom: 2px solid #000;
-              padding-bottom: 8px;
-              margin-bottom: 8px;
-            }
-            .company-name {
-              font-size: 16px;
-              font-weight: bold;
-              margin-bottom: 4px;
-            }
-            .company-address {
-              font-size: 10px;
-              color: #666;
-            }
-            .content {
-              flex: 1;
-              display: flex;
-              flex-direction: column;
-              gap: 6px;
-            }
-            .row {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-            }
-            .label-text {
-              font-weight: bold;
-              font-size: 10px;
-            }
-            .value {
-              font-size: 11px;
-            }
-            .qr-section {
-              text-align: center;
-              margin-top: 8px;
-              padding-top: 8px;
-              border-top: 1px solid #ccc;
-            }
-            .qr-code {
-              width: 100px;
-              height: 100px;
-              margin: 0 auto 4px;
-            }
-            .qr-code img {
-              width: 100%;
-              height: 100%;
-              display: block;
-            }
-            .tracking-number {
-              font-size: 14px;
-              font-weight: bold;
-              text-align: center;
-              margin-top: 4px;
-            }
-            .footer {
-              text-align: center;
-              font-size: 8px;
-              color: #666;
-              margin-top: 8px;
-              padding-top: 4px;
-              border-top: 1px solid #ccc;
-            }
-          </style>
-        </head>
-        <body>
-          ${labelsHTML}
-        </body>
-      </html>
-    `;
-  };
+  // generatePrintContent, generateBulkPrintContent remain for preview UI text; PDF path is used for actual prints
 
   return (
     <div style={{ padding: 24, maxWidth: 1200, margin: "0 auto" }}>
@@ -545,7 +152,7 @@ const PackagePrintPage = () => {
           <PrinterOutlined /> Package Label Printer
         </Title>
         <Text type="secondary">
-          Generate and print package labels with barcodes and QR codes
+          Generate and print package labels as 4x6in PDFs with QR codes
         </Text>
 
         <div style={{ marginTop: 16 }}>
@@ -604,7 +211,7 @@ const PackagePrintPage = () => {
                 <Space direction="vertical" style={{ width: "100%" }}>
                   <Alert
                     message="Package Selected"
-                    description="Ready to print label for the selected package"
+                    description="Ready to generate PDF label for the selected package"
                     type="success"
                     showIcon
                   />
@@ -617,7 +224,7 @@ const PackagePrintPage = () => {
                     size="large"
                     style={{ width: "100%" }}
                   >
-                    {isPrinting ? "Printing..." : "Print Label"}
+                    {isPrinting ? "Generating PDF..." : "Generate PDF Label"}
                   </Button>
                 </Space>
               )}
@@ -625,44 +232,27 @@ const PackagePrintPage = () => {
           </Col>
 
           <Col span={12}>
-            <Card>
-              <Title level={4}>Label Preview</Title>
-              {selectedPackage ? (
-                <PackageLabel
-                  packageData={packagesData?.packages.find(
-                    (pkg: any) => pkg.id === selectedPackage
-                  )}
-                />
-              ) : (
-                <div
-                  style={{ textAlign: "center", padding: 40, color: "#999" }}
-                >
-                  <QrcodeOutlined style={{ fontSize: 48, marginBottom: 16 }} />
-                  <div>Select a package to preview the label</div>
-                </div>
-              )}
-            </Card>
+            <PackageLabel />
           </Col>
         </Row>
       ) : (
         <Row gutter={24}>
-          <Col span={16}>
+          <Col span={12}>
             <Card>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: 16,
-                }}
-              >
-                <Title level={4}>Select Packages for Bulk Print</Title>
-                <Space>
+              <Title level={4}>Select Packages (Bulk)</Title>
+              <Space direction="vertical" style={{ width: "100%" }}>
+                <Input
+                  placeholder="Search packages by name or package number..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  allowClear
+                />
+
+                <div>
                   <Checkbox
                     checked={
                       selectedPackages.length ===
-                        packagesData?.packages.length &&
-                      packagesData?.packages.length > 0
+                      (packagesData?.packages.length || 0)
                     }
                     indeterminate={
                       selectedPackages.length > 0 &&
@@ -671,53 +261,36 @@ const PackagePrintPage = () => {
                     }
                     onChange={(e) => handleSelectAll(e.target.checked)}
                   >
-                    Select All ({packagesData?.packages.length || 0})
+                    Select All
                   </Checkbox>
-                  <Tag color="blue">{selectedPackages.length} selected</Tag>
-                </Space>
-              </div>
+                </div>
 
-              <Input
-                placeholder="Search packages by name or package number..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                allowClear
-                style={{ marginBottom: 16 }}
-              />
+                <List
+                  dataSource={packagesData?.packages || []}
+                  renderItem={(pkg: any) => (
+                    <List.Item
+                      actions={[
+                        <Checkbox
+                          key="select"
+                          checked={selectedPackages.includes(pkg.id)}
+                          onChange={(e) =>
+                            handlePackageSelect(pkg.id, e.target.checked)
+                          }
+                        />,
+                        <Tag key="status" color="blue">
+                          {pkg.status}
+                        </Tag>,
+                      ]}
+                    >
+                      <List.Item.Meta
+                        title={`${pkg.packageNumber} - ${pkg.name}`}
+                        description={`${pkg.customerName} • ${pkg.customerPhone}`}
+                      />
+                    </List.Item>
+                  )}
+                />
 
-              <List
-                dataSource={packagesData?.packages || []}
-                loading={packagesLoading}
-                pagination={{
-                  pageSize: 10,
-                  showSizeChanger: true,
-                  showQuickJumper: true,
-                }}
-                renderItem={(pkg: any) => (
-                  <List.Item
-                    actions={[
-                      <Checkbox
-                        key="select"
-                        checked={selectedPackages.includes(pkg.id)}
-                        onChange={(e) =>
-                          handlePackageSelect(pkg.id, e.target.checked)
-                        }
-                      >
-                        Select
-                      </Checkbox>,
-                    ]}
-                  >
-                    <List.Item.Meta
-                      title={`${pkg.packageNumber} - ${pkg.name}`}
-                      description={`Customer: ${pkg.customerName} | Phone: ${pkg.customerPhone} | COD: $${pkg.codAmount}`}
-                    />
-                  </List.Item>
-                )}
-              />
-
-              {selectedPackages.length > 0 && (
-                <div style={{ marginTop: 16 }}>
-                  <Divider />
+                {selectedPackages.length > 0 && (
                   <Button
                     type="primary"
                     icon={<PrinterOutlined />}
@@ -727,41 +300,38 @@ const PackagePrintPage = () => {
                     style={{ width: "100%" }}
                   >
                     {isBulkPrinting
-                      ? "Printing..."
-                      : `Print ${selectedPackages.length} Labels`}
+                      ? "Generating PDFs..."
+                      : `Generate ${selectedPackages.length} PDF Label(s)`}
                   </Button>
-                </div>
-              )}
+                )}
+              </Space>
             </Card>
           </Col>
 
-          <Col span={8}>
+          <Col span={12}>
             <Card>
               <Title level={4}>Selected Packages</Title>
               {selectedPackages.length > 0 ? (
                 <List
-                  size="small"
-                  dataSource={selectedPackages
-                    .map((id) =>
-                      packagesData?.packages.find((pkg: any) => pkg.id === id)
-                    )
-                    .filter(Boolean)}
+                  dataSource={
+                    packagesData?.packages.filter((pkg: any) =>
+                      selectedPackages.includes(pkg.id)
+                    ) || []
+                  }
                   renderItem={(pkg: any) => (
                     <List.Item
                       actions={[
                         <Button
                           key="remove"
                           type="text"
-                          danger
                           icon={<DeleteOutlined />}
                           onClick={() => handleRemoveFromBulk(pkg.id)}
-                          size="small"
                         />,
                       ]}
                     >
                       <List.Item.Meta
-                        title={pkg.packageNumber}
-                        description={pkg.customerName}
+                        title={`${pkg.packageNumber} - ${pkg.name}`}
+                        description={`${pkg.customerName} • ${pkg.customerPhone}`}
                       />
                     </List.Item>
                   )}
@@ -783,43 +353,22 @@ const PackagePrintPage = () => {
         <Title level={4}>Print Instructions</Title>
         <Space direction="vertical">
           <Text>
-            <strong>Single Print Mode:</strong>
+            <strong>Single/Bulk:</strong>
           </Text>
-          <Text>1. Search and select a package from the dropdown</Text>
-          <Text>2. Preview the label on the right side</Text>
-          <Text>
-            3. Click &ldquo;Print Label&rdquo; to open the print dialog
-          </Text>
-
-          <Divider />
-
-          <Text>
-            <strong>Bulk Print Mode:</strong>
-          </Text>
-          <Text>1. Switch to &ldquo;Bulk Print&rdquo; mode</Text>
-          <Text>2. Select multiple packages using checkboxes</Text>
-          <Text>
-            3. Use &ldquo;Select All&rdquo; to choose all packages at once
-          </Text>
-          <Text>
-            4. Click &ldquo;Print X Labels&rdquo; to print all selected packages
-          </Text>
+          <Text>1. Select package(s)</Text>
+          <Text>2. Click "Generate PDF Label"</Text>
+          <Text>3. Print from the PDF viewer (Mac system dialog)</Text>
 
           <Divider />
 
           <Text>
             <strong>General:</strong>
           </Text>
+          <Text>• Label size is 4" x 6" (101.6mm x 152.4mm)</Text>
           <Text>
-            • Make sure your printer is set to 4&ldquo; x 6&rdquo; label size
+            • Includes QR codes, tracking numbers, and all package details
           </Text>
-          <Text>
-            • Labels include real QR codes, tracking numbers, and all package
-            details
-          </Text>
-          <Text>
-            • Each label prints on a separate page for easy separation
-          </Text>
+          <Text>• Each label prints on a separate page</Text>
         </Space>
       </Card>
     </div>
