@@ -8,52 +8,63 @@ export interface PdfLabelPackage {
   customerName: string;
   customerPhone: string;
   customerAddress: string;
-  codAmount: number;
+  codAmount: number | string;
   merchant: { name: string };
 }
 
-const PAGE_W = 101.6; // mm (4in)
-const PAGE_H = 152.4; // mm (6in)
+const PAGE_W = 101.6; // mm (4in) - matches 4x6 paper width
+const PAGE_H = 152.4; // mm (6in) - matches 4x6 paper height
 
 async function drawLabelOnDoc(doc: jsPDF, pkg: PdfLabelPackage) {
-  const marginX = 5;
-  const contentWidth = PAGE_W - marginX * 2;
+  // Center the label content horizontally only (X-axis), keep at top (Y-axis)
+  const labelWidth = 80; // mm - actual label width
+  const labelHeight = 100; // mm - actual label height
+  const marginX = (PAGE_W - labelWidth) / 2; // Center horizontally only
+  const marginY = 1; // Fixed top margin, not centered vertically
+  const contentWidth = labelWidth - 10; // Internal content width
 
   // Clear any styles
   doc.setDrawColor(0);
   doc.setTextColor(0);
 
-  // Border
+  // Border - centered on the paper
   doc.setLineWidth(0.6);
-  doc.rect(marginX, 5, contentWidth, PAGE_H - 10);
+  doc.rect(marginX + 5, marginY + 3, contentWidth, labelHeight - 6);
 
-  // Header
+  // Header - centered within the label area
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text("DYHE DELIVERY", PAGE_W / 2, 12, { align: "center" });
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.text("#123, Street 456, Phnom Penh, Cambodia", PAGE_W / 2, 16, {
+  doc.setFontSize(9);
+  doc.text("DYHE DELIVERY", marginX + labelWidth / 2, marginY + 10, {
     align: "center",
   });
-  doc.text("Tel: +855 12 345 678 | info@dyhe.com", PAGE_W / 2, 19, {
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(5);
+  doc.text(
+    "#123, Street 456, Phnom Penh",
+    marginX + labelWidth / 2,
+    marginY + 13,
+    {
+      align: "center",
+    }
+  );
+  doc.text("Tel: +855 12 345 678", marginX + labelWidth / 2, marginY + 16, {
     align: "center",
   });
 
   // Divider
-  doc.line(marginX, 22, PAGE_W - marginX, 22);
+  doc.line(marginX + 5, marginY + 18, marginX + labelWidth - 5, marginY + 18);
 
-  // Content rows
-  let y = 26;
+  // Content rows - positioned within the centered label
+  let y = marginY + 22;
   const row = (label: string, value: string) => {
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
-    doc.text(label, marginX + 1, y);
+    doc.setFontSize(6);
+    doc.text(label, marginX + 6, y);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.text(value, marginX + 26, y, { maxWidth: contentWidth - 28 });
-    y += 6;
+    doc.setFontSize(7);
+    doc.text(value, marginX + 23, y, { maxWidth: contentWidth - 25 });
+    y += 4.5;
   };
 
   row("FROM:", pkg.merchant.name);
@@ -61,26 +72,19 @@ async function drawLabelOnDoc(doc: jsPDF, pkg: PdfLabelPackage) {
   row("PHONE:", pkg.customerPhone);
   row("ADDRESS:", pkg.customerAddress);
   row("PACKAGE:", pkg.name);
-  row("COD:", `$${pkg.codAmount.toFixed(2)}`);
+  row("COD:", `$${Number(pkg.codAmount).toFixed(2)}`);
   row("DATE:", new Date().toLocaleDateString());
 
-  // QR code
-  const qr = await generateQRCode(pkg.packageNumber, { width: 300, margin: 1 });
-  const qrSize = 30; // mm (~1.18in)
-  const qrX = PAGE_W / 2 - qrSize / 2;
-  const qrY = y + 4;
+  // QR code - centered within the label area
+  const qr = await generateQRCode(pkg.packageNumber, { width: 180, margin: 1 });
+  const qrSize = 18; // mm - compact size for narrow label
+  const qrX = marginX + labelWidth / 2 - qrSize / 2; // Center within label
+  const qrY = y + 2;
   doc.addImage(qr, "PNG", qrX, qrY, qrSize, qrSize, undefined, "FAST");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.text(pkg.packageNumber, PAGE_W / 2, qrY + qrSize + 6, {
-    align: "center",
-  });
-
-  // Footer
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.text("Scan QR for tracking | www.dyhe.com", PAGE_W / 2, PAGE_H - 6, {
+  doc.setFontSize(7);
+  doc.text(pkg.packageNumber, marginX + labelWidth / 2, qrY + qrSize + 3, {
     align: "center",
   });
 }
