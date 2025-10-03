@@ -27,6 +27,7 @@ import { Package } from "../../../../lib/api/packages";
 import { usePackages, useDeletePackage } from "../../../../hooks/usePackages";
 import { ColumnType } from "antd/es/table";
 import Link from "next/link";
+import { generateQRCode } from "../../../../lib/utils/qrcode";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -67,8 +68,9 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
     [deletePackageMutation]
   );
 
-  const generatePrintContent = useCallback((packageData: Package) => {
-    return `
+  const generatePrintContent = useCallback(
+    (packageData: Package, qrCodeUrl: string) => {
+      return `
       <!DOCTYPE html>
       <html>
         <head>
@@ -134,15 +136,14 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
               border-top: 1px solid #ccc;
             }
             .qr-code {
-              width: 80px;
-              height: 80px;
-              border: 1px solid #000;
+              width: 100px;
+              height: 100px;
               margin: 0 auto 4px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-size: 8px;
-              background: #f0f0f0;
+            }
+            .qr-code img {
+              width: 100%;
+              height: 100%;
+              display: block;
             }
             .tracking-number {
               font-size: 14px;
@@ -209,8 +210,7 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
             
             <div class="qr-section">
               <div class="qr-code">
-                QR CODE<br>
-                ${packageData.packageNumber}
+                <img src="${qrCodeUrl}" alt="QR Code">
               </div>
               <div class="tracking-number">${packageData.packageNumber}</div>
             </div>
@@ -222,25 +222,63 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
         </body>
       </html>
     `;
-  }, []);
+    },
+    []
+  );
 
   const handlePrintLabel = useCallback(
-    (packageData: Package) => {
-      // Create a new window for printing
-      const printWindow = window.open("", "_blank");
-      if (!printWindow) return;
+    async (packageData: Package) => {
+      try {
+        // Generate QR code
+        const qrCodeUrl = await generateQRCode(packageData.packageNumber, {
+          width: 200,
+          margin: 1,
+        });
 
-      // Generate the print content
-      const printContent = generatePrintContent(packageData);
+        // Create iframe for better thermal printer compatibility
+        const iframe = document.createElement("iframe");
+        iframe.style.position = "absolute";
+        iframe.style.width = "0";
+        iframe.style.height = "0";
+        iframe.style.border = "none";
+        document.body.appendChild(iframe);
 
-      printWindow.document.write(printContent);
-      printWindow.document.close();
+        const iframeDoc = iframe.contentWindow?.document;
+        if (!iframeDoc) return;
 
-      // Wait for content to load, then print
-      printWindow.onload = () => {
-        printWindow.print();
-        printWindow.close();
-      };
+        // Generate the print content with QR code
+        const printContent = generatePrintContent(packageData, qrCodeUrl);
+
+        iframeDoc.open();
+        iframeDoc.write(printContent);
+        iframeDoc.close();
+
+        // Wait for images to load
+        const images = iframeDoc.images;
+        const imageLoadPromises = Array.from(images).map((img) => {
+          if (img.complete) return Promise.resolve();
+          return new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve;
+          });
+        });
+
+        await Promise.all(imageLoadPromises);
+
+        // Extra delay for rendering
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        // Print using iframe
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+
+        // Clean up after printing
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+        }, 1000);
+      } catch (error) {
+        console.error("Error printing label:", error);
+      }
     },
     [generatePrintContent]
   );

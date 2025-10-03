@@ -1,0 +1,32 @@
+# dependencies
+node_modules
+.pnpm-store
+
+# git
+.git
+
+# editors
+.vscode
+.idea
+
+# logs
+*.log
+
+# build outputs
+**/dist
+**/.next
+**/out
+**/.turbo
+**/.vercel
+**/.cache
+**/coverage
+
+# env files
+**/.env*
+**/env.*
+
+# misc
+README.md
+Dockerfile
+**/Dockerfile
+.dockerignore

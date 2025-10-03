@@ -23,6 +23,7 @@ import {
 } from "@ant-design/icons";
 import { PackageLabel } from "./_components/package-label";
 import { usePackages } from "../../../../hooks/usePackages";
+import { generateQRCode } from "../../../../lib/utils/qrcode";
 // import { useMerchants } from "../../../../hooks/useMerchants";
 
 const { Title, Text } = Typography;
@@ -44,33 +45,76 @@ const PackagePrintPage = () => {
 
   // const { data: merchantsData } = useMerchants({ limit: 100 });
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     if (!selectedPackage) return;
 
     setIsPrinting(true);
 
-    // Find the selected package
-    const packageToPrint = packagesData?.packages.find(
-      (pkg: any) => pkg.id === selectedPackage
-    );
-    if (!packageToPrint) return;
+    try {
+      // Find the selected package
+      const packageToPrint = packagesData?.packages.find(
+        (pkg: any) => pkg.id === selectedPackage
+      );
+      if (!packageToPrint) {
+        setIsPrinting(false);
+        return;
+      }
 
-    // Create a new window for printing
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
+      // Generate QR code
+      const qrCodeUrl = await generateQRCode(packageToPrint.packageNumber, {
+        width: 200,
+        margin: 1,
+      });
 
-    // Generate the print content
-    const printContent = generatePrintContent(packageToPrint);
+      // Create iframe for better thermal printer compatibility
+      const iframe = document.createElement("iframe");
+      iframe.style.position = "absolute";
+      iframe.style.width = "0";
+      iframe.style.height = "0";
+      iframe.style.border = "none";
+      document.body.appendChild(iframe);
 
-    printWindow.document.write(printContent);
-    printWindow.document.close();
+      const iframeDoc = iframe.contentWindow?.document;
+      if (!iframeDoc) {
+        setIsPrinting(false);
+        return;
+      }
 
-    // Wait for content to load, then print
-    printWindow.onload = () => {
-      printWindow.print();
-      printWindow.close();
+      // Generate the print content with QR code
+      const printContent = generatePrintContent(packageToPrint, qrCodeUrl);
+
+      iframeDoc.open();
+      iframeDoc.write(printContent);
+      iframeDoc.close();
+
+      // Wait for images to load
+      const images = iframeDoc.images;
+      const imageLoadPromises = Array.from(images).map((img) => {
+        if (img.complete) return Promise.resolve();
+        return new Promise((resolve) => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      });
+
+      await Promise.all(imageLoadPromises);
+
+      // Extra delay for rendering
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Print using iframe
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+
+      // Clean up after printing
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+        setIsPrinting(false);
+      }, 1000);
+    } catch (error) {
+      console.error("Error printing label:", error);
       setIsPrinting(false);
-    };
+    }
   };
 
   const handleBulkPrint = async () => {
@@ -85,24 +129,67 @@ const PackagePrintPage = () => {
           selectedPackages.includes(pkg.id)
         ) || [];
 
-      if (packagesToPrint.length === 0) return;
+      if (packagesToPrint.length === 0) {
+        setIsBulkPrinting(false);
+        return;
+      }
 
-      // Create a new window for printing
-      const printWindow = window.open("", "_blank");
-      if (!printWindow) return;
+      // Generate QR codes for all packages
+      const packagesWithQR = await Promise.all(
+        packagesToPrint.map(async (pkg: any) => {
+          const qrCodeUrl = await generateQRCode(pkg.packageNumber, {
+            width: 200,
+            margin: 1,
+          });
+          return { pkg, qrCodeUrl };
+        })
+      );
+
+      // Create iframe for better thermal printer compatibility
+      const iframe = document.createElement("iframe");
+      iframe.style.position = "absolute";
+      iframe.style.width = "0";
+      iframe.style.height = "0";
+      iframe.style.border = "none";
+      document.body.appendChild(iframe);
+
+      const iframeDoc = iframe.contentWindow?.document;
+      if (!iframeDoc) {
+        setIsBulkPrinting(false);
+        return;
+      }
 
       // Generate bulk print content
-      const printContent = generateBulkPrintContent(packagesToPrint);
+      const printContent = generateBulkPrintContent(packagesWithQR);
 
-      printWindow.document.write(printContent);
-      printWindow.document.close();
+      iframeDoc.open();
+      iframeDoc.write(printContent);
+      iframeDoc.close();
 
-      // Wait for content to load, then print
-      printWindow.onload = () => {
-        printWindow.print();
-        printWindow.close();
+      // Wait for images to load
+      const images = iframeDoc.images;
+      const imageLoadPromises = Array.from(images).map((img) => {
+        if (img.complete) return Promise.resolve();
+        return new Promise((resolve) => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      });
+
+      await Promise.all(imageLoadPromises);
+
+      // Extra delay for rendering
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Print using iframe
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+
+      // Clean up after printing
+      setTimeout(() => {
+        document.body.removeChild(iframe);
         setIsBulkPrinting(false);
-      };
+      }, 1000);
     } catch (error) {
       console.error("Bulk print failed:", error);
       setIsBulkPrinting(false);
@@ -131,7 +218,7 @@ const PackagePrintPage = () => {
     setSelectedPackages(selectedPackages.filter((id) => id !== packageId));
   };
 
-  const generatePrintContent = (packageData: any) => {
+  const generatePrintContent = (packageData: any, qrCodeUrl: string) => {
     return `
       <!DOCTYPE html>
       <html>
@@ -198,15 +285,14 @@ const PackagePrintPage = () => {
               border-top: 1px solid #ccc;
             }
             .qr-code {
-              width: 80px;
-              height: 80px;
-              border: 1px solid #000;
+              width: 100px;
+              height: 100px;
               margin: 0 auto 4px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-size: 8px;
-              background: #f0f0f0;
+            }
+            .qr-code img {
+              width: 100%;
+              height: 100%;
+              display: block;
             }
             .tracking-number {
               font-size: 14px;
@@ -273,8 +359,7 @@ const PackagePrintPage = () => {
             
             <div class="qr-section">
               <div class="qr-code">
-                QR CODE<br>
-                ${packageData.packageNumber}
+                <img src="${qrCodeUrl}" alt="QR Code">
               </div>
               <div class="tracking-number">${packageData.packageNumber}</div>
             </div>
@@ -288,11 +373,13 @@ const PackagePrintPage = () => {
     `;
   };
 
-  const generateBulkPrintContent = (packages: any[]) => {
-    const labelsHTML = packages
+  const generateBulkPrintContent = (
+    packagesWithQR: { pkg: any; qrCodeUrl: string }[]
+  ) => {
+    const labelsHTML = packagesWithQR
       .map(
-        (packageData, index) => `
-      <div class="label" style="page-break-after: ${index < packages.length - 1 ? "always" : "auto"};">
+        ({ pkg: packageData, qrCodeUrl }, index) => `
+      <div class="label" style="page-break-after: ${index < packagesWithQR.length - 1 ? "always" : "auto"};">
         <div class="header">
           <div class="company-name">DYHE DELIVERY</div>
           <div class="company-address">
@@ -340,8 +427,7 @@ const PackagePrintPage = () => {
         
         <div class="qr-section">
           <div class="qr-code">
-            QR CODE<br>
-            ${packageData.packageNumber}
+            <img src="${qrCodeUrl}" alt="QR Code">
           </div>
           <div class="tracking-number">${packageData.packageNumber}</div>
         </div>
@@ -358,7 +444,7 @@ const PackagePrintPage = () => {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Bulk Package Labels - ${packages.length} packages</title>
+          <title>Bulk Package Labels - ${packagesWithQR.length} packages</title>
           <style>
             @page {
               size: 4in 6in;
@@ -420,15 +506,14 @@ const PackagePrintPage = () => {
               border-top: 1px solid #ccc;
             }
             .qr-code {
-              width: 80px;
-              height: 80px;
-              border: 1px solid #000;
+              width: 100px;
+              height: 100px;
               margin: 0 auto 4px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-size: 8px;
-              background: #f0f0f0;
+            }
+            .qr-code img {
+              width: 100%;
+              height: 100%;
+              display: block;
             }
             .tracking-number {
               font-size: 14px;
