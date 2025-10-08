@@ -10,6 +10,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { PackagesModule } from './modules/packages/packages.module';
 import { UsersModule } from './modules/users/users.module';
 import { CustomersModule } from './modules/customers/customers.module';
+import { ReportsModule } from './modules/reports/reports.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -23,6 +24,7 @@ import { CustomersModule } from './modules/customers/customers.module';
     PackagesModule,
     UsersModule,
     CustomersModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
