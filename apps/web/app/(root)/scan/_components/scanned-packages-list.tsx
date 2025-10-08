@@ -36,10 +36,10 @@ export const ScannedPackagesList: React.FC<ScannedPackagesListProps> = ({
   return (
     <div>
       {/* Driver Selection */}
-      <Card style={{ marginBottom: 16 }}>
+      <Card>
         <Space direction="vertical" style={{ width: "100%" }}>
           <div>
-            <Title level={5}>
+            <Title level={5} style={{ margin: 0 }}>
               <UserOutlined /> Select Driver
             </Title>
             <Text type="secondary">
@@ -53,6 +53,7 @@ export const ScannedPackagesList: React.FC<ScannedPackagesListProps> = ({
             style={{ width: "100%" }}
             showSearch
             optionFilterProp="children"
+            size="large"
           >
             {driversData?.drivers.map(
               (driver: {
@@ -77,6 +78,9 @@ export const ScannedPackagesList: React.FC<ScannedPackagesListProps> = ({
         dataSource={packages}
         renderItem={(pkg, index) => (
           <List.Item
+            style={{
+              borderBottom: "1px solid #f0f0f0",
+            }}
             actions={[
               <Button
                 key="remove"
@@ -84,6 +88,7 @@ export const ScannedPackagesList: React.FC<ScannedPackagesListProps> = ({
                 danger
                 icon={<DeleteOutlined />}
                 onClick={() => onRemovePackage(pkg.packageNumber)}
+                size="large"
               >
                 Remove
               </Button>,
@@ -91,18 +96,20 @@ export const ScannedPackagesList: React.FC<ScannedPackagesListProps> = ({
           >
             <List.Item.Meta
               title={
-                <Space>
-                  <Text strong>#{index + 1}</Text>
-                  <Text code>{pkg.packageNumber}</Text>
+                <Space style={{ marginBottom: 8 }}>
+                  <Text strong style={{ fontSize: 16 }}>
+                    #{index + 1}
+                  </Text>
+                  <Text code style={{ fontSize: 14 }}>
+                    {pkg.packageNumber}
+                  </Text>
                   <Tag color="blue">{pkg.status}</Tag>
                 </Space>
               }
               description={
                 <Space direction="vertical" size="small">
-                  <Text>{pkg.name}</Text>
-                  <Text type="secondary">Customer: {pkg.customerName}</Text>
                   <Text type="secondary" style={{ fontSize: 12 }}>
-                    Scanned: {new Date(pkg.scannedAt).toLocaleString()}
+                    Added: {new Date(pkg.scannedAt).toLocaleString()}
                   </Text>
                 </Space>
               }
@@ -110,7 +117,7 @@ export const ScannedPackagesList: React.FC<ScannedPackagesListProps> = ({
           </List.Item>
         )}
         locale={{
-          emptyText: "No packages scanned yet",
+          emptyText: "No packages added yet",
         }}
       />
 

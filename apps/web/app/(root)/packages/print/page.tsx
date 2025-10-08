@@ -146,7 +146,7 @@ const PackagePrintPage = () => {
   // generatePrintContent, generateBulkPrintContent remain for preview UI text; PDF path is used for actual prints
 
   return (
-    <div style={{ padding: 24, maxWidth: 1200, margin: "0 auto" }}>
+    <div style={{ padding: 24, maxWidth: 1600, margin: "0 auto" }}>
       <div style={{ marginBottom: 24 }}>
         <Title level={2}>
           <PrinterOutlined /> Package Label Printer
@@ -160,12 +160,14 @@ const PackagePrintPage = () => {
             <Button
               type={printMode === "single" ? "primary" : "default"}
               onClick={() => setPrintMode("single")}
+              size="large"
             >
               Single Print
             </Button>
             <Button
               type={printMode === "bulk" ? "primary" : "default"}
               onClick={() => setPrintMode("bulk")}
+              size="large"
             >
               Bulk Print
             </Button>
@@ -174,22 +176,15 @@ const PackagePrintPage = () => {
       </div>
 
       {printMode === "single" ? (
-        <Row gutter={24}>
-          <Col span={12}>
+        <Row gutter={32}>
+          <Col span={10}>
             <Card>
               <Title level={4}>Select Package to Print</Title>
 
               <Space
                 direction="vertical"
-                style={{ width: "100%", marginBottom: 16 }}
+                style={{ width: "100%", marginBottom: 20 }}
               >
-                <Input
-                  placeholder="Search packages by name or package number..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  allowClear
-                />
-
                 <Select
                   placeholder="Select a package to print"
                   value={selectedPackage}
@@ -198,6 +193,7 @@ const PackagePrintPage = () => {
                   showSearch
                   optionFilterProp="children"
                   loading={packagesLoading}
+                  size="large"
                 >
                   {packagesData?.packages.map((pkg: any) => (
                     <Option key={pkg.id} value={pkg.id}>
@@ -231,13 +227,13 @@ const PackagePrintPage = () => {
             </Card>
           </Col>
 
-          <Col span={12}>
+          <Col span={14}>
             <PackageLabel />
           </Col>
         </Row>
       ) : (
-        <Row gutter={24}>
-          <Col span={12}>
+        <Row gutter={32}>
+          <Col span={14}>
             <Card>
               <Title level={4}>Select Packages (Bulk)</Title>
               <Space direction="vertical" style={{ width: "100%" }}>
@@ -246,6 +242,7 @@ const PackagePrintPage = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   allowClear
+                  size="large"
                 />
 
                 <div>
@@ -260,8 +257,9 @@ const PackagePrintPage = () => {
                         (packagesData?.packages.length || 0)
                     }
                     onChange={(e) => handleSelectAll(e.target.checked)}
+                    style={{ fontSize: 16 }}
                   >
-                    Select All
+                    Select All ({packagesData?.packages.length || 0} packages)
                   </Checkbox>
                 </div>
 
@@ -269,6 +267,10 @@ const PackagePrintPage = () => {
                   dataSource={packagesData?.packages || []}
                   renderItem={(pkg: any) => (
                     <List.Item
+                      style={{
+                        borderBottom: "1px solid #f0f0f0",
+                        padding: "12px 0",
+                      }}
                       actions={[
                         <Checkbox
                           key="select"
@@ -283,11 +285,25 @@ const PackagePrintPage = () => {
                       ]}
                     >
                       <List.Item.Meta
-                        title={`${pkg.packageNumber} - ${pkg.name}`}
-                        description={`${pkg.customerName} • ${pkg.customerPhone}`}
+                        title={
+                          <Text strong style={{ fontSize: 15 }}>
+                            {pkg.packageNumber} - {pkg.name}
+                          </Text>
+                        }
+                        description={
+                          <Space direction="vertical" size="small">
+                            <Text type="secondary" style={{ fontSize: 13 }}>
+                              {pkg.customerName} • {pkg.customerPhone}
+                            </Text>
+                            <Text type="secondary" style={{ fontSize: 12 }}>
+                              COD: ${Number(pkg.codAmount).toFixed(2)}
+                            </Text>
+                          </Space>
+                        }
                       />
                     </List.Item>
                   )}
+                  style={{ maxHeight: 400, overflowY: "auto" }}
                 />
 
                 {selectedPackages.length > 0 && (
@@ -308,9 +324,11 @@ const PackagePrintPage = () => {
             </Card>
           </Col>
 
-          <Col span={12}>
+          <Col span={10}>
             <Card>
-              <Title level={4}>Selected Packages</Title>
+              <Title level={4}>
+                Selected Packages ({selectedPackages.length})
+              </Title>
               {selectedPackages.length > 0 ? (
                 <List
                   dataSource={
@@ -320,28 +338,51 @@ const PackagePrintPage = () => {
                   }
                   renderItem={(pkg: any) => (
                     <List.Item
+                      style={{
+                        borderBottom: "1px solid #f0f0f0",
+                        padding: "12px 0",
+                      }}
                       actions={[
                         <Button
                           key="remove"
                           type="text"
+                          danger
                           icon={<DeleteOutlined />}
                           onClick={() => handleRemoveFromBulk(pkg.id)}
+                          size="large"
                         />,
                       ]}
                     >
                       <List.Item.Meta
-                        title={`${pkg.packageNumber} - ${pkg.name}`}
-                        description={`${pkg.customerName} • ${pkg.customerPhone}`}
+                        title={
+                          <Text strong style={{ fontSize: 15 }}>
+                            {pkg.packageNumber} - {pkg.name}
+                          </Text>
+                        }
+                        description={
+                          <Space direction="vertical" size="small">
+                            <Text type="secondary" style={{ fontSize: 13 }}>
+                              {pkg.customerName} • {pkg.customerPhone}
+                            </Text>
+                            <Text type="secondary" style={{ fontSize: 12 }}>
+                              COD: ${Number(pkg.codAmount).toFixed(2)}
+                            </Text>
+                          </Space>
+                        }
                       />
                     </List.Item>
                   )}
+                  style={{ maxHeight: 400, overflowY: "auto" }}
                 />
               ) : (
                 <div
-                  style={{ textAlign: "center", padding: 20, color: "#999" }}
+                  style={{ textAlign: "center", padding: 40, color: "#999" }}
                 >
-                  <QrcodeOutlined style={{ fontSize: 32, marginBottom: 8 }} />
-                  <div>No packages selected</div>
+                  <QrcodeOutlined style={{ fontSize: 48, marginBottom: 16 }} />
+                  <div style={{ fontSize: 16 }}>No packages selected</div>
+                  <div style={{ fontSize: 12, marginTop: 8 }}>
+                    Select packages from the list on the left
+                  </div>
                 </div>
               )}
             </Card>
@@ -349,26 +390,51 @@ const PackagePrintPage = () => {
         </Row>
       )}
 
-      <Card style={{ marginTop: 24 }}>
+      <Card style={{ marginTop: 32 }}>
         <Title level={4}>Print Instructions</Title>
-        <Space direction="vertical">
-          <Text>
-            <strong>Single/Bulk:</strong>
-          </Text>
-          <Text>1. Select package(s)</Text>
-          <Text>2. Click "Generate PDF Label"</Text>
-          <Text>3. Print from the PDF viewer (Mac system dialog)</Text>
+        <Space direction="vertical" size="middle">
+          <div>
+            <Text strong style={{ fontSize: 16 }}>
+              Single/Bulk Printing:
+            </Text>
+            <ul style={{ marginTop: 8, paddingLeft: 20 }}>
+              <li>
+                <Text>Select package(s) from the dropdown or list</Text>
+              </li>
+              <li>
+                <Text>Click &quot;Generate PDF Label(s)&quot; button</Text>
+              </li>
+              <li>
+                <Text>
+                  Print from the PDF viewer using your system print dialog
+                </Text>
+              </li>
+            </ul>
+          </div>
 
           <Divider />
 
-          <Text>
-            <strong>General:</strong>
-          </Text>
-          <Text>• Label size is 4" x 6" (101.6mm x 152.4mm)</Text>
-          <Text>
-            • Includes QR codes, tracking numbers, and all package details
-          </Text>
-          <Text>• Each label prints on a separate page</Text>
+          <div>
+            <Text strong style={{ fontSize: 16 }}>
+              Label Specifications:
+            </Text>
+            <ul style={{ marginTop: 8, paddingLeft: 20 }}>
+              <li>
+                <Text>Label size: 4&quot; x 6&quot; (101.6mm x 152.4mm)</Text>
+              </li>
+              <li>
+                <Text>
+                  Includes QR codes, tracking numbers, and all package details
+                </Text>
+              </li>
+              <li>
+                <Text>Each label prints on a separate page</Text>
+              </li>
+              <li>
+                <Text>Optimized for thermal printers (Xprinter XP-480B)</Text>
+              </li>
+            </ul>
+          </div>
         </Space>
       </Card>
     </div>

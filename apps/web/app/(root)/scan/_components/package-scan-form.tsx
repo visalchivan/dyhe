@@ -1,12 +1,8 @@
 "use client";
 
-import React, { useRef, useState } from "react";
-import { Button, Input, Typography, Space, Alert, Card, Divider } from "antd";
-import {
-  QrcodeOutlined,
-  CameraOutlined,
-  StopOutlined,
-} from "@ant-design/icons";
+import React, { useState } from "react";
+import { Button, Input, Typography, Space, Alert, Card, message } from "antd";
+import { QrcodeOutlined, PlusOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 
@@ -20,39 +16,9 @@ interface PackageScanFormProps {
 
 export const PackageScanForm: React.FC<PackageScanFormProps> = ({
   onPackageScanned,
-  isScanning,
-  onScanningChange,
 }) => {
   const [scanResult, setScanResult] = useState<string>("");
   const [error, setError] = useState<string>("");
-  const streamRef = useRef<MediaStream | null>(null);
-
-  const startScanning = async () => {
-    try {
-      setError("");
-      onScanningChange(true);
-
-      // For now, we'll use a simple input field for testing
-      // In a real app, you'd integrate with a QR code scanner library like @zxing/library
-      console.log("Starting camera for QR code scanning...");
-
-      // Simulate scanning process
-      setTimeout(() => {
-        onScanningChange(false);
-      }, 2000);
-    } catch {
-      setError("Failed to start camera. Please check permissions.");
-      onScanningChange(false);
-    }
-  };
-
-  const stopScanning = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
-    onScanningChange(false);
-  };
 
   const handleManualScan = () => {
     if (!scanResult.trim()) {
@@ -87,6 +53,7 @@ export const PackageScanForm: React.FC<PackageScanFormProps> = ({
     onPackageScanned(packageData);
     setScanResult("");
     setError("");
+    message.success(`Package ${scanResult.trim()} added successfully!`);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -97,70 +64,42 @@ export const PackageScanForm: React.FC<PackageScanFormProps> = ({
 
   return (
     <div>
-      {!isScanning ? (
-        <Space direction="vertical" style={{ width: "100%" }}>
-          <Card>
-            <Title level={5}>Camera Scanner</Title>
-            <Text type="secondary">
-              Use your device camera to scan QR codes on packages
-            </Text>
-            <br />
-            <Button
-              type="primary"
-              icon={<CameraOutlined />}
-              onClick={startScanning}
-              style={{ marginTop: 12 }}
-            >
-              Start Camera Scanner
-            </Button>
-          </Card>
+      <Space direction="vertical" style={{ width: "100%" }}>
+        <div>
+          <Text type="secondary">
+            Enter package number to add it to the scanned list
+          </Text>
+        </div>
 
-          <Divider>OR</Divider>
+        <Space.Compact style={{ width: "100%" }}>
+          <Input
+            placeholder="Enter package number (e.g., DYHE123456ABC)"
+            value={scanResult}
+            onChange={(e) => {
+              setScanResult(e.target.value);
+              setError("");
+            }}
+            onKeyPress={handleKeyPress}
+            style={{ flex: 1 }}
+            size="large"
+          />
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={handleManualScan}
+            size="large"
+            style={{ minWidth: 120 }}
+          >
+            Add Package
+          </Button>
+        </Space.Compact>
 
-          <Card>
-            <Title level={5}>Manual Entry</Title>
-            <Text type="secondary">
-              Enter package number manually if QR code is not readable
-            </Text>
-            <Space.Compact style={{ width: "100%", marginTop: 12 }}>
-              <Input
-                placeholder="Enter package number (e.g., DYHE123456ABC)"
-                value={scanResult}
-                onChange={(e) => setScanResult(e.target.value)}
-                onKeyPress={handleKeyPress}
-                style={{ flex: 1 }}
-              />
-              <Button
-                type="primary"
-                icon={<QrcodeOutlined />}
-                onClick={handleManualScan}
-              >
-                Add Package
-              </Button>
-            </Space.Compact>
-          </Card>
-        </Space>
-      ) : (
-        <Card>
-          <div style={{ textAlign: "center", padding: 20 }}>
-            <CameraOutlined style={{ fontSize: 48, color: "#1890ff" }} />
-            <Title level={4} style={{ marginTop: 16 }}>
-              Scanning for QR Codes...
-            </Title>
-            <Text type="secondary">
-              Point your camera at the package QR code
-            </Text>
-            <br />
-            <Button
-              icon={<StopOutlined />}
-              onClick={stopScanning}
-              style={{ marginTop: 16 }}
-            >
-              Stop Scanning
-            </Button>
-          </div>
-        </Card>
-      )}
+        <div style={{ marginTop: 8 }}>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            💡 Tip: Press Enter or click "Add Package" to add the package
+          </Text>
+        </div>
+      </Space>
 
       {error && (
         <Alert

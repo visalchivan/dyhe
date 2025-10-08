@@ -72,18 +72,6 @@ export const PackageForm: React.FC<PackageFormProps> = ({
       <Row gutter={16}>
         <Col span={12}>
           <Form.Item
-            name="name"
-            label="Package Name"
-            rules={[
-              { required: true, message: "Please enter package name" },
-              { min: 2, message: "Name must be at least 2 characters" },
-            ]}
-          >
-            <Input placeholder="Enter package name" />
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item
             name="customerName"
             label="Customer Name"
             rules={[

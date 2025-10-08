@@ -28,65 +28,144 @@ async function drawLabelOnDoc(doc: jsPDF, pkg: PdfLabelPackage) {
   doc.setTextColor(0);
 
   // Border - centered on the paper
-  doc.setLineWidth(0.6);
+  doc.setLineWidth(0.8);
   doc.rect(marginX + 5, marginY + 3, contentWidth, labelHeight - 6);
 
-  // Header - centered within the label area
+  // Define section heights based on the wireframe
+  const headerHeight = 18; // Top section
+  const middleHeight = 50; // Middle section
+
+  const headerY = marginY + 5;
+  const middleY = headerY + headerHeight;
+  const footerY = middleY + middleHeight;
+
+  // Company info on left
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.text("DYHE DELIVERY", marginX + labelWidth / 2, marginY + 10, {
-    align: "center",
-  });
+  doc.setFontSize(8);
+  doc.text("DYHE DELIVERY", marginX + 7, headerY + 6);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(5);
-  doc.text(
-    "#123, Street 456, Phnom Penh",
-    marginX + labelWidth / 2,
-    marginY + 13,
-    {
-      align: "center",
-    }
-  );
-  doc.text("Tel: +855 12 345 678", marginX + labelWidth / 2, marginY + 16, {
-    align: "center",
-  });
+  doc.text("#123, Street 456, Phnom Penh", marginX + 7, headerY + 10);
+  doc.text("Tel: +855 12 345 678", marginX + 7, headerY + 14);
 
-  // Divider
-  doc.line(marginX + 5, marginY + 18, marginX + labelWidth - 5, marginY + 18);
-
-  // Content rows - positioned within the centered label
-  let y = marginY + 22;
-  const row = (label: string, value: string) => {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(6);
-    doc.text(label, marginX + 6, y);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(7);
-    doc.text(value, marginX + 23, y, { maxWidth: contentWidth - 25 });
-    y += 4.5;
-  };
-
-  row("FROM:", pkg.merchant.name);
-  row("TO:", pkg.customerName);
-  row("PHONE:", pkg.customerPhone);
-  row("ADDRESS:", pkg.customerAddress);
-  row("PACKAGE:", pkg.name);
-  row("COD:", `$${Number(pkg.codAmount).toFixed(2)}`);
-  row("DATE:", new Date().toLocaleDateString());
-
-  // QR code - centered within the label area
-  const qr = await generateQRCode(pkg.packageNumber, { width: 180, margin: 1 });
-  const qrSize = 18; // mm - compact size for narrow label
-  const qrX = marginX + labelWidth / 2 - qrSize / 2; // Center within label
-  const qrY = y + 2;
-  doc.addImage(qr, "PNG", qrX, qrY, qrSize, qrSize, undefined, "FAST");
+  // Tracking info on right
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(6);
+  doc.text("Tracking#:", marginX + 45, headerY + 6);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(5);
+  doc.text(pkg.packageNumber, marginX + 45, headerY + 10);
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7);
-  doc.text(pkg.packageNumber, marginX + labelWidth / 2, qrY + qrSize + 3, {
-    align: "center",
+  doc.setFontSize(6);
+  doc.text("DATE:", marginX + 45, headerY + 14);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(5);
+  doc.text(new Date().toLocaleDateString(), marginX + 45, headerY + 17);
+
+  // Horizontal divider between header and middle
+  doc.setLineWidth(0.8);
+  doc.line(marginX + 5, middleY, marginX + labelWidth - 5, middleY);
+
+  // Vertical divider for two columns
+  const leftColWidth = contentWidth * 0.4; // Left column ~40%
+  const rightColWidth = contentWidth * 0.6; // Right column ~60%
+  doc.setLineWidth(0.8);
+  doc.line(
+    marginX + 5 + leftColWidth,
+    middleY,
+    marginX + 5 + leftColWidth,
+    footerY
+  );
+
+  // Horizontal divider between left sections
+  const leftSectionHeight = (middleHeight - 2) / 2;
+  doc.setLineWidth(0.8);
+  doc.line(
+    marginX + 5,
+    middleY + leftSectionHeight,
+    marginX + 5 + leftColWidth,
+    middleY + leftSectionHeight
+  );
+
+  // FROM section (top left)
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(6);
+  doc.text("FROM", marginX + 7, middleY + 5);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(5);
+  doc.text(pkg.merchant.name, marginX + 7, middleY + 9);
+
+  // SHIP TO section (bottom left)
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(6);
+  doc.text("SHIP TO", marginX + 7, middleY + leftSectionHeight + 5);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(5);
+  doc.text(pkg.customerName, marginX + 7, middleY + leftSectionHeight + 9);
+  doc.text(pkg.customerPhone, marginX + 7, middleY + leftSectionHeight + 13);
+  doc.text(pkg.customerAddress, marginX + 7, middleY + leftSectionHeight + 17, {
+    maxWidth: leftColWidth - 4,
   });
+
+  // RIGHT COLUMN - Package details and QR code
+  const rightStartX = marginX + 5 + leftColWidth + 2;
+  let rightY = middleY + 5;
+
+  // Package details
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(6);
+  doc.text("PACKAGE#:", rightStartX, rightY);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(5);
+  doc.text("1", rightStartX, rightY + 4);
+
+  rightY += 8;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(6);
+  doc.text("SHP WT#:", rightStartX, rightY);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(5);
+  doc.text("1", rightStartX, rightY + 4);
+
+  rightY += 8;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(6);
+  doc.text("COD in USD:", rightStartX, rightY);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(5);
+  doc.text(`$${Number(pkg.codAmount).toFixed(2)}`, rightStartX, rightY + 4);
+
+  // QR code in right column
+  const qr = await generateQRCode(pkg.packageNumber, { width: 120, margin: 1 });
+  const qrSize = 12; // mm
+  const qrX = rightStartX + 15;
+  const qrY = middleY + 25;
+  doc.addImage(qr, "PNG", qrX, qrY, qrSize, qrSize, undefined, "FAST");
+
+  // Horizontal divider between middle and footer
+  doc.setLineWidth(0.8);
+  doc.line(marginX + 5, footerY, marginX + labelWidth - 5, footerY);
+
+  // Remarks
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(6);
+  doc.text("REMARKS", marginX + 7, footerY + 5);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(4);
+  doc.text(
+    "DYHE Express does not accept illegal goods or animals.",
+    marginX + 7,
+    footerY + 9,
+    { maxWidth: contentWidth - 4 }
+  );
+  doc.text(
+    "We reserve the right to refuse delivery if goods are suspected to be illegal.",
+    marginX + 7,
+    footerY + 13,
+    { maxWidth: contentWidth - 4 }
+  );
 }
 
 export async function createLabelPdf(pkg: PdfLabelPackage): Promise<jsPDF> {

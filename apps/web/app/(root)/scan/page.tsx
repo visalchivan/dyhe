@@ -70,20 +70,22 @@ const ScanPackagePage = () => {
   };
 
   return (
-    <div style={{ padding: 24, maxWidth: 1200, margin: "0 auto" }}>
+    <div style={{ padding: 24, maxWidth: 1600, margin: "0 auto" }}>
       <div style={{ marginBottom: 24 }}>
         <Title level={2}>
-          <QrcodeOutlined /> Package Scanner
+          <QrcodeOutlined /> Assign Packages
         </Title>
         <Text type="secondary">
-          Scan packages to assign them to drivers in bulk
+          Manually enter package numbers to assign them to drivers in bulk
         </Text>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
-        {/* Scanner Section */}
-        <Card>
-          <Title level={4}>Scan Packages</Title>
+      <div
+        style={{ display: "grid", gridTemplateColumns: "400px 1fr", gap: 32 }}
+      >
+        {/* Manual Entry Section */}
+        <Card style={{ height: "fit-content" }}>
+          <Title level={4}>Manual Entry</Title>
           <PackageScanForm
             onPackageScanned={handlePackageScanned}
             isScanning={isScanning}
@@ -109,6 +111,7 @@ const ScanPackagePage = () => {
                 onClick={handleBulkAssign}
                 disabled={!selectedDriver}
                 loading={isAssigning}
+                size="large"
               >
                 {isAssigning ? "Assigning..." : "Assign to Driver"}
               </Button>
@@ -118,9 +121,10 @@ const ScanPackagePage = () => {
           {scannedPackages.length === 0 ? (
             <Alert
               message="No packages scanned yet"
-              description="Start scanning packages using the QR code scanner on the left"
+              description="Start adding packages using the manual entry form on the left"
               type="info"
               showIcon
+              style={{ marginTop: 20 }}
             />
           ) : (
             <ScannedPackagesList

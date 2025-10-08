@@ -317,9 +317,6 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
                 Print Label
               </Button>
             </Link>
-            <Button icon={<PlusOutlined />} onClick={onCreatePackage}>
-              Create Package
-            </Button>
             <Button
               type="primary"
               icon={<AppstoreAddOutlined />}

@@ -33,14 +33,6 @@ export default function PackagesPage() {
     setViewDrawerVisible(true);
   };
 
-  const handleCloseModals = () => {
-    setCreateModalVisible(false);
-    setBulkCreateModalVisible(false);
-    setEditModalVisible(false);
-    setViewDrawerVisible(false);
-    setSelectedPackage(null);
-  };
-
   return (
     <div style={{ padding: 24 }}>
       <PackagesTable
@@ -48,11 +40,6 @@ export default function PackagesPage() {
         onBulkCreatePackages={handleBulkCreatePackages}
         onEditPackage={handleEditPackage}
         onViewPackage={handleViewPackage}
-      />
-
-      <CreatePackageModal
-        visible={createModalVisible}
-        onClose={() => setCreateModalVisible(false)}
       />
 
       <BulkCreatePackageModal

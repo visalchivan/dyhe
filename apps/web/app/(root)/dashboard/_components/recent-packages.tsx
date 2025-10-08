@@ -34,10 +34,14 @@ export const RecentPackages: React.FC<RecentPackagesProps> = ({
 
   const columns = [
     {
-      title: "Tracking Number",
-      dataIndex: "trackingNumber",
-      key: "trackingNumber",
-      render: (text: string) => <Typography.Text code>{text}</Typography.Text>,
+      title: "Package Number",
+      dataIndex: "packageNumber",
+      key: "packageNumber",
+      render: (text: string) => (
+        <Typography.Text code copyable>
+          {text}
+        </Typography.Text>
+      ),
     },
     {
       title: "Merchant",

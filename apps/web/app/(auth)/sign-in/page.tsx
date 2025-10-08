@@ -44,11 +44,10 @@ const SignInPage: React.FC = () => {
         padding: "20px",
       }}
     >
-      <Card
+      <div
         style={{
           width: "100%",
           maxWidth: 400,
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
         }}
       >
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
@@ -107,27 +106,8 @@ const SignInPage: React.FC = () => {
               </Button>
             </Form.Item>
           </Form>
-
-          <div style={{ textAlign: "center" }}>
-            <Text type="secondary">
-              Don't have an account?{" "}
-              <a href="/sign-up" style={{ color: "#1890ff" }}>
-                Sign up
-              </a>
-            </Text>
-          </div>
-
-          <div style={{ textAlign: "center", marginTop: "20px" }}>
-            <Text type="secondary" style={{ fontSize: "12px" }}>
-              Test accounts:
-              <br />
-              admin@dyhe.com / admin123 (Super Admin)
-              <br />
-              john.doe@example.com / password123 (User)
-            </Text>
-          </div>
         </Space>
-      </Card>
+      </div>
     </div>
   );
 };

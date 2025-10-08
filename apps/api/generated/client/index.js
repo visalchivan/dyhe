@@ -238,7 +238,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/Users/chivanvisal/workspace/dyhe-platform/apps/api/generated/client",
+      "value": "/Users/chivanvisal/Desktop/dyhe-platform/apps/api/generated/client",
       "fromEnvVar": null
     },
     "config": {
@@ -252,11 +252,11 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/Users/chivanvisal/workspace/dyhe-platform/apps/api/prisma/schema.prisma",
+    "sourceFilePath": "/Users/chivanvisal/Desktop/dyhe-platform/apps/api/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../../.env",
+    "rootEnvPath": null,
     "schemaEnvPath": "../../.env"
   },
   "relativePath": "../../prisma",
@@ -266,7 +266,6 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
