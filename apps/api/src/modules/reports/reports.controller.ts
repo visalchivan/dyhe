@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import {
   Controller,
   Get,
@@ -12,6 +13,7 @@ import type { Response } from 'express';
 import { ReportsService } from './reports.service';
 import { ReportsQueryDto, ReportType } from './dto/reports-query.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { DriverReportDto, MerchantReportDto } from './dto/reports-response.dto';
 import * as XLSX from 'xlsx';
 
 @Controller('reports')
@@ -20,7 +22,7 @@ export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
   @Get('debug')
-  async debug(@Query() query: any) {
+  debug(@Query() query: Record<string, unknown>) {
     return {
       message: 'Reports API is working',
       query,
@@ -36,7 +38,9 @@ export class ReportsController {
       return await this.reportsService.getReports(query);
     } catch (error) {
       console.error('Reports API Error:', error);
-      throw new BadRequestException(`Failed to get reports: ${error.message}`);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      throw new BadRequestException(`Failed to get reports: ${errorMessage}`);
     }
   }
 
@@ -131,31 +135,33 @@ export class ReportsController {
       'DETAILED PACKAGE LIST:',
       '',
       headers.join(','),
-      ...reports.data.map((item: any, index: number) => {
-        const deliveryDate = item.shipmentDeliveryDate
-          ? new Date(item.shipmentDeliveryDate).toLocaleDateString() +
-            ' ' +
-            new Date(item.shipmentDeliveryDate).toLocaleTimeString()
-          : 'Not Delivered';
+      ...reports.data.map(
+        (item: DriverReportDto | MerchantReportDto, index: number) => {
+          const deliveryDate = item.shipmentDeliveryDate
+            ? new Date(item.shipmentDeliveryDate).toLocaleDateString() +
+              ' ' +
+              new Date(item.shipmentDeliveryDate).toLocaleTimeString()
+            : 'Not Delivered';
 
-        return [
-          index + 1,
-          new Date(item.shipmentCreateDate).toLocaleDateString() +
-            ' ' +
-            new Date(item.shipmentCreateDate).toLocaleTimeString(),
-          deliveryDate,
-          `"${item.receiverName}"`,
-          `"${item.address}"`,
-          `"${item.contact}"`,
-          `"${item.trackingNumber}"`,
-          item.cashCollectionAmount > 0
-            ? `$${item.cashCollectionAmount.toFixed(2)}`
-            : '$0.00',
-          `"${item.driverName || 'Not Assigned'}"`,
-          `"${item.merchantName}"`,
-          `"${item.status}"`,
-        ].join(',');
-      }),
+          return [
+            index + 1,
+            new Date(item.shipmentCreateDate).toLocaleDateString() +
+              ' ' +
+              new Date(item.shipmentCreateDate).toLocaleTimeString(),
+            deliveryDate,
+            `"${item.receiverName}"`,
+            `"${item.address}"`,
+            `"${item.contact}"`,
+            `"${item.trackingNumber}"`,
+            item.cashCollectionAmount > 0
+              ? `$${item.cashCollectionAmount.toFixed(2)}`
+              : '$0.00',
+            `"${item.driverName || 'Not Assigned'}"`,
+            `"${item.merchantName}"`,
+            `"${item.status}"`,
+          ].join(',');
+        },
+      ),
       '',
       'END OF REPORT',
     ].join('\n');
@@ -214,29 +220,31 @@ export class ReportsController {
         'Status',
       ];
 
-      const dataRows = reports.data.map((item: any, index: number) => {
-        const deliveryDate = item.shipmentDeliveryDate
-          ? new Date(item.shipmentDeliveryDate).toLocaleDateString() +
-            ' ' +
-            new Date(item.shipmentDeliveryDate).toLocaleTimeString()
-          : 'Not Delivered';
+      const dataRows = reports.data.map(
+        (item: DriverReportDto | MerchantReportDto, index: number) => {
+          const deliveryDate = item.shipmentDeliveryDate
+            ? new Date(item.shipmentDeliveryDate).toLocaleDateString() +
+              ' ' +
+              new Date(item.shipmentDeliveryDate).toLocaleTimeString()
+            : 'Not Delivered';
 
-        return [
-          index + 1,
-          new Date(item.shipmentCreateDate).toLocaleDateString() +
-            ' ' +
-            new Date(item.shipmentCreateDate).toLocaleTimeString(),
-          deliveryDate,
-          item.receiverName,
-          item.address,
-          item.contact,
-          item.trackingNumber,
-          item.cashCollectionAmount,
-          item.driverName || 'Not Assigned',
-          item.merchantName,
-          item.status,
-        ];
-      });
+          return [
+            index + 1,
+            new Date(item.shipmentCreateDate).toLocaleDateString() +
+              ' ' +
+              new Date(item.shipmentCreateDate).toLocaleTimeString(),
+            deliveryDate,
+            item.receiverName,
+            item.address,
+            item.contact,
+            item.trackingNumber,
+            item.cashCollectionAmount,
+            item.driverName || 'Not Assigned',
+            item.merchantName,
+            item.status,
+          ];
+        },
+      );
 
       // Combine all data
       const allData = [...summaryData, headers, ...dataRows];
@@ -260,10 +268,124 @@ export class ReportsController {
       ];
       worksheet['!cols'] = columnWidths;
 
+      // Add styling and colors
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const range = XLSX.utils.decode_range((worksheet as any)['!ref'] || 'A1');
+
+      // Style the header row (DYHE DELIVERY REPORT)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      (worksheet['A1'] as any).s = {
+        font: { bold: true, size: 16, color: { rgb: 'FFFFFF' } },
+        fill: { fgColor: { rgb: '2E86AB' } },
+        alignment: { horizontal: 'center', vertical: 'center' },
+      };
+
+      // Merge cells for title
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      (worksheet as any)['!merges'] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 10 } },
+      ];
+
+      // Style the generation date
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      (worksheet['A2'] as any).s = {
+        font: { italic: true, size: 10 },
+        fill: { fgColor: { rgb: 'F8F9FA' } },
+      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+      (worksheet as any)['!merges'].push({
+        s: { r: 1, c: 0 },
+        e: { r: 1, c: 10 },
+      });
+
+      // Style the summary section
+      const summaryStartRow = 4;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      (worksheet[`A${summaryStartRow}`] as any).s = {
+        font: { bold: true, size: 12, color: { rgb: 'FFFFFF' } },
+        fill: { fgColor: { rgb: '28A745' } },
+      };
+
+      // Style summary headers (Metric, Value)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      (worksheet[`A${summaryStartRow + 1}`] as any).s = {
+        font: { bold: true },
+        fill: { fgColor: { rgb: 'E9ECEF' } },
+      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      (worksheet[`B${summaryStartRow + 1}`] as any).s = {
+        font: { bold: true },
+        fill: { fgColor: { rgb: 'E9ECEF' } },
+      };
+
+      // Style summary values
+      for (let i = 0; i < 5; i++) {
+        const row = summaryStartRow + 2 + i;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        (worksheet[`A${row}`] as any).s = {
+          fill: { fgColor: { rgb: 'F8F9FA' } },
+        };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        (worksheet[`B${row}`] as any).s = {
+          font: { bold: true },
+          fill: { fgColor: { rgb: 'F8F9FA' } },
+        };
+      }
+
+      // Style the detailed list header
+      const dataStartRow = summaryStartRow + 8;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      (worksheet[`A${dataStartRow}`] as any).s = {
+        font: { bold: true, size: 12, color: { rgb: 'FFFFFF' } },
+        fill: { fgColor: { rgb: '6C757D' } },
+      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+      (worksheet as any)['!merges'].push({
+        s: { r: dataStartRow - 1, c: 0 },
+        e: { r: dataStartRow - 1, c: 10 },
+      });
+
+      // Style column headers
+      const headerRow = dataStartRow + 2;
+      for (let col = 0; col < headers.length; col++) {
+        const cellRef = XLSX.utils.encode_cell({ r: headerRow - 1, c: col });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        (worksheet[cellRef] as any).s = {
+          font: { bold: true, color: { rgb: 'FFFFFF' } },
+          fill: { fgColor: { rgb: '495057' } },
+          alignment: { horizontal: 'center', vertical: 'center' },
+        };
+      }
+
+      // Style data rows with alternating colors
+      for (let row = headerRow; row <= range.e.r; row++) {
+        const isEvenRow = (row - headerRow) % 2 === 0;
+        const fillColor = isEvenRow ? 'FFFFFF' : 'F8F9FA';
+
+        for (let col = 0; col <= range.e.c; col++) {
+          const cellRef = XLSX.utils.encode_cell({ r: row, c: col });
+          if (!worksheet[cellRef]) continue;
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+          (worksheet[cellRef] as any).s = {
+            fill: { fgColor: { rgb: fillColor } },
+            border: {
+              top: { style: 'thin', color: { rgb: 'DEE2E6' } },
+              bottom: { style: 'thin', color: { rgb: 'DEE2E6' } },
+              left: { style: 'thin', color: { rgb: 'DEE2E6' } },
+              right: { style: 'thin', color: { rgb: 'DEE2E6' } },
+            },
+          };
+        }
+      }
+
       // Add the worksheet to workbook
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Delivery Report');
 
       // Generate Excel file buffer
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const excelBuffer = XLSX.write(workbook, {
         type: 'buffer',
         bookType: 'xlsx',
@@ -272,7 +394,9 @@ export class ReportsController {
       res.send(excelBuffer);
     } catch (error) {
       console.error('Excel Export Error:', error);
-      throw new BadRequestException(`Failed to export Excel: ${error.message}`);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      throw new BadRequestException(`Failed to export Excel: ${errorMessage}`);
     }
   }
 }
