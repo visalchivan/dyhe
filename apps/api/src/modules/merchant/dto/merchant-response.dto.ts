@@ -9,8 +9,6 @@ export class MerchantResponseDto {
   bankAccountName: string;
   address: string;
   googleMapsUrl?: string;
-  latitude: number;
-  longitude: number;
   status: string;
   createdAt: Date;
   updatedAt: Date;

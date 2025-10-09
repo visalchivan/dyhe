@@ -133,24 +133,26 @@ export const MerchantDrawer: React.FC<MerchantDrawerProps> = ({
           </Descriptions>
         </div>
 
-        <Divider />
+        {merchant.googleMapsUrl && (
+          <>
+            <Divider />
 
-        <div>
-          <Title level={5}>Location</Title>
-          <Descriptions column={1} size="small">
-            <Descriptions.Item label="Latitude">
-              <Text code>{merchant.latitude}</Text>
-            </Descriptions.Item>
-            <Descriptions.Item label="Longitude">
-              <Text code>{merchant.longitude}</Text>
-            </Descriptions.Item>
-            <Descriptions.Item label="Coordinates">
-              <Text copyable>
-                {merchant.latitude}, {merchant.longitude}
-              </Text>
-            </Descriptions.Item>
-          </Descriptions>
-        </div>
+            <div>
+              <Title level={5}>Location</Title>
+              <Descriptions column={1} size="small">
+                <Descriptions.Item label="Google Maps">
+                  <a
+                    href={merchant.googleMapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View on Google Maps
+                  </a>
+                </Descriptions.Item>
+              </Descriptions>
+            </div>
+          </>
+        )}
       </Space>
     </Drawer>
   );

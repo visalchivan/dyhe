@@ -4,7 +4,6 @@ import {
   IsNumber,
   IsOptional,
   IsEnum,
-  IsUrl,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
@@ -32,7 +31,7 @@ export class CreateMerchantDto {
   @IsString()
   phone: string;
 
-  @Transform(({ value }) => parseFloat(value))
+  @Transform(({ value }) => parseFloat(value as string))
   @IsNumber()
   deliverFee: number;
 
@@ -49,16 +48,8 @@ export class CreateMerchantDto {
   address: string;
 
   @IsOptional()
-  @IsUrl()
+  @IsString()
   googleMapsUrl?: string;
-
-  @Transform(({ value }) => parseFloat(value))
-  @IsNumber()
-  latitude: number;
-
-  @Transform(({ value }) => parseFloat(value))
-  @IsNumber()
-  longitude: number;
 
   @IsOptional()
   @IsEnum(Status)

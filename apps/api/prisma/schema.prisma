@@ -85,8 +85,7 @@ model Driver {
   bank        Bank     @default(ABA)
   bankAccountNumber String   @unique @map("bank_account_number")
   bankAccountName String   @unique @map("bank_account_name")
-  latitude Float?   @map("latitude")
-  longitude Float?   @map("longitude")
+  googleMapsUrl String?   @map("google_maps_url")
   status Status @default(ACTIVE)
   createdAt DateTime @default(now()) @map("created_at") 
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -107,8 +106,6 @@ model Merchant {
   bankAccountName String   @unique @map("bank_account_name")
   address    String  
   googleMapsUrl String?   @map("google_maps_url")
-  latitude Float?   @map("latitude")
-  longitude Float?   @map("longitude")
   status Status @default(ACTIVE)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

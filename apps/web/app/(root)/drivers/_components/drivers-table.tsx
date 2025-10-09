@@ -24,6 +24,8 @@ import {
 import { Driver } from "../../../../lib/api/drivers";
 import { useDrivers, useDeleteDriver } from "../../../../hooks/useDrivers";
 import { ColumnType } from "antd/es/table";
+import { useAuth } from "../../../../contexts/AuthContext";
+import { canCreate, canEdit, canDelete } from "../../../../lib/rbac";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -50,6 +52,12 @@ export const DriversTable: React.FC<DriversTableProps> = ({
   });
 
   const deleteDriverMutation = useDeleteDriver();
+  const { user } = useAuth();
+
+  // Check permissions
+  const canCreateDrivers = canCreate(user?.role, "drivers");
+  const canEditDrivers = canEdit(user?.role, "drivers");
+  const canDeleteDrivers = canDelete(user?.role, "drivers");
 
   const handleDelete = async (id: string) => {
     try {
@@ -168,39 +176,48 @@ export const DriversTable: React.FC<DriversTableProps> = ({
     {
       title: "Actions",
       key: "actions",
+      fixed: "right",
+      width: 250,
       render: (_: unknown, record: Driver) => (
         <Space size="small">
           <Tooltip title="View Details">
             <Button
+              size="large"
               type="text"
               icon={<EyeOutlined />}
               onClick={() => onViewDriver(record)}
             />
           </Tooltip>
-          <Tooltip title="Edit">
-            <Button
-              type="text"
-              icon={<EditOutlined />}
-              onClick={() => onEditDriver(record)}
-            />
-          </Tooltip>
-          <Tooltip title="Delete">
-            <Popconfirm
-              title="Delete Driver"
-              description="Are you sure you want to delete this driver? This action cannot be undone."
-              onConfirm={() => handleDelete(record.id)}
-              okText="Yes"
-              cancelText="No"
-              okType="danger"
-            >
+          {canEditDrivers && (
+            <Tooltip title="Edit">
               <Button
+                size="large"
                 type="text"
-                danger
-                icon={<DeleteOutlined />}
-                loading={deleteDriverMutation.isPending}
+                icon={<EditOutlined />}
+                onClick={() => onEditDriver(record)}
               />
-            </Popconfirm>
-          </Tooltip>
+            </Tooltip>
+          )}
+          {canDeleteDrivers && (
+            <Tooltip title="Delete">
+              <Popconfirm
+                title="Delete Driver"
+                description="Are you sure you want to delete this driver? This action cannot be undone."
+                onConfirm={() => handleDelete(record.id)}
+                okText="Yes"
+                cancelText="No"
+                okType="danger"
+              >
+                <Button
+                  size="large"
+                  type="text"
+                  danger
+                  icon={<DeleteOutlined />}
+                  loading={deleteDriverMutation.isPending}
+                />
+              </Popconfirm>
+            </Tooltip>
+          )}
         </Space>
       ),
     },
@@ -210,7 +227,7 @@ export const DriversTable: React.FC<DriversTableProps> = ({
     <div>
       <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
         <Col>
-          <Title level={4} style={{ margin: 0 }}>
+          <Title level={2} style={{ margin: 0 }}>
             Drivers
           </Title>
         </Col>
@@ -219,24 +236,29 @@ export const DriversTable: React.FC<DriversTableProps> = ({
             <Search
               placeholder="Search drivers..."
               allowClear
+              size="large"
               onSearch={handleSearch}
               style={{ width: 300 }}
               prefix={<SearchOutlined />}
             />
             <Button
+              size="large"
               icon={<ReloadOutlined />}
               onClick={handleRefresh}
               loading={isLoading}
             >
               Refresh
             </Button>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={onCreateDriver}
-            >
-              Add Driver
-            </Button>
+            {canCreateDrivers && (
+              <Button
+                type="primary"
+                size="large"
+                icon={<PlusOutlined />}
+                onClick={onCreateDriver}
+              >
+                Add Driver
+              </Button>
+            )}
           </Space>
         </Col>
       </Row>

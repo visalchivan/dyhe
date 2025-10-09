@@ -27,6 +27,8 @@ import {
   useDeleteMerchant,
 } from "../../../../hooks/useMerchants";
 import { ColumnType } from "antd/es/table";
+import { useAuth } from "../../../../contexts/AuthContext";
+import { canCreate, canEdit, canDelete } from "../../../../lib/rbac";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -53,6 +55,12 @@ export const MerchantsTable: React.FC<MerchantsTableProps> = ({
   });
 
   const deleteMerchantMutation = useDeleteMerchant();
+  const { user } = useAuth();
+
+  // Check permissions
+  const canCreateMerchants = canCreate(user?.role, "merchants");
+  const canEditMerchants = canEdit(user?.role, "merchants");
+  const canDeleteMerchants = canDelete(user?.role, "merchants");
 
   const handleDelete = async (id: string) => {
     try {
@@ -132,39 +140,48 @@ export const MerchantsTable: React.FC<MerchantsTableProps> = ({
     {
       title: "Actions",
       key: "actions",
+      fixed: "right",
+      width: 250,
       render: (_: unknown, record: Merchant) => (
         <Space size="small">
           <Tooltip title="View Details">
             <Button
+              size="large"
               type="text"
               icon={<EyeOutlined />}
               onClick={() => onViewMerchant(record)}
             />
           </Tooltip>
-          <Tooltip title="Edit">
-            <Button
-              type="text"
-              icon={<EditOutlined />}
-              onClick={() => onEditMerchant(record)}
-            />
-          </Tooltip>
-          <Tooltip title="Delete">
-            <Popconfirm
-              title="Delete Merchant"
-              description="Are you sure you want to delete this merchant? This action cannot be undone."
-              onConfirm={() => handleDelete(record.id)}
-              okText="Yes"
-              cancelText="No"
-              okType="danger"
-            >
+          {canEditMerchants && (
+            <Tooltip title="Edit">
               <Button
+                size="large"
                 type="text"
-                danger
-                icon={<DeleteOutlined />}
-                loading={deleteMerchantMutation.isPending}
+                icon={<EditOutlined />}
+                onClick={() => onEditMerchant(record)}
               />
-            </Popconfirm>
-          </Tooltip>
+            </Tooltip>
+          )}
+          {canDeleteMerchants && (
+            <Tooltip title="Delete">
+              <Popconfirm
+                title="Delete Merchant"
+                description="Are you sure you want to delete this merchant? This action cannot be undone."
+                onConfirm={() => handleDelete(record.id)}
+                okText="Yes"
+                cancelText="No"
+                okType="danger"
+              >
+                <Button
+                  size="large"
+                  type="text"
+                  danger
+                  icon={<DeleteOutlined />}
+                  loading={deleteMerchantMutation.isPending}
+                />
+              </Popconfirm>
+            </Tooltip>
+          )}
         </Space>
       ),
     },
@@ -174,7 +191,7 @@ export const MerchantsTable: React.FC<MerchantsTableProps> = ({
     <div>
       <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
         <Col>
-          <Title level={4} style={{ margin: 0 }}>
+          <Title level={2} style={{ margin: 0 }}>
             Merchants
           </Title>
         </Col>
@@ -183,24 +200,29 @@ export const MerchantsTable: React.FC<MerchantsTableProps> = ({
             <Search
               placeholder="Search merchants..."
               allowClear
+              size="large"
               onSearch={handleSearch}
               style={{ width: 300 }}
               prefix={<SearchOutlined />}
             />
             <Button
+              size="large"
               icon={<ReloadOutlined />}
               onClick={handleRefresh}
               loading={isLoading}
             >
               Refresh
             </Button>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={onCreateMerchant}
-            >
-              Add Merchant
-            </Button>
+            {canCreateMerchants && (
+              <Button
+                type="primary"
+                size="large"
+                icon={<PlusOutlined />}
+                onClick={onCreateMerchant}
+              >
+                Add Merchant
+              </Button>
+            )}
           </Space>
         </Col>
       </Row>

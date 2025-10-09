@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
-import { authApi, LoginRequest, RegisterRequest, User } from "../lib/auth";
+import { authApi, LoginRequest, RegisterRequest } from "../lib/auth";
 
 // Query keys
 export const authKeys = {
@@ -27,9 +27,9 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: (data: LoginRequest) => authApi.login(data),
     onSuccess: (data) => {
-      // Store tokens in cookies
-      Cookies.set("accessToken", data.accessToken, { expires: 1 }); // 1 day
-      Cookies.set("refreshToken", data.refreshToken, { expires: 7 }); // 7 days
+      // Store tokens in cookies with longer expiration
+      Cookies.set("accessToken", data.accessToken, { expires: 7 }); // 7 days
+      Cookies.set("refreshToken", data.refreshToken, { expires: 30 }); // 30 days
 
       // Update profile in cache
       queryClient.setQueryData(authKeys.profile(), data.user);
@@ -51,9 +51,9 @@ export const useRegister = () => {
   return useMutation({
     mutationFn: (data: RegisterRequest) => authApi.register(data),
     onSuccess: (data) => {
-      // Store tokens in cookies
-      Cookies.set("accessToken", data.accessToken, { expires: 1 }); // 1 day
-      Cookies.set("refreshToken", data.refreshToken, { expires: 7 }); // 7 days
+      // Store tokens in cookies with longer expiration
+      Cookies.set("accessToken", data.accessToken, { expires: 7 }); // 7 days
+      Cookies.set("refreshToken", data.refreshToken, { expires: 30 }); // 30 days
 
       // Update profile in cache
       queryClient.setQueryData(authKeys.profile(), data.user);

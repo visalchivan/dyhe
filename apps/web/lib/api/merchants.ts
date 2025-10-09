@@ -11,8 +11,6 @@ export interface Merchant {
   bankAccountName: string;
   address: string;
   googleMapsUrl?: string;
-  latitude: number;
-  longitude: number;
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -28,8 +26,6 @@ export interface CreateMerchantDto {
   bankAccountName: string;
   address: string;
   googleMapsUrl?: string;
-  latitude: number;
-  longitude: number;
   status?: string;
 }
 

@@ -341,8 +341,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.16.2
-   * Query Engine version: 1c57fdcd7e44b29b9313256c76699e91c3ac3c43
+   * Prisma Client JS version: 6.17.0
+   * Query Engine version: c0aafc03b8ef6cdced8654b9a817999e02457d6a
    */
   export type PrismaVersion = {
     client: string
@@ -2373,14 +2373,10 @@ export namespace Prisma {
 
   export type DriverAvgAggregateOutputType = {
     deliverFee: Decimal | null
-    latitude: number | null
-    longitude: number | null
   }
 
   export type DriverSumAggregateOutputType = {
     deliverFee: Decimal | null
-    latitude: number | null
-    longitude: number | null
   }
 
   export type DriverMinAggregateOutputType = {
@@ -2393,8 +2389,7 @@ export namespace Prisma {
     bank: $Enums.Bank | null
     bankAccountNumber: string | null
     bankAccountName: string | null
-    latitude: number | null
-    longitude: number | null
+    googleMapsUrl: string | null
     status: $Enums.Status | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -2410,8 +2405,7 @@ export namespace Prisma {
     bank: $Enums.Bank | null
     bankAccountNumber: string | null
     bankAccountName: string | null
-    latitude: number | null
-    longitude: number | null
+    googleMapsUrl: string | null
     status: $Enums.Status | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -2427,8 +2421,7 @@ export namespace Prisma {
     bank: number
     bankAccountNumber: number
     bankAccountName: number
-    latitude: number
-    longitude: number
+    googleMapsUrl: number
     status: number
     createdAt: number
     updatedAt: number
@@ -2438,14 +2431,10 @@ export namespace Prisma {
 
   export type DriverAvgAggregateInputType = {
     deliverFee?: true
-    latitude?: true
-    longitude?: true
   }
 
   export type DriverSumAggregateInputType = {
     deliverFee?: true
-    latitude?: true
-    longitude?: true
   }
 
   export type DriverMinAggregateInputType = {
@@ -2458,8 +2447,7 @@ export namespace Prisma {
     bank?: true
     bankAccountNumber?: true
     bankAccountName?: true
-    latitude?: true
-    longitude?: true
+    googleMapsUrl?: true
     status?: true
     createdAt?: true
     updatedAt?: true
@@ -2475,8 +2463,7 @@ export namespace Prisma {
     bank?: true
     bankAccountNumber?: true
     bankAccountName?: true
-    latitude?: true
-    longitude?: true
+    googleMapsUrl?: true
     status?: true
     createdAt?: true
     updatedAt?: true
@@ -2492,8 +2479,7 @@ export namespace Prisma {
     bank?: true
     bankAccountNumber?: true
     bankAccountName?: true
-    latitude?: true
-    longitude?: true
+    googleMapsUrl?: true
     status?: true
     createdAt?: true
     updatedAt?: true
@@ -2596,8 +2582,7 @@ export namespace Prisma {
     bank: $Enums.Bank
     bankAccountNumber: string
     bankAccountName: string
-    latitude: number | null
-    longitude: number | null
+    googleMapsUrl: string | null
     status: $Enums.Status
     createdAt: Date
     updatedAt: Date
@@ -2632,8 +2617,7 @@ export namespace Prisma {
     bank?: boolean
     bankAccountNumber?: boolean
     bankAccountName?: boolean
-    latitude?: boolean
-    longitude?: boolean
+    googleMapsUrl?: boolean
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -2651,8 +2635,7 @@ export namespace Prisma {
     bank?: boolean
     bankAccountNumber?: boolean
     bankAccountName?: boolean
-    latitude?: boolean
-    longitude?: boolean
+    googleMapsUrl?: boolean
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -2668,8 +2651,7 @@ export namespace Prisma {
     bank?: boolean
     bankAccountNumber?: boolean
     bankAccountName?: boolean
-    latitude?: boolean
-    longitude?: boolean
+    googleMapsUrl?: boolean
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -2685,14 +2667,13 @@ export namespace Prisma {
     bank?: boolean
     bankAccountNumber?: boolean
     bankAccountName?: boolean
-    latitude?: boolean
-    longitude?: boolean
+    googleMapsUrl?: boolean
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type DriverOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "phone" | "deliverFee" | "driverStatus" | "bank" | "bankAccountNumber" | "bankAccountName" | "latitude" | "longitude" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["driver"]>
+  export type DriverOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "phone" | "deliverFee" | "driverStatus" | "bank" | "bankAccountNumber" | "bankAccountName" | "googleMapsUrl" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["driver"]>
   export type DriverInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     packages?: boolean | Driver$packagesArgs<ExtArgs>
     _count?: boolean | DriverCountOutputTypeDefaultArgs<ExtArgs>
@@ -2715,8 +2696,7 @@ export namespace Prisma {
       bank: $Enums.Bank
       bankAccountNumber: string
       bankAccountName: string
-      latitude: number | null
-      longitude: number | null
+      googleMapsUrl: string | null
       status: $Enums.Status
       createdAt: Date
       updatedAt: Date
@@ -3153,8 +3133,7 @@ export namespace Prisma {
     readonly bank: FieldRef<"Driver", 'Bank'>
     readonly bankAccountNumber: FieldRef<"Driver", 'String'>
     readonly bankAccountName: FieldRef<"Driver", 'String'>
-    readonly latitude: FieldRef<"Driver", 'Float'>
-    readonly longitude: FieldRef<"Driver", 'Float'>
+    readonly googleMapsUrl: FieldRef<"Driver", 'String'>
     readonly status: FieldRef<"Driver", 'Status'>
     readonly createdAt: FieldRef<"Driver", 'DateTime'>
     readonly updatedAt: FieldRef<"Driver", 'DateTime'>
@@ -3602,14 +3581,10 @@ export namespace Prisma {
 
   export type MerchantAvgAggregateOutputType = {
     deliverFee: Decimal | null
-    latitude: number | null
-    longitude: number | null
   }
 
   export type MerchantSumAggregateOutputType = {
     deliverFee: Decimal | null
-    latitude: number | null
-    longitude: number | null
   }
 
   export type MerchantMinAggregateOutputType = {
@@ -3623,8 +3598,6 @@ export namespace Prisma {
     bankAccountName: string | null
     address: string | null
     googleMapsUrl: string | null
-    latitude: number | null
-    longitude: number | null
     status: $Enums.Status | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -3641,8 +3614,6 @@ export namespace Prisma {
     bankAccountName: string | null
     address: string | null
     googleMapsUrl: string | null
-    latitude: number | null
-    longitude: number | null
     status: $Enums.Status | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -3659,8 +3630,6 @@ export namespace Prisma {
     bankAccountName: number
     address: number
     googleMapsUrl: number
-    latitude: number
-    longitude: number
     status: number
     createdAt: number
     updatedAt: number
@@ -3670,14 +3639,10 @@ export namespace Prisma {
 
   export type MerchantAvgAggregateInputType = {
     deliverFee?: true
-    latitude?: true
-    longitude?: true
   }
 
   export type MerchantSumAggregateInputType = {
     deliverFee?: true
-    latitude?: true
-    longitude?: true
   }
 
   export type MerchantMinAggregateInputType = {
@@ -3691,8 +3656,6 @@ export namespace Prisma {
     bankAccountName?: true
     address?: true
     googleMapsUrl?: true
-    latitude?: true
-    longitude?: true
     status?: true
     createdAt?: true
     updatedAt?: true
@@ -3709,8 +3672,6 @@ export namespace Prisma {
     bankAccountName?: true
     address?: true
     googleMapsUrl?: true
-    latitude?: true
-    longitude?: true
     status?: true
     createdAt?: true
     updatedAt?: true
@@ -3727,8 +3688,6 @@ export namespace Prisma {
     bankAccountName?: true
     address?: true
     googleMapsUrl?: true
-    latitude?: true
-    longitude?: true
     status?: true
     createdAt?: true
     updatedAt?: true
@@ -3832,8 +3791,6 @@ export namespace Prisma {
     bankAccountName: string
     address: string
     googleMapsUrl: string | null
-    latitude: number | null
-    longitude: number | null
     status: $Enums.Status
     createdAt: Date
     updatedAt: Date
@@ -3869,8 +3826,6 @@ export namespace Prisma {
     bankAccountName?: boolean
     address?: boolean
     googleMapsUrl?: boolean
-    latitude?: boolean
-    longitude?: boolean
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -3889,8 +3844,6 @@ export namespace Prisma {
     bankAccountName?: boolean
     address?: boolean
     googleMapsUrl?: boolean
-    latitude?: boolean
-    longitude?: boolean
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -3907,8 +3860,6 @@ export namespace Prisma {
     bankAccountName?: boolean
     address?: boolean
     googleMapsUrl?: boolean
-    latitude?: boolean
-    longitude?: boolean
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -3925,14 +3876,12 @@ export namespace Prisma {
     bankAccountName?: boolean
     address?: boolean
     googleMapsUrl?: boolean
-    latitude?: boolean
-    longitude?: boolean
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type MerchantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "phone" | "email" | "deliverFee" | "bank" | "bankAccountNumber" | "bankAccountName" | "address" | "googleMapsUrl" | "latitude" | "longitude" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["merchant"]>
+  export type MerchantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "phone" | "email" | "deliverFee" | "bank" | "bankAccountNumber" | "bankAccountName" | "address" | "googleMapsUrl" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["merchant"]>
   export type MerchantInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     packages?: boolean | Merchant$packagesArgs<ExtArgs>
     _count?: boolean | MerchantCountOutputTypeDefaultArgs<ExtArgs>
@@ -3956,8 +3905,6 @@ export namespace Prisma {
       bankAccountName: string
       address: string
       googleMapsUrl: string | null
-      latitude: number | null
-      longitude: number | null
       status: $Enums.Status
       createdAt: Date
       updatedAt: Date
@@ -4395,8 +4342,6 @@ export namespace Prisma {
     readonly bankAccountName: FieldRef<"Merchant", 'String'>
     readonly address: FieldRef<"Merchant", 'String'>
     readonly googleMapsUrl: FieldRef<"Merchant", 'String'>
-    readonly latitude: FieldRef<"Merchant", 'Float'>
-    readonly longitude: FieldRef<"Merchant", 'Float'>
     readonly status: FieldRef<"Merchant", 'Status'>
     readonly createdAt: FieldRef<"Merchant", 'DateTime'>
     readonly updatedAt: FieldRef<"Merchant", 'DateTime'>
@@ -6162,8 +6107,7 @@ export namespace Prisma {
     bank: 'bank',
     bankAccountNumber: 'bankAccountNumber',
     bankAccountName: 'bankAccountName',
-    latitude: 'latitude',
-    longitude: 'longitude',
+    googleMapsUrl: 'googleMapsUrl',
     status: 'status',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -6183,8 +6127,6 @@ export namespace Prisma {
     bankAccountName: 'bankAccountName',
     address: 'address',
     googleMapsUrl: 'googleMapsUrl',
-    latitude: 'latitude',
-    longitude: 'longitude',
     status: 'status',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -6358,20 +6300,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Float'
-   */
-  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-  /**
-   * Reference to a field of type 'Float[]'
-   */
-  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
-    
-
-
-  /**
    * Reference to a field of type 'PackageStatus'
    */
   export type EnumPackageStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PackageStatus'>
@@ -6382,6 +6310,20 @@ export namespace Prisma {
    * Reference to a field of type 'PackageStatus[]'
    */
   export type ListEnumPackageStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PackageStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float'
+   */
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float[]'
+   */
+  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
 
 
@@ -6497,8 +6439,7 @@ export namespace Prisma {
     bank?: EnumBankFilter<"Driver"> | $Enums.Bank
     bankAccountNumber?: StringFilter<"Driver"> | string
     bankAccountName?: StringFilter<"Driver"> | string
-    latitude?: FloatNullableFilter<"Driver"> | number | null
-    longitude?: FloatNullableFilter<"Driver"> | number | null
+    googleMapsUrl?: StringNullableFilter<"Driver"> | string | null
     status?: EnumStatusFilter<"Driver"> | $Enums.Status
     createdAt?: DateTimeFilter<"Driver"> | Date | string
     updatedAt?: DateTimeFilter<"Driver"> | Date | string
@@ -6515,8 +6456,7 @@ export namespace Prisma {
     bank?: SortOrder
     bankAccountNumber?: SortOrder
     bankAccountName?: SortOrder
-    latitude?: SortOrderInput | SortOrder
-    longitude?: SortOrderInput | SortOrder
+    googleMapsUrl?: SortOrderInput | SortOrder
     status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -6536,8 +6476,7 @@ export namespace Prisma {
     deliverFee?: DecimalFilter<"Driver"> | Decimal | DecimalJsLike | number | string
     driverStatus?: EnumDriverStatusFilter<"Driver"> | $Enums.DriverStatus
     bank?: EnumBankFilter<"Driver"> | $Enums.Bank
-    latitude?: FloatNullableFilter<"Driver"> | number | null
-    longitude?: FloatNullableFilter<"Driver"> | number | null
+    googleMapsUrl?: StringNullableFilter<"Driver"> | string | null
     status?: EnumStatusFilter<"Driver"> | $Enums.Status
     createdAt?: DateTimeFilter<"Driver"> | Date | string
     updatedAt?: DateTimeFilter<"Driver"> | Date | string
@@ -6554,8 +6493,7 @@ export namespace Prisma {
     bank?: SortOrder
     bankAccountNumber?: SortOrder
     bankAccountName?: SortOrder
-    latitude?: SortOrderInput | SortOrder
-    longitude?: SortOrderInput | SortOrder
+    googleMapsUrl?: SortOrderInput | SortOrder
     status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -6579,8 +6517,7 @@ export namespace Prisma {
     bank?: EnumBankWithAggregatesFilter<"Driver"> | $Enums.Bank
     bankAccountNumber?: StringWithAggregatesFilter<"Driver"> | string
     bankAccountName?: StringWithAggregatesFilter<"Driver"> | string
-    latitude?: FloatNullableWithAggregatesFilter<"Driver"> | number | null
-    longitude?: FloatNullableWithAggregatesFilter<"Driver"> | number | null
+    googleMapsUrl?: StringNullableWithAggregatesFilter<"Driver"> | string | null
     status?: EnumStatusWithAggregatesFilter<"Driver"> | $Enums.Status
     createdAt?: DateTimeWithAggregatesFilter<"Driver"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Driver"> | Date | string
@@ -6600,8 +6537,6 @@ export namespace Prisma {
     bankAccountName?: StringFilter<"Merchant"> | string
     address?: StringFilter<"Merchant"> | string
     googleMapsUrl?: StringNullableFilter<"Merchant"> | string | null
-    latitude?: FloatNullableFilter<"Merchant"> | number | null
-    longitude?: FloatNullableFilter<"Merchant"> | number | null
     status?: EnumStatusFilter<"Merchant"> | $Enums.Status
     createdAt?: DateTimeFilter<"Merchant"> | Date | string
     updatedAt?: DateTimeFilter<"Merchant"> | Date | string
@@ -6619,8 +6554,6 @@ export namespace Prisma {
     bankAccountName?: SortOrder
     address?: SortOrder
     googleMapsUrl?: SortOrderInput | SortOrder
-    latitude?: SortOrderInput | SortOrder
-    longitude?: SortOrderInput | SortOrder
     status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -6641,8 +6574,6 @@ export namespace Prisma {
     bank?: EnumBankFilter<"Merchant"> | $Enums.Bank
     address?: StringFilter<"Merchant"> | string
     googleMapsUrl?: StringNullableFilter<"Merchant"> | string | null
-    latitude?: FloatNullableFilter<"Merchant"> | number | null
-    longitude?: FloatNullableFilter<"Merchant"> | number | null
     status?: EnumStatusFilter<"Merchant"> | $Enums.Status
     createdAt?: DateTimeFilter<"Merchant"> | Date | string
     updatedAt?: DateTimeFilter<"Merchant"> | Date | string
@@ -6660,8 +6591,6 @@ export namespace Prisma {
     bankAccountName?: SortOrder
     address?: SortOrder
     googleMapsUrl?: SortOrderInput | SortOrder
-    latitude?: SortOrderInput | SortOrder
-    longitude?: SortOrderInput | SortOrder
     status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -6686,8 +6615,6 @@ export namespace Prisma {
     bankAccountName?: StringWithAggregatesFilter<"Merchant"> | string
     address?: StringWithAggregatesFilter<"Merchant"> | string
     googleMapsUrl?: StringNullableWithAggregatesFilter<"Merchant"> | string | null
-    latitude?: FloatNullableWithAggregatesFilter<"Merchant"> | number | null
-    longitude?: FloatNullableWithAggregatesFilter<"Merchant"> | number | null
     status?: EnumStatusWithAggregatesFilter<"Merchant"> | $Enums.Status
     createdAt?: DateTimeWithAggregatesFilter<"Merchant"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Merchant"> | Date | string
@@ -6921,8 +6848,7 @@ export namespace Prisma {
     bank?: $Enums.Bank
     bankAccountNumber: string
     bankAccountName: string
-    latitude?: number | null
-    longitude?: number | null
+    googleMapsUrl?: string | null
     status?: $Enums.Status
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -6939,8 +6865,7 @@ export namespace Prisma {
     bank?: $Enums.Bank
     bankAccountNumber: string
     bankAccountName: string
-    latitude?: number | null
-    longitude?: number | null
+    googleMapsUrl?: string | null
     status?: $Enums.Status
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -6957,8 +6882,7 @@ export namespace Prisma {
     bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
     bankAccountNumber?: StringFieldUpdateOperationsInput | string
     bankAccountName?: StringFieldUpdateOperationsInput | string
-    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6975,8 +6899,7 @@ export namespace Prisma {
     bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
     bankAccountNumber?: StringFieldUpdateOperationsInput | string
     bankAccountName?: StringFieldUpdateOperationsInput | string
-    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6993,8 +6916,7 @@ export namespace Prisma {
     bank?: $Enums.Bank
     bankAccountNumber: string
     bankAccountName: string
-    latitude?: number | null
-    longitude?: number | null
+    googleMapsUrl?: string | null
     status?: $Enums.Status
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -7010,8 +6932,7 @@ export namespace Prisma {
     bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
     bankAccountNumber?: StringFieldUpdateOperationsInput | string
     bankAccountName?: StringFieldUpdateOperationsInput | string
-    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7027,8 +6948,7 @@ export namespace Prisma {
     bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
     bankAccountNumber?: StringFieldUpdateOperationsInput | string
     bankAccountName?: StringFieldUpdateOperationsInput | string
-    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7045,8 +6965,6 @@ export namespace Prisma {
     bankAccountName: string
     address: string
     googleMapsUrl?: string | null
-    latitude?: number | null
-    longitude?: number | null
     status?: $Enums.Status
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -7064,8 +6982,6 @@ export namespace Prisma {
     bankAccountName: string
     address: string
     googleMapsUrl?: string | null
-    latitude?: number | null
-    longitude?: number | null
     status?: $Enums.Status
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -7083,8 +6999,6 @@ export namespace Prisma {
     bankAccountName?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7102,8 +7016,6 @@ export namespace Prisma {
     bankAccountName?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7121,8 +7033,6 @@ export namespace Prisma {
     bankAccountName: string
     address: string
     googleMapsUrl?: string | null
-    latitude?: number | null
-    longitude?: number | null
     status?: $Enums.Status
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -7139,8 +7049,6 @@ export namespace Prisma {
     bankAccountName?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7157,8 +7065,6 @@ export namespace Prisma {
     bankAccountName?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7493,17 +7399,6 @@ export namespace Prisma {
     not?: NestedEnumBankFilter<$PrismaModel> | $Enums.Bank
   }
 
-  export type FloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
-  }
-
   export type PackageListRelationFilter = {
     every?: PackageWhereInput
     some?: PackageWhereInput
@@ -7529,8 +7424,7 @@ export namespace Prisma {
     bank?: SortOrder
     bankAccountNumber?: SortOrder
     bankAccountName?: SortOrder
-    latitude?: SortOrder
-    longitude?: SortOrder
+    googleMapsUrl?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -7538,8 +7432,6 @@ export namespace Prisma {
 
   export type DriverAvgOrderByAggregateInput = {
     deliverFee?: SortOrder
-    latitude?: SortOrder
-    longitude?: SortOrder
   }
 
   export type DriverMaxOrderByAggregateInput = {
@@ -7552,8 +7444,7 @@ export namespace Prisma {
     bank?: SortOrder
     bankAccountNumber?: SortOrder
     bankAccountName?: SortOrder
-    latitude?: SortOrder
-    longitude?: SortOrder
+    googleMapsUrl?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -7569,8 +7460,7 @@ export namespace Prisma {
     bank?: SortOrder
     bankAccountNumber?: SortOrder
     bankAccountName?: SortOrder
-    latitude?: SortOrder
-    longitude?: SortOrder
+    googleMapsUrl?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -7578,8 +7468,6 @@ export namespace Prisma {
 
   export type DriverSumOrderByAggregateInput = {
     deliverFee?: SortOrder
-    latitude?: SortOrder
-    longitude?: SortOrder
   }
 
   export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -7636,22 +7524,6 @@ export namespace Prisma {
     _max?: NestedEnumBankFilter<$PrismaModel>
   }
 
-  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedFloatNullableFilter<$PrismaModel>
-    _min?: NestedFloatNullableFilter<$PrismaModel>
-    _max?: NestedFloatNullableFilter<$PrismaModel>
-  }
-
   export type MerchantCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
@@ -7663,8 +7535,6 @@ export namespace Prisma {
     bankAccountName?: SortOrder
     address?: SortOrder
     googleMapsUrl?: SortOrder
-    latitude?: SortOrder
-    longitude?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -7672,8 +7542,6 @@ export namespace Prisma {
 
   export type MerchantAvgOrderByAggregateInput = {
     deliverFee?: SortOrder
-    latitude?: SortOrder
-    longitude?: SortOrder
   }
 
   export type MerchantMaxOrderByAggregateInput = {
@@ -7687,8 +7555,6 @@ export namespace Prisma {
     bankAccountName?: SortOrder
     address?: SortOrder
     googleMapsUrl?: SortOrder
-    latitude?: SortOrder
-    longitude?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -7705,8 +7571,6 @@ export namespace Prisma {
     bankAccountName?: SortOrder
     address?: SortOrder
     googleMapsUrl?: SortOrder
-    latitude?: SortOrder
-    longitude?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -7714,8 +7578,6 @@ export namespace Prisma {
 
   export type MerchantSumOrderByAggregateInput = {
     deliverFee?: SortOrder
-    latitude?: SortOrder
-    longitude?: SortOrder
   }
 
   export type EnumPackageStatusFilter<$PrismaModel = never> = {
@@ -7723,6 +7585,17 @@ export namespace Prisma {
     in?: $Enums.PackageStatus[] | ListEnumPackageStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.PackageStatus[] | ListEnumPackageStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumPackageStatusFilter<$PrismaModel> | $Enums.PackageStatus
+  }
+
+  export type FloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type MerchantScalarRelationFilter = {
@@ -7821,6 +7694,22 @@ export namespace Prisma {
     _max?: NestedEnumPackageStatusFilter<$PrismaModel>
   }
 
+  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
   export type StringFieldUpdateOperationsInput = {
     set?: string
   }
@@ -7873,14 +7762,6 @@ export namespace Prisma {
 
   export type EnumBankFieldUpdateOperationsInput = {
     set?: $Enums.Bank
-  }
-
-  export type NullableFloatFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type PackageUpdateManyWithoutDriverNestedInput = {
@@ -7967,6 +7848,14 @@ export namespace Prisma {
 
   export type EnumPackageStatusFieldUpdateOperationsInput = {
     set?: $Enums.PackageStatus
+  }
+
+  export type NullableFloatFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type MerchantUpdateOneRequiredWithoutPackagesNestedInput = {
@@ -8144,17 +8033,6 @@ export namespace Prisma {
     not?: NestedEnumBankFilter<$PrismaModel> | $Enums.Bank
   }
 
-  export type NestedFloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
-  }
-
   export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -8219,6 +8097,34 @@ export namespace Prisma {
     _max?: NestedEnumBankFilter<$PrismaModel>
   }
 
+  export type NestedEnumPackageStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.PackageStatus | EnumPackageStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PackageStatus[] | ListEnumPackageStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PackageStatus[] | ListEnumPackageStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPackageStatusFilter<$PrismaModel> | $Enums.PackageStatus
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedEnumPackageStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PackageStatus | EnumPackageStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.PackageStatus[] | ListEnumPackageStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PackageStatus[] | ListEnumPackageStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumPackageStatusWithAggregatesFilter<$PrismaModel> | $Enums.PackageStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPackageStatusFilter<$PrismaModel>
+    _max?: NestedEnumPackageStatusFilter<$PrismaModel>
+  }
+
   export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel> | null
     in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
@@ -8233,23 +8139,6 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
-  }
-
-  export type NestedEnumPackageStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.PackageStatus | EnumPackageStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.PackageStatus[] | ListEnumPackageStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.PackageStatus[] | ListEnumPackageStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumPackageStatusFilter<$PrismaModel> | $Enums.PackageStatus
-  }
-
-  export type NestedEnumPackageStatusWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.PackageStatus | EnumPackageStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.PackageStatus[] | ListEnumPackageStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.PackageStatus[] | ListEnumPackageStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumPackageStatusWithAggregatesFilter<$PrismaModel> | $Enums.PackageStatus
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumPackageStatusFilter<$PrismaModel>
-    _max?: NestedEnumPackageStatusFilter<$PrismaModel>
   }
 
   export type PackageCreateWithoutDriverInput = {
@@ -8414,8 +8303,6 @@ export namespace Prisma {
     bankAccountName: string
     address: string
     googleMapsUrl?: string | null
-    latitude?: number | null
-    longitude?: number | null
     status?: $Enums.Status
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -8432,8 +8319,6 @@ export namespace Prisma {
     bankAccountName: string
     address: string
     googleMapsUrl?: string | null
-    latitude?: number | null
-    longitude?: number | null
     status?: $Enums.Status
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -8454,8 +8339,7 @@ export namespace Prisma {
     bank?: $Enums.Bank
     bankAccountNumber: string
     bankAccountName: string
-    latitude?: number | null
-    longitude?: number | null
+    googleMapsUrl?: string | null
     status?: $Enums.Status
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -8471,8 +8355,7 @@ export namespace Prisma {
     bank?: $Enums.Bank
     bankAccountNumber: string
     bankAccountName: string
-    latitude?: number | null
-    longitude?: number | null
+    googleMapsUrl?: string | null
     status?: $Enums.Status
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -8505,8 +8388,6 @@ export namespace Prisma {
     bankAccountName?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8523,8 +8404,6 @@ export namespace Prisma {
     bankAccountName?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8551,8 +8430,7 @@ export namespace Prisma {
     bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
     bankAccountNumber?: StringFieldUpdateOperationsInput | string
     bankAccountName?: StringFieldUpdateOperationsInput | string
-    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8568,8 +8446,7 @@ export namespace Prisma {
     bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
     bankAccountNumber?: StringFieldUpdateOperationsInput | string
     bankAccountName?: StringFieldUpdateOperationsInput | string
-    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
-    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

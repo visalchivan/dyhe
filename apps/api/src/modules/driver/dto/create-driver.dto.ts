@@ -38,7 +38,7 @@ export class CreateDriverDto {
   @IsString()
   phone: string;
 
-  @Transform(({ value }) => parseFloat(value))
+  @Transform(({ value }) => parseFloat(value as string))
   @IsNumber()
   deliverFee: number;
 
@@ -54,13 +54,9 @@ export class CreateDriverDto {
   @IsString()
   bankAccountName: string;
 
-  @Transform(({ value }) => parseFloat(value))
-  @IsNumber()
-  latitude: number;
-
-  @Transform(({ value }) => parseFloat(value))
-  @IsNumber()
-  longitude: number;
+  @IsOptional()
+  @IsString()
+  googleMapsUrl?: string;
 
   @IsOptional()
   @IsEnum(Status)

@@ -10,8 +10,7 @@ export interface Driver {
   bank: string;
   bankAccountNumber: string;
   bankAccountName: string;
-  latitude: number;
-  longitude: number;
+  googleMapsUrl?: string;
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -26,8 +25,7 @@ export interface CreateDriverDto {
   bank: string;
   bankAccountNumber: string;
   bankAccountName: string;
-  latitude: number;
-  longitude: number;
+  googleMapsUrl?: string;
   status?: string;
 }
 

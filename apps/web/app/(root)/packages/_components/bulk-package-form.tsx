@@ -119,6 +119,7 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
       render: (value: string, record: PackageDataDto, index: number) => (
         <Input
           value={value}
+          size="large"
           placeholder="Customer name"
           onChange={(e) => updatePackage(index, "customerName", e.target.value)}
         />
@@ -131,6 +132,7 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
       render: (value: string, record: PackageDataDto, index: number) => (
         <Input
           value={value}
+          size="large"
           placeholder="Customer phone"
           onChange={(e) =>
             updatePackage(index, "customerPhone", e.target.value)
@@ -145,6 +147,7 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
       render: (value: string, record: PackageDataDto, index: number) => (
         <Input
           value={value}
+          size="large"
           placeholder="Customer address"
           onChange={(e) =>
             updatePackage(index, "customerAddress", e.target.value)
@@ -159,6 +162,7 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
       render: (value: number, record: PackageDataDto, index: number) => (
         <InputNumber
           value={value}
+          size="large"
           placeholder="COD amount (optional)"
           precision={2}
           min={0}
@@ -174,6 +178,7 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
       render: (value: number, record: PackageDataDto, index: number) => (
         <InputNumber
           value={value}
+          size="large"
           placeholder="Delivery fee (optional)"
           precision={2}
           min={0}
@@ -216,6 +221,7 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
               rules={[{ required: true, message: "Please select merchant" }]}
             >
               <Select
+                size="large"
                 placeholder="Select merchant"
                 showSearch
                 optionFilterProp="children"
@@ -231,7 +237,7 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
         </Row>
 
         <Form.Item name="status" style={{ display: "none" }}>
-          <Input />
+          <Input size="large" />
         </Form.Item>
       </Card>
 
@@ -247,7 +253,12 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
           <Title level={4} style={{ margin: 0 }}>
             Package Details ({packages.length} packages)
           </Title>
-          <Button type="dashed" icon={<PlusOutlined />} onClick={addPackage}>
+          <Button
+            type="dashed"
+            icon={<PlusOutlined />}
+            onClick={addPackage}
+            size="large"
+          >
             Add Package
           </Button>
         </div>
@@ -265,8 +276,15 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
 
       <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
         <Space>
-          <Button onClick={onCancel}>Cancel</Button>
-          <Button type="primary" htmlType="submit" loading={loading}>
+          <Button onClick={onCancel} size="large">
+            Cancel
+          </Button>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={loading}
+            size="large"
+          >
             Create {packages.length} Packages
           </Button>
         </Space>

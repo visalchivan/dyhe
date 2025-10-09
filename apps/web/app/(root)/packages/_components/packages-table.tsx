@@ -1,33 +1,33 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
 import {
-  Table,
-  Button,
-  Space,
-  Tag,
-  Tooltip,
-  Input,
-  Row,
-  Col,
-  Typography,
-  Popconfirm,
-} from "antd";
-import {
-  PlusOutlined,
+  AppstoreAddOutlined,
+  DeleteOutlined,
   EditOutlined,
   EyeOutlined,
-  DeleteOutlined,
-  SearchOutlined,
-  ReloadOutlined,
-  AppstoreAddOutlined,
   PrinterOutlined,
+  ReloadOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
-import { Package } from "../../../../lib/api/packages";
-import { usePackages, useDeletePackage } from "../../../../hooks/usePackages";
+import {
+  Button,
+  Col,
+  Input,
+  Popconfirm,
+  Row,
+  Space,
+  Table,
+  Tag,
+  Tooltip,
+  Typography,
+} from "antd";
 import { ColumnType } from "antd/es/table";
 import Link from "next/link";
-import { generateQRCode } from "../../../../lib/utils/qrcode";
+import React, { useCallback, useMemo, useState } from "react";
+import { useAuth } from "../../../../contexts/AuthContext";
+import { useDeletePackage, usePackages } from "../../../../hooks/usePackages";
+import { Package } from "../../../../lib/api/packages";
+import { canCreate, canDelete, canEdit } from "../../../../lib/rbac";
 import {
   createLabelPdf,
   openPdfInNewTab,
@@ -44,7 +44,6 @@ interface PackagesTableProps {
 }
 
 export const PackagesTable: React.FC<PackagesTableProps> = ({
-  onCreatePackage,
   onBulkCreatePackages,
   onEditPackage,
   onViewPackage,
@@ -60,6 +59,12 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
   });
 
   const deletePackageMutation = useDeletePackage();
+  const { user } = useAuth();
+
+  // Check permissions
+  const canCreatePackages = canCreate(user?.role, "packages");
+  const canEditPackages = canEdit(user?.role, "packages");
+  const canDeletePackages = canDelete(user?.role, "packages");
 
   const handleDelete = useCallback(
     async (id: string) => {
@@ -124,6 +129,7 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
       {
         title: "Package Number",
         dataIndex: "packageNumber",
+        fixed: "left",
         key: "packageNumber",
         width: 200,
         render: (text: string) => (
@@ -231,12 +237,14 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
       {
         title: "Actions",
         key: "actions",
-        width: 150,
+        fixed: "right",
+        width: 250,
         render: (_: unknown, record: Package) => {
           return (
             <Space size="small">
               <Tooltip title="View Details">
                 <Button
+                  size="large"
                   type="text"
                   icon={<EyeOutlined />}
                   onClick={() => onViewPackage(record)}
@@ -244,35 +252,42 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
               </Tooltip>
               <Tooltip title="Print Label (PDF)">
                 <Button
+                  size="large"
                   type="text"
                   icon={<PrinterOutlined />}
                   onClick={() => handlePrintLabel(record)}
                 />
               </Tooltip>
-              <Tooltip title="Edit">
-                <Button
-                  type="text"
-                  icon={<EditOutlined />}
-                  onClick={() => onEditPackage(record)}
-                />
-              </Tooltip>
-              <Tooltip title="Delete">
-                <Popconfirm
-                  title="Delete Package"
-                  description="Are you sure you want to delete this package? This action cannot be undone."
-                  onConfirm={() => handleDelete(record.id)}
-                  okText="Yes"
-                  cancelText="No"
-                  okType="danger"
-                >
+              {canEditPackages && (
+                <Tooltip title="Edit">
                   <Button
+                    size="large"
                     type="text"
-                    danger
-                    icon={<DeleteOutlined />}
-                    loading={deletePackageMutation.isPending}
+                    icon={<EditOutlined />}
+                    onClick={() => onEditPackage(record)}
                   />
-                </Popconfirm>
-              </Tooltip>
+                </Tooltip>
+              )}
+              {canDeletePackages && (
+                <Tooltip title="Delete">
+                  <Popconfirm
+                    title="Delete Package"
+                    description="Are you sure you want to delete this package? This action cannot be undone."
+                    onConfirm={() => handleDelete(record.id)}
+                    okText="Yes"
+                    cancelText="No"
+                    okType="danger"
+                  >
+                    <Button
+                      size="large"
+                      type="text"
+                      danger
+                      icon={<DeleteOutlined />}
+                      loading={deletePackageMutation.isPending}
+                    />
+                  </Popconfirm>
+                </Tooltip>
+              )}
             </Space>
           );
         },
@@ -285,6 +300,8 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
       handleDelete,
       handlePrintLabel,
       deletePackageMutation.isPending,
+      canEditPackages,
+      canDeletePackages,
     ]
   );
 
@@ -292,7 +309,7 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
     <div>
       <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
         <Col>
-          <Title level={4} style={{ margin: 0 }}>
+          <Title level={2} style={{ margin: 0 }}>
             Packages
           </Title>
         </Col>
@@ -300,12 +317,14 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
           <Space>
             <Search
               placeholder="Search packages..."
+              size="large"
               allowClear
               onSearch={handleSearch}
               style={{ width: 300 }}
               prefix={<SearchOutlined />}
             />
             <Button
+              size="large"
               icon={<ReloadOutlined />}
               onClick={handleRefresh}
               loading={isLoading}
@@ -313,17 +332,20 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
               Refresh
             </Button>
             <Link href="/packages/print">
-              <Button type="default" icon={<PrinterOutlined />}>
+              <Button type="default" icon={<PrinterOutlined />} size="large">
                 Print Label
               </Button>
             </Link>
-            <Button
-              type="primary"
-              icon={<AppstoreAddOutlined />}
-              onClick={onBulkCreatePackages}
-            >
-              Bulk Create
-            </Button>
+            {canCreatePackages && (
+              <Button
+                type="primary"
+                size="large"
+                icon={<AppstoreAddOutlined />}
+                onClick={onBulkCreatePackages}
+              >
+                Bulk Create
+              </Button>
+            )}
           </Space>
         </Col>
       </Row>

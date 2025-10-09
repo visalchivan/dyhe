@@ -27,6 +27,7 @@ import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import Image from "next/image";
 import { useAuth } from "../../contexts/AuthContext";
 import { useLogout } from "../../hooks/useAuth";
+import { canView } from "../../lib/rbac";
 
 const { Header, Content, Footer, Sider } = Layout;
 const { Text } = Typography;
@@ -37,27 +38,45 @@ function getItem(
   label: React.ReactNode,
   key: React.Key,
   icon?: React.ReactNode,
-  children?: MenuItem[]
+  children?: MenuItem[],
+  resource?: string
 ): MenuItem {
   return {
     key,
     icon,
     children,
     label,
-  } as MenuItem;
+    resource, // Store resource name for permission checking
+  } as MenuItem & { resource?: string };
 }
 
-const items: MenuItem[] = [
-  getItem("Home", "/dashboard", <HomeOutlined />),
-  getItem("Packages", "/packages", <GiftOutlined />),
-  getItem("Print Packages", "/packages/print", <PrinterOutlined />),
-  getItem("Assign Packages", "/scan", <ScanOutlined />),
-  getItem("Merchants", "/merchants", <ShopOutlined />),
-  getItem("Drivers", "/drivers", <CarOutlined />),
-  getItem("Team", "/team", <TeamOutlined />),
-  getItem("Reports", "/reports", <BarChartOutlined />),
-  getItem("Settings", "/settings", <SettingOutlined />),
-];
+// Define all menu items with their resource names
+const allMenuItems = [
+  getItem("Home", "/dashboard", <HomeOutlined />, undefined, "dashboard"),
+  getItem("Packages", "/packages", <GiftOutlined />, undefined, "packages"),
+  getItem(
+    "Print Packages",
+    "/packages/print",
+    <PrinterOutlined />,
+    undefined,
+    "packages"
+  ),
+  getItem("Assign Packages", "/scan", <ScanOutlined />, undefined, "packages"),
+  getItem("Merchants", "/merchants", <ShopOutlined />, undefined, "merchants"),
+  getItem("Drivers", "/drivers", <CarOutlined />, undefined, "drivers"),
+  getItem("Team", "/team", <TeamOutlined />, undefined, "team"),
+  getItem("Reports", "/reports", <BarChartOutlined />, undefined, "reports"),
+  getItem("Settings", "/settings", <SettingOutlined />, undefined, "settings"),
+] as (MenuItem & { resource?: string })[];
+
+// Filter menu items based on user role
+function getFilteredMenuItems(userRole: string | undefined): MenuItem[] {
+  return allMenuItems.filter((item) => {
+    const menuItem = item as MenuItem & { resource?: string };
+    if (!menuItem.resource) return true;
+    return canView(userRole, menuItem.resource);
+  });
+}
 
 // Breadcrumb mapping
 const breadcrumbMap: Record<string, string[]> = {
@@ -87,6 +106,9 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const {
     token: { colorBgContainer },
   } = theme.useToken();
+
+  // Get filtered menu items based on user role
+  const menuItems = getFilteredMenuItems(user?.role);
 
   // Update selected key and breadcrumb when pathname changes
   useEffect(() => {
@@ -142,7 +164,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           theme="dark"
           selectedKeys={[selectedKey]}
           mode="inline"
-          items={items}
+          items={menuItems}
           onClick={handleMenuClick}
         />
       </Sider>

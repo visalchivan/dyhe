@@ -139,24 +139,26 @@ export const DriverDrawer: React.FC<DriverDrawerProps> = ({
           </Descriptions>
         </div>
 
-        <Divider />
+        {driver.googleMapsUrl && (
+          <>
+            <Divider />
 
-        <div>
-          <Title level={5}>Location</Title>
-          <Descriptions column={1} size="small">
-            <Descriptions.Item label="Latitude">
-              <Text code>{driver.latitude}</Text>
-            </Descriptions.Item>
-            <Descriptions.Item label="Longitude">
-              <Text code>{driver.longitude}</Text>
-            </Descriptions.Item>
-            <Descriptions.Item label="Coordinates">
-              <Text copyable>
-                {driver.latitude}, {driver.longitude}
-              </Text>
-            </Descriptions.Item>
-          </Descriptions>
-        </div>
+            <div>
+              <Title level={5}>Location</Title>
+              <Descriptions column={1} size="small">
+                <Descriptions.Item label="Google Maps">
+                  <a
+                    href={driver.googleMapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View on Google Maps
+                  </a>
+                </Descriptions.Item>
+              </Descriptions>
+            </div>
+          </>
+        )}
       </Space>
     </Drawer>
   );

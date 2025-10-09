@@ -14,6 +14,10 @@ const api: AxiosInstance = axios.create({
   },
 });
 
+// Track token refresh state
+let isRefreshing = false;
+let refreshPromise: Promise<any> | null = null;
+
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
@@ -28,6 +32,49 @@ api.interceptors.request.use(
   }
 );
 
+// Function to refresh token
+async function refreshAccessToken() {
+  if (isRefreshing && refreshPromise) {
+    return refreshPromise;
+  }
+
+  isRefreshing = true;
+  refreshPromise = (async () => {
+    try {
+      const refreshToken = Cookies.get("refreshToken");
+      if (!refreshToken) {
+        throw new Error("No refresh token available");
+      }
+
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/auth/refresh`,
+        { refreshToken }
+      );
+
+      const { accessToken, refreshToken: newRefreshToken } = response.data;
+
+      // Update cookies with longer expiration
+      Cookies.set("accessToken", accessToken, { expires: 7 }); // 7 days
+      Cookies.set("refreshToken", newRefreshToken, { expires: 30 }); // 30 days
+
+      return accessToken;
+    } catch (error) {
+      // Refresh failed, clear tokens and redirect
+      Cookies.remove("accessToken");
+      Cookies.remove("refreshToken");
+      if (typeof window !== "undefined") {
+        window.location.href = "/sign-in";
+      }
+      throw error;
+    } finally {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
 // Response interceptor to handle token refresh
 api.interceptors.response.use(
   (response: AxiosResponse) => {
@@ -40,32 +87,15 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshToken = Cookies.get("refreshToken");
-        if (refreshToken) {
-          const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/auth/refresh`,
-            { refreshToken }
-          );
+        const newAccessToken = await refreshAccessToken();
 
-          const { accessToken, refreshToken: newRefreshToken } = response.data;
-
-          // Update cookies
-          Cookies.set("accessToken", accessToken, { expires: 1 }); // 1 day
-          Cookies.set("refreshToken", newRefreshToken, { expires: 7 }); // 7 days
-
-          // Retry original request with new token
-          if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          }
-          return api(originalRequest);
+        // Retry original request with new token
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         }
+        return api(originalRequest);
       } catch (refreshError) {
-        // Refresh failed, redirect to login
-        Cookies.remove("accessToken");
-        Cookies.remove("refreshToken");
-        if (typeof window !== "undefined") {
-          window.location.href = "/sign-in";
-        }
+        return Promise.reject(refreshError);
       }
     }
 

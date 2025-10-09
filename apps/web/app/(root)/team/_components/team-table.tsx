@@ -25,6 +25,8 @@ import {
 import { User } from "../../../../lib/api/team";
 import { useTeam, useDeleteUser } from "../../../../hooks/useTeam";
 import { ColumnType } from "antd/es/table";
+import { useAuth } from "../../../../contexts/AuthContext";
+import { canCreate, canEdit, canDelete } from "../../../../lib/rbac";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -53,6 +55,12 @@ export const TeamTable: React.FC<TeamTableProps> = ({
   });
 
   const deleteUserMutation = useDeleteUser();
+  const { user } = useAuth();
+
+  // Check permissions
+  const canCreateTeam = canCreate(user?.role, "team");
+  const canEditTeam = canEdit(user?.role, "team");
+  const canDeleteTeam = canDelete(user?.role, "team");
 
   const handleDelete = async (id: string) => {
     try {
@@ -170,46 +178,58 @@ export const TeamTable: React.FC<TeamTableProps> = ({
     {
       title: "Actions",
       key: "actions",
+      fixed: "right",
+      width: 250,
       render: (_: unknown, record: User) => (
         <Space size="small">
           <Tooltip title="View Details">
             <Button
+              size="large"
               type="text"
               icon={<EyeOutlined />}
               onClick={() => onViewUser(record)}
             />
           </Tooltip>
-          <Tooltip title="Edit">
-            <Button
-              type="text"
-              icon={<EditOutlined />}
-              onClick={() => onEditUser(record)}
-            />
-          </Tooltip>
-          <Tooltip title="Change Password">
-            <Button
-              type="text"
-              icon={<KeyOutlined />}
-              onClick={() => onChangePassword(record)}
-            />
-          </Tooltip>
-          <Tooltip title="Delete">
-            <Popconfirm
-              title="Delete User"
-              description="Are you sure you want to delete this user? This action cannot be undone."
-              onConfirm={() => handleDelete(record.id)}
-              okText="Yes"
-              cancelText="No"
-              okType="danger"
-            >
+          {canEditTeam && (
+            <Tooltip title="Edit">
               <Button
+                size="large"
                 type="text"
-                danger
-                icon={<DeleteOutlined />}
-                loading={deleteUserMutation.isPending}
+                icon={<EditOutlined />}
+                onClick={() => onEditUser(record)}
               />
-            </Popconfirm>
-          </Tooltip>
+            </Tooltip>
+          )}
+          {canEditTeam && (
+            <Tooltip title="Change Password">
+              <Button
+                size="large"
+                type="text"
+                icon={<KeyOutlined />}
+                onClick={() => onChangePassword(record)}
+              />
+            </Tooltip>
+          )}
+          {canDeleteTeam && (
+            <Tooltip title="Delete">
+              <Popconfirm
+                title="Delete User"
+                description="Are you sure you want to delete this user? This action cannot be undone."
+                onConfirm={() => handleDelete(record.id)}
+                okText="Yes"
+                cancelText="No"
+                okType="danger"
+              >
+                <Button
+                  size="large"
+                  type="text"
+                  danger
+                  icon={<DeleteOutlined />}
+                  loading={deleteUserMutation.isPending}
+                />
+              </Popconfirm>
+            </Tooltip>
+          )}
         </Space>
       ),
     },
@@ -219,7 +239,7 @@ export const TeamTable: React.FC<TeamTableProps> = ({
     <div>
       <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
         <Col>
-          <Title level={4} style={{ margin: 0 }}>
+          <Title level={2} style={{ margin: 0 }}>
             Team Members
           </Title>
         </Col>
@@ -228,24 +248,29 @@ export const TeamTable: React.FC<TeamTableProps> = ({
             <Search
               placeholder="Search team members..."
               allowClear
+              size="large"
               onSearch={handleSearch}
               style={{ width: 300 }}
               prefix={<SearchOutlined />}
             />
             <Button
+              size="large"
               icon={<ReloadOutlined />}
               onClick={handleRefresh}
               loading={isLoading}
             >
               Refresh
             </Button>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={onCreateUser}
-            >
-              Add Team Member
-            </Button>
+            {canCreateTeam && (
+              <Button
+                type="primary"
+                size="large"
+                icon={<PlusOutlined />}
+                onClick={onCreateUser}
+              >
+                Add Team Member
+              </Button>
+            )}
           </Space>
         </Col>
       </Row>

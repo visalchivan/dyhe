@@ -179,7 +179,7 @@ const ReportsPage = () => {
       title: "Tracking#",
       dataIndex: "trackingNumber",
       key: "trackingNumber",
-      width: 150,
+      width: 200,
       render: (text: string) => <Text code>{text}</Text>,
     },
     {
@@ -224,8 +224,8 @@ const ReportsPage = () => {
   return (
     <div style={{ padding: 24, maxWidth: 1600, margin: "0 auto" }}>
       <div style={{ marginBottom: 24 }}>
-        <Title level={2}>
-          <FileExcelOutlined /> Reports & Analytics
+        <Title level={2} style={{ margin: 0 }}>
+          Reports & Analytics
         </Title>
         <Text type="secondary">
           Generate comprehensive reports for drivers, merchants, and packages
@@ -283,6 +283,7 @@ const ReportsPage = () => {
           <Col span={6}>
             <Text strong>Driver:</Text>
             <Select
+              size="large"
               placeholder="Select Driver"
               value={selectedDriver}
               onChange={setSelectedDriver}
@@ -301,6 +302,7 @@ const ReportsPage = () => {
           <Col span={6}>
             <Text strong>Merchant:</Text>
             <Select
+              size="large"
               placeholder="Select Merchant"
               value={selectedMerchant}
               onChange={setSelectedMerchant}
@@ -319,6 +321,7 @@ const ReportsPage = () => {
           <Col span={6}>
             <Text strong>Date Range:</Text>
             <RangePicker
+              size="large"
               style={{ width: "100%", marginTop: 4 }}
               value={dateRange}
               onChange={setDateRange}
@@ -328,6 +331,7 @@ const ReportsPage = () => {
             <Space style={{ marginTop: 20 }}>
               <Button
                 type="primary"
+                size="large"
                 icon={<FileExcelOutlined />}
                 onClick={exportToExcel}
                 loading={currentLoading}
@@ -335,6 +339,7 @@ const ReportsPage = () => {
                 Export Excel
               </Button>
               <Button
+                size="large"
                 icon={<ReloadOutlined />}
                 onClick={() => refetchReports()}
                 loading={currentLoading}
@@ -349,6 +354,7 @@ const ReportsPage = () => {
       {/* Reports Tabs */}
       <Card>
         <Tabs
+          size="large"
           activeKey={activeTab}
           onChange={setActiveTab}
           items={[
@@ -362,6 +368,7 @@ const ReportsPage = () => {
               ),
               children: (
                 <Table
+                  size="large"
                   columns={driverReportColumns}
                   dataSource={currentData?.data || []}
                   loading={currentLoading}
@@ -387,6 +394,7 @@ const ReportsPage = () => {
               ),
               children: (
                 <Table
+                  size="large"
                   columns={driverReportColumns}
                   dataSource={currentData?.data || []}
                   loading={currentLoading}

@@ -76,8 +76,6 @@ export const DriverForm: React.FC<DriverFormProps> = ({
         status: "ACTIVE",
         driverStatus: "ACTIVE",
         deliverFee: 0,
-        latitude: 11.5564,
-        longitude: 104.9282,
       }}
     >
       <Row gutter={16}>
@@ -130,9 +128,20 @@ export const DriverForm: React.FC<DriverFormProps> = ({
             rules={[
               { required: true, message: "Please enter delivery fee" },
               {
-                type: "number",
-                min: 0,
-                message: "Delivery fee must be positive",
+                validator: (_, value) => {
+                  if (value === null || value === undefined) {
+                    return Promise.reject(
+                      new Error("Please enter delivery fee")
+                    );
+                  }
+                  const numValue = Number(value);
+                  if (isNaN(numValue) || numValue < 0) {
+                    return Promise.reject(
+                      new Error("Delivery fee must be positive")
+                    );
+                  }
+                  return Promise.resolve();
+                },
               },
             ]}
           >
@@ -188,42 +197,29 @@ export const DriverForm: React.FC<DriverFormProps> = ({
         </Col>
       </Row>
 
-      <Row gutter={16}>
-        <Col span={12}>
-          <Form.Item
-            name="latitude"
-            label="Latitude"
-            rules={[
-              { required: true, message: "Please enter latitude" },
-              { type: "number", message: "Please enter a valid latitude" },
-            ]}
-          >
-            <InputNumber
-              style={{ width: "100%" }}
-              placeholder="Enter latitude"
-              precision={6}
-              step={0.000001}
-            />
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item
-            name="longitude"
-            label="Longitude"
-            rules={[
-              { required: true, message: "Please enter longitude" },
-              { type: "number", message: "Please enter a valid longitude" },
-            ]}
-          >
-            <InputNumber
-              style={{ width: "100%" }}
-              placeholder="Enter longitude"
-              precision={6}
-              step={0.000001}
-            />
-          </Form.Item>
-        </Col>
-      </Row>
+      <Form.Item
+        name="googleMapsUrl"
+        label="Google Maps URL (Optional)"
+        rules={[
+          {
+            validator: (_, value) => {
+              if (!value || value.trim() === "") {
+                return Promise.resolve();
+              }
+              if (/^https?:\/\/.+/.test(value)) {
+                return Promise.resolve();
+              }
+              return Promise.reject(
+                new Error(
+                  "Please enter a valid URL starting with http:// or https://"
+                )
+              );
+            },
+          },
+        ]}
+      >
+        <Input placeholder="Enter Google Maps URL (e.g., https://maps.google.com/...)" />
+      </Form.Item>
 
       <Row gutter={16}>
         <Col span={12}>

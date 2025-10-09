@@ -8,8 +8,7 @@ export class DriverResponseDto {
   bank: string;
   bankAccountNumber: string;
   bankAccountName: string;
-  latitude: number;
-  longitude: number;
+  googleMapsUrl?: string;
   status: string;
   createdAt: Date;
   updatedAt: Date;
