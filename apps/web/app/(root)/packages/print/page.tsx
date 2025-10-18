@@ -146,7 +146,7 @@ const PackagePrintPage = () => {
           <PrinterOutlined /> Package Label Printer
         </Title>
         <Text type="secondary">
-          Print package labels directly - 4x6in labels with QR codes
+          Print package labels directly - 80mm x 100mm labels with QR codes
         </Text>
 
         <div style={{ marginTop: 16 }}>
@@ -419,7 +419,7 @@ const PackagePrintPage = () => {
             </Text>
             <ul style={{ marginTop: 8, paddingLeft: 20 }}>
               <li>
-                <Text>Label size: 4&quot; x 6&quot; (101.6mm x 152.4mm)</Text>
+                <Text>Label size: 80mm x 100mm</Text>
               </li>
               <li>
                 <Text>
@@ -430,7 +430,7 @@ const PackagePrintPage = () => {
                 <Text>Each label prints on a separate page</Text>
               </li>
               <li>
-                <Text>Optimized for thermal printers (Xprinter XP-480B)</Text>
+                <Text>Optimized for thermal printers</Text>
               </li>
             </ul>
           </div>

@@ -94,7 +94,7 @@ function generateLabelCSS(): string {
   return `
     <style>
       @page {
-        size: 4in 6in;
+        size: 80mm 100mm;
         margin: 0;
       }
 
@@ -111,20 +111,20 @@ function generateLabelCSS(): string {
       }
 
       .label-container {
-        width: 4in;
-        height: 6in;
+        width: 80mm;
+        height: 100mm;
         page-break-after: always;
         display: flex;
         justify-content: center;
         align-items: flex-start;
-        padding-top: 0.04in;
+        padding-top: 1mm;
       }
 
       .label {
-        width: 3.15in;
-        height: 3.94in;
+        width: 76mm;
+        height: 96mm;
         border: 2px solid #000;
-        padding: 0.2in;
+        padding: 2mm;
         background: white;
       }
 
@@ -132,8 +132,8 @@ function generateLabelCSS(): string {
       .header {
         display: flex;
         justify-content: space-between;
-        height: 0.71in;
-        padding-bottom: 0.08in;
+        height: 16mm;
+        padding-bottom: 2mm;
         border-bottom: 2px solid #000;
       }
 
@@ -143,13 +143,13 @@ function generateLabelCSS(): string {
 
       .company-name {
         font-weight: bold;
-        font-size: 10pt;
-        margin-bottom: 0.04in;
+        font-size: 9pt;
+        margin-bottom: 1mm;
       }
 
       .company-address,
       .company-phone {
-        font-size: 6pt;
+        font-size: 5pt;
         line-height: 1.4;
       }
 
@@ -160,20 +160,20 @@ function generateLabelCSS(): string {
       .tracking-label,
       .date-label {
         font-weight: bold;
-        font-size: 7pt;
-        margin-bottom: 0.02in;
+        font-size: 6pt;
+        margin-bottom: 0.5mm;
       }
 
       .tracking-number,
       .date-value {
-        font-size: 6pt;
-        margin-bottom: 0.06in;
+        font-size: 5pt;
+        margin-bottom: 1.5mm;
       }
 
       /* Middle Section */
       .middle {
         display: flex;
-        height: 1.97in;
+        height: 48mm;
         border-bottom: 2px solid #000;
       }
 
@@ -186,7 +186,7 @@ function generateLabelCSS(): string {
 
       .from-section,
       .ship-to-section {
-        padding: 0.08in;
+        padding: 2mm;
         flex: 1;
       }
 
@@ -196,53 +196,53 @@ function generateLabelCSS(): string {
 
       .section-title {
         font-weight: bold;
-        font-size: 7pt;
-        margin-bottom: 0.04in;
+        font-size: 6pt;
+        margin-bottom: 1mm;
       }
 
       .merchant-name {
-        font-size: 6pt;
+        font-size: 5pt;
       }
 
       .customer-name {
-        font-size: 6pt;
-        margin-bottom: 0.02in;
+        font-size: 5pt;
+        margin-bottom: 0.5mm;
       }
 
       .customer-phone {
-        font-size: 6pt;
-        margin-bottom: 0.02in;
+        font-size: 5pt;
+        margin-bottom: 0.5mm;
       }
 
       .customer-address {
-        font-size: 6pt;
+        font-size: 5pt;
         line-height: 1.3;
       }
 
       .right-column {
         width: 60%;
-        padding: 0.08in;
+        padding: 2mm;
         display: flex;
         flex-direction: column;
       }
 
       .package-details {
-        margin-bottom: 0.08in;
+        margin-bottom: 2mm;
       }
 
       .detail-row {
-        margin-bottom: 0.1in;
+        margin-bottom: 2mm;
       }
 
       .detail-label {
         font-weight: bold;
-        font-size: 7pt;
+        font-size: 6pt;
         display: block;
-        margin-bottom: 0.02in;
+        margin-bottom: 0.5mm;
       }
 
       .detail-value {
-        font-size: 6pt;
+        font-size: 5pt;
         display: block;
       }
 
@@ -250,27 +250,27 @@ function generateLabelCSS(): string {
         display: flex;
         justify-content: center;
         align-items: center;
-        margin-top: 0.1in;
+        margin-top: 2mm;
       }
 
       .qr-code img {
-        width: 0.47in;
-        height: 0.47in;
+        width: 20mm;
+        height: 20mm;
       }
 
       /* Footer */
       .footer {
-        padding: 0.08in 0;
+        padding: 2mm 0;
       }
 
       .remarks-title {
         font-weight: bold;
-        font-size: 7pt;
-        margin-bottom: 0.04in;
+        font-size: 6pt;
+        margin-bottom: 1mm;
       }
 
       .remarks-text {
-        font-size: 5pt;
+        font-size: 4pt;
         line-height: 1.4;
       }
 
@@ -311,12 +311,22 @@ export async function printLabel(pkg: PrintLabelPackage): Promise<void> {
   const labelHTML = await generateLabelHTML(pkg);
   const css = generateLabelCSS();
 
-  const printWindow = window.open("", "_blank");
-  if (!printWindow) {
-    throw new Error("Could not open print window. Please allow popups.");
+  // Create a hidden iframe for printing
+  const iframe = document.createElement("iframe");
+  iframe.style.position = "absolute";
+  iframe.style.width = "0";
+  iframe.style.height = "0";
+  iframe.style.border = "none";
+  iframe.style.visibility = "hidden";
+
+  document.body.appendChild(iframe);
+
+  const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+  if (!iframeDoc) {
+    throw new Error("Could not access iframe document");
   }
 
-  printWindow.document.write(`
+  iframeDoc.write(`
     <!DOCTYPE html>
     <html>
       <head>
@@ -330,16 +340,17 @@ export async function printLabel(pkg: PrintLabelPackage): Promise<void> {
     </html>
   `);
 
-  printWindow.document.close();
+  iframeDoc.close();
 
   // Wait for images (QR code) to load before printing
-  printWindow.onload = () => {
+  iframe.onload = () => {
     setTimeout(() => {
-      printWindow.print();
-      // Close window after printing (user can cancel this)
-      printWindow.onafterprint = () => {
-        printWindow.close();
-      };
+      iframe.contentWindow?.print();
+
+      // Remove iframe after printing
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+      }, 1000);
     }, 250);
   };
 }
@@ -360,12 +371,22 @@ export async function printBulkLabels(
 
   const css = generateLabelCSS();
 
-  const printWindow = window.open("", "_blank");
-  if (!printWindow) {
-    throw new Error("Could not open print window. Please allow popups.");
+  // Create a hidden iframe for printing
+  const iframe = document.createElement("iframe");
+  iframe.style.position = "absolute";
+  iframe.style.width = "0";
+  iframe.style.height = "0";
+  iframe.style.border = "none";
+  iframe.style.visibility = "hidden";
+
+  document.body.appendChild(iframe);
+
+  const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+  if (!iframeDoc) {
+    throw new Error("Could not access iframe document");
   }
 
-  printWindow.document.write(`
+  iframeDoc.write(`
     <!DOCTYPE html>
     <html>
       <head>
@@ -379,16 +400,17 @@ export async function printBulkLabels(
     </html>
   `);
 
-  printWindow.document.close();
+  iframeDoc.close();
 
   // Wait for images (QR codes) to load before printing
-  printWindow.onload = () => {
+  iframe.onload = () => {
     setTimeout(() => {
-      printWindow.print();
-      // Close window after printing (user can cancel this)
-      printWindow.onafterprint = () => {
-        printWindow.close();
-      };
+      iframe.contentWindow?.print();
+
+      // Remove iframe after printing
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+      }, 1000);
     }, 500);
   };
 }
