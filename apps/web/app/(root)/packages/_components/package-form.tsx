@@ -48,7 +48,13 @@ export const PackageForm: React.FC<PackageFormProps> = ({
 
   React.useEffect(() => {
     if (packageData) {
-      form.setFieldsValue(packageData);
+      // Convert numeric fields to numbers for proper validation
+      form.setFieldsValue({
+        ...packageData,
+        codAmount: Number(packageData.codAmount),
+        deliveryFee: Number(packageData.deliveryFee),
+        merchantId: packageData.merchant?.id || packageData.merchantId,
+      });
     } else {
       form.resetFields();
     }

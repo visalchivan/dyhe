@@ -15,7 +15,7 @@ const protectedRoutes = [
 ];
 
 // Define auth routes (routes that should redirect if user is already authenticated)
-const authRoutes = ["/sign-in", "/sign-up"];
+const authRoutes = ["/", "/sign-in"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -28,8 +28,13 @@ export function middleware(request: NextRequest) {
     pathname.startsWith(route)
   );
 
-  // Check if the current path is an auth route
-  const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
+  // Check if the current path is an auth route (exact match for "/" or startsWith for others)
+  const isAuthRoute = authRoutes.some((route) => {
+    if (route === "/") {
+      return pathname === "/";
+    }
+    return pathname.startsWith(route);
+  });
 
   // If user is not authenticated and trying to access protected route
   if (isProtectedRoute && !accessToken) {

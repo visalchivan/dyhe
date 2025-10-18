@@ -50,7 +50,11 @@ export const MerchantForm: React.FC<MerchantFormProps> = ({
 
   React.useEffect(() => {
     if (merchant) {
-      form.setFieldsValue(merchant);
+      // Convert numeric fields to numbers for proper validation
+      form.setFieldsValue({
+        ...merchant,
+        deliverFee: Number(merchant.deliverFee || 0),
+      });
     } else {
       form.resetFields();
     }

@@ -57,7 +57,11 @@ export const DriverForm: React.FC<DriverFormProps> = ({
 
   React.useEffect(() => {
     if (driver) {
-      form.setFieldsValue(driver);
+      // Convert numeric fields to numbers for proper validation
+      form.setFieldsValue({
+        ...driver,
+        deliverFee: Number(driver.deliverFee || 0),
+      });
     } else {
       form.resetFields();
     }

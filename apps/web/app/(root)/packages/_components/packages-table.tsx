@@ -317,7 +317,6 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
               allowClear
               onSearch={handleSearch}
               style={{ width: 300 }}
-              prefix={<SearchOutlined />}
             />
             <Button
               size="large"
