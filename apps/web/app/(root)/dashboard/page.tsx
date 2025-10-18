@@ -2,6 +2,8 @@
 
 import React from "react";
 import { Row, Col, Typography, Spin } from "antd";
+import { useAuth } from "../../../contexts/AuthContext";
+import { DriverDashboard } from "./driver-dashboard";
 import { StatsCards } from "./_components/stats-cards";
 import { RecentPackages } from "./_components/recent-packages";
 import { TopPerformers } from "./_components/top-performers";
@@ -17,6 +19,12 @@ import {
 const { Title } = Typography;
 
 export default function DashboardPage() {
+  const { user } = useAuth();
+
+  // Show driver-specific dashboard for drivers
+  if (user?.role === "DRIVER") {
+    return <DriverDashboard />;
+  }
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { data: recentPackages, isLoading: packagesLoading } =
     useRecentPackages(10);

@@ -73,3 +73,21 @@ export const useDeleteDriver = () => {
     },
   });
 };
+
+export const useChangeDriverPassword = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, newPassword }: { id: string; newPassword: string }) =>
+      driverApi.changeDriverPassword(id, newPassword),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["driver", id] });
+      message.success("Driver password changed successfully!");
+    },
+    onError: (error: any) => {
+      message.error(
+        error.response?.data?.message || "Failed to change driver password"
+      );
+    },
+  });
+};

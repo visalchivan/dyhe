@@ -159,6 +159,52 @@ export const DriverForm: React.FC<DriverFormProps> = ({
         </Col>
       </Row>
 
+      {/* Login Credentials */}
+      <Row gutter={16}>
+        <Col span={driver ? 24 : 12}>
+          <Form.Item
+            name="username"
+            label="Username (for driver login)"
+            rules={
+              !driver
+                ? [
+                    { required: true, message: "Please enter username" },
+                    {
+                      min: 3,
+                      message: "Username must be at least 3 characters",
+                    },
+                    {
+                      max: 20,
+                      message: "Username must be less than 20 characters",
+                    },
+                  ]
+                : []
+            }
+          >
+            <Input
+              placeholder={
+                driver ? "No username set" : "Enter username for driver login"
+              }
+              disabled={!!driver}
+            />
+          </Form.Item>
+        </Col>
+        {!driver && (
+          <Col span={12}>
+            <Form.Item
+              name="password"
+              label="Password (for driver login)"
+              rules={[
+                { required: true, message: "Please enter password" },
+                { min: 6, message: "Password must be at least 6 characters" },
+              ]}
+            >
+              <Input.Password placeholder="Enter password for driver login" />
+            </Form.Item>
+          </Col>
+        )}
+      </Row>
+
       <Row gutter={16}>
         <Col span={8}>
           <Form.Item

@@ -5,18 +5,24 @@ services:
     image: postgres:16-alpine
     container_name: dyhe-db
     environment:
-      POSTGRES_DB: dyhe
-      POSTGRES_USER: dyhe
-      POSTGRES_PASSWORD: dyhe
+      POSTGRES_DB: ${POSTGRES_DB:-dyhe_production}
+      POSTGRES_USER: ${POSTGRES_USER:-dyhe_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-this-password}
     volumes:
       - db_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+      - ./backups:/backups
+    networks:
+      - dyhe-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dyhe -d dyhe"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-dyhe_user} -d ${POSTGRES_DB:-dyhe_production}",
+        ]
       interval: 5s
       timeout: 5s
       retries: 10
+    restart: unless-stopped
 
   api:
     build:
@@ -29,10 +35,19 @@ services:
     environment:
       NODE_ENV: production
       PORT: 8000
-      DATABASE_URL: postgresql://dyhe:dyhe@db:5432/dyhe?schema=public
-      JWT_SECRET: change-me
-    ports:
-      - "8000:8000"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-dyhe_user}:${POSTGRES_PASSWORD:-change-this-password}@db:5432/${POSTGRES_DB:-dyhe_production}?schema=public
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-secure-random-string}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-to-another-secure-string}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-1h}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-30d}
+    networks:
+      - dyhe-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     restart: unless-stopped
 
   web:
@@ -41,14 +56,53 @@ services:
       dockerfile: apps/web/Dockerfile
     container_name: dyhe-web
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 3000
-      NEXT_PUBLIC_API_URL: http://api:8000
-    ports:
-      - "3000:3000"
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    networks:
+      - dyhe-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: dyhe-nginx
+    depends_on:
+      - web
+      - api
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx-docker.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+    networks:
+      - dyhe-network
+    restart: unless-stopped
+
+  certbot:
+    image: certbot/certbot
+    container_name: dyhe-certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - dyhe-network
+
+networks:
+  dyhe-network:
+    driver: bridge
 
 volumes:
   db_data:
+    driver: local

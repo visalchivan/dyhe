@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateDriverDto } from './dto/create-driver.dto';
 import { UpdateDriverDto } from './dto/update-driver.dto';
@@ -13,11 +14,12 @@ export class DriverService {
   constructor(private prisma: PrismaService) {}
 
   async create(createDriverDto: CreateDriverDto) {
-    // Check if driver with email already exists
+    // Check if driver with email or phone already exists
     const existingDriver = await this.prisma.driver.findFirst({
       where: {
         OR: [
           { email: createDriverDto.email },
+          { phone: createDriverDto.phone },
           { bankAccountNumber: createDriverDto.bankAccountNumber },
         ],
       },
@@ -25,12 +27,62 @@ export class DriverService {
 
     if (existingDriver) {
       throw new ConflictException(
-        'Driver with this email or bank account number already exists',
+        'Driver with this email, phone, or bank account number already exists',
       );
     }
 
+    // Check if username is taken in users table
+    if (createDriverDto.username) {
+      const existingUser = await this.prisma.user.findUnique({
+        where: { username: createDriverDto.username },
+      });
+
+      if (existingUser) {
+        throw new ConflictException('Username is already taken');
+      }
+    }
+
+    // Create user account if username and password are provided
+    let userId: string | undefined;
+    if (createDriverDto.username && createDriverDto.password) {
+      const hashedPassword = await bcrypt.hash(createDriverDto.password, 10);
+
+      const user = await this.prisma.user.create({
+        data: {
+          username: createDriverDto.username,
+          name: createDriverDto.name,
+          email: createDriverDto.email,
+          phone: createDriverDto.phone,
+          password: hashedPassword,
+          role: 'DRIVER',
+          gender: 'MALE', // Default
+          status: 'ACTIVE',
+        },
+      });
+
+      userId = user.id;
+    }
+
+    // Create driver profile (remove username and password from driver data)
+    const {
+      username: _username,
+      password: _password,
+      ...driverData
+    } = createDriverDto;
     const driver = await this.prisma.driver.create({
-      data: createDriverDto as Prisma.DriverCreateInput,
+      data: {
+        ...driverData,
+        ...(userId && { userId }),
+      } as Prisma.DriverCreateInput,
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            role: true,
+          },
+        },
+      },
     });
 
     return driver;
@@ -152,5 +204,27 @@ export class DriverService {
     });
 
     return { message: 'Driver deleted successfully' };
+  }
+
+  async changePassword(id: string, newPassword: string) {
+    // Check if driver exists
+    const existingDriver = await this.prisma.driver.findUnique({
+      where: { id },
+    });
+
+    if (!existingDriver) {
+      throw new NotFoundException(`Driver with ID ${id} not found`);
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password
+    await this.prisma.driver.update({
+      where: { id },
+      data: { user: { update: { password: hashedPassword } } },
+    });
+
+    return { message: 'Driver password changed successfully' };
   }
 }

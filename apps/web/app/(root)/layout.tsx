@@ -69,8 +69,30 @@ const allMenuItems = [
   getItem("Settings", "/settings", <SettingOutlined />, undefined, "settings"),
 ] as (MenuItem & { resource?: string })[];
 
+// Driver-specific menu items
+const driverMenuItems = [
+  getItem("Home", "/dashboard", <HomeOutlined />, undefined, "dashboard"),
+  getItem(
+    "My Deliveries",
+    "/my-deliveries",
+    <GiftOutlined />,
+    undefined,
+    "my-deliveries"
+  ),
+] as (MenuItem & { resource?: string })[];
+
 // Filter menu items based on user role
 function getFilteredMenuItems(userRole: string | undefined): MenuItem[] {
+  // Drivers get their own special menu
+  if (userRole === "DRIVER") {
+    return driverMenuItems.filter((item) => {
+      const menuItem = item as MenuItem & { resource?: string };
+      if (!menuItem.resource) return true;
+      return canView(userRole, menuItem.resource);
+    });
+  }
+
+  // All other roles use the standard menu
   return allMenuItems.filter((item) => {
     const menuItem = item as MenuItem & { resource?: string };
     if (!menuItem.resource) return true;
@@ -89,6 +111,7 @@ const breadcrumbMap: Record<string, string[]> = {
   "/team": ["Home", "Team"],
   "/reports": ["Home", "Reports"],
   "/settings": ["Home", "Settings"],
+  "/my-deliveries": ["Home", "My Deliveries"],
 };
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -108,7 +131,22 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   } = theme.useToken();
 
   // Get filtered menu items based on user role
+  // This will automatically update when user role changes
   const menuItems = getFilteredMenuItems(user?.role);
+
+  // Reset menu selection when user role changes
+  useEffect(() => {
+    if (user?.role) {
+      // Verify current path is accessible by new role
+      const hasAccess = menuItems.some(
+        (item) => item && "key" in item && item.key === pathname
+      );
+      if (!hasAccess && pathname !== "/dashboard") {
+        // Redirect to dashboard if current page is not accessible
+        router.push("/dashboard");
+      }
+    }
+  }, [user?.role, menuItems, pathname, router]);
 
   // Update selected key and breadcrumb when pathname changes
   useEffect(() => {

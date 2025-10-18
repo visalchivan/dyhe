@@ -2,12 +2,14 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreatePackageDto } from './dto/create-package.dto';
 import { BulkCreatePackagesDto } from './dto/bulk-create-packages.dto';
 import { BulkAssignPackagesDto } from './dto/bulk-assign-packages.dto';
 import { UpdatePackageDto } from './dto/update-package.dto';
+import { UpdatePackageStatusDto } from './dto/update-package-status.dto';
 import { PackageStatus } from 'generated/client';
 
 @Injectable()
@@ -441,6 +443,222 @@ export class PackagesService {
       message: `Successfully assigned ${updatedPackages.length} packages to driver`,
       packages: updatedPackages,
       count: updatedPackages.length,
+    };
+  }
+
+  // Driver-specific methods
+  async getDriverPackages(
+    userId: string,
+    page: number = 1,
+    limit: number = 20,
+    status?: string,
+  ) {
+    // Find driver record by userId
+    const driver = await this.prisma.driver.findUnique({
+      where: { userId },
+    });
+
+    if (!driver) {
+      throw new NotFoundException('Driver profile not found');
+    }
+
+    const skip = (page - 1) * limit;
+
+    const where: any = { driverId: driver.id };
+    if (status) {
+      where.status = status;
+    }
+
+    const [packages, total] = await Promise.all([
+      this.prisma.package.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          merchant: {
+            select: {
+              id: true,
+              name: true,
+              phone: true,
+              address: true,
+            },
+          },
+        },
+      }),
+      this.prisma.package.count({ where }),
+    ]);
+
+    return {
+      packages,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async getDriverPackageById(userId: string, packageId: string) {
+    // Find driver record by userId
+    const driver = await this.prisma.driver.findUnique({
+      where: { userId },
+    });
+
+    if (!driver) {
+      throw new NotFoundException('Driver profile not found');
+    }
+
+    const packageData = await this.prisma.package.findFirst({
+      where: {
+        id: packageId,
+        driverId: driver.id,
+      },
+      include: {
+        merchant: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            email: true,
+            address: true,
+            googleMapsUrl: true,
+          },
+        },
+        driver: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+          },
+        },
+      },
+    });
+
+    if (!packageData) {
+      throw new NotFoundException('Package not found or not assigned to you');
+    }
+
+    return packageData;
+  }
+
+  async updatePackageStatusByDriver(
+    userId: string,
+    packageId: string,
+    updateStatusDto: UpdatePackageStatusDto,
+  ) {
+    // Find driver record by userId
+    const driver = await this.prisma.driver.findUnique({
+      where: { userId },
+    });
+
+    if (!driver) {
+      throw new NotFoundException('Driver profile not found');
+    }
+
+    // Verify package belongs to this driver
+    const packageData = await this.prisma.package.findFirst({
+      where: {
+        id: packageId,
+        driverId: driver.id,
+      },
+    });
+
+    if (!packageData) {
+      throw new ForbiddenException(
+        'You can only update packages assigned to you',
+      );
+    }
+
+    // Update package status
+    const updatedPackage = await this.prisma.package.update({
+      where: { id: packageId },
+      data: {
+        status: updateStatusDto.status,
+      },
+      include: {
+        merchant: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+          },
+        },
+        driver: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+          },
+        },
+      },
+    });
+
+    return updatedPackage;
+  }
+
+  async getDriverStats(userId: string) {
+    // Find driver record by userId
+    const driver = await this.prisma.driver.findUnique({
+      where: { userId },
+    });
+
+    if (!driver) {
+      throw new NotFoundException('Driver profile not found');
+    }
+
+    const driverId = driver.id;
+    const [total, delivering, delivered, cancelled, returned, todayDelivered] =
+      await Promise.all([
+        this.prisma.package.count({ where: { driverId } }),
+        this.prisma.package.count({
+          where: { driverId, status: PackageStatus.DELIVERING },
+        }),
+        this.prisma.package.count({
+          where: { driverId, status: PackageStatus.DELIVERED },
+        }),
+        this.prisma.package.count({
+          where: { driverId, status: PackageStatus.CANCELLED },
+        }),
+        this.prisma.package.count({
+          where: { driverId, status: PackageStatus.RETURNED },
+        }),
+        this.prisma.package.count({
+          where: {
+            driverId,
+            status: PackageStatus.DELIVERED,
+            updatedAt: {
+              gte: new Date(new Date().setHours(0, 0, 0, 0)),
+            },
+          },
+        }),
+      ]);
+
+    // Calculate total COD amount for delivered packages
+    const deliveredPackages = await this.prisma.package.findMany({
+      where: {
+        driverId,
+        status: PackageStatus.DELIVERED,
+      },
+      select: {
+        codAmount: true,
+      },
+    });
+
+    const totalCOD = deliveredPackages.reduce(
+      (sum, pkg) => sum + Number(pkg.codAmount),
+      0,
+    );
+
+    return {
+      total,
+      delivering,
+      delivered,
+      cancelled,
+      returned,
+      todayDelivered,
+      totalCOD,
     };
   }
 }

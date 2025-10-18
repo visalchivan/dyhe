@@ -31,11 +31,14 @@ export const useLogin = () => {
       Cookies.set("accessToken", data.accessToken, { expires: 7 }); // 7 days
       Cookies.set("refreshToken", data.refreshToken, { expires: 30 }); // 30 days
 
+      // Clear all cache to ensure fresh data for new user
+      queryClient.clear();
+
       // Update profile in cache
       queryClient.setQueryData(authKeys.profile(), data.user);
 
-      // Redirect to dashboard
-      router.push("/dashboard");
+      // Force a hard refresh to reload the layout with correct user role
+      window.location.href = "/dashboard";
     },
     onError: (error) => {
       console.error("Login failed:", error);
@@ -82,8 +85,8 @@ export const useLogout = () => {
       // Clear all cached data
       queryClient.clear();
 
-      // Redirect to sign-in
-      router.push("/sign-in");
+      // Force hard refresh to sign-in to ensure clean state
+      window.location.href = "/sign-in";
     },
     onError: (error) => {
       console.error("Logout failed:", error);
@@ -91,7 +94,8 @@ export const useLogout = () => {
       Cookies.remove("accessToken");
       Cookies.remove("refreshToken");
       queryClient.clear();
-      router.push("/sign-in");
+      // Force hard refresh to sign-in
+      window.location.href = "/sign-in";
     },
   });
 };

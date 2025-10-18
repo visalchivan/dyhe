@@ -20,6 +20,8 @@ export interface CreateDriverDto {
   name: string;
   email: string;
   phone: string;
+  username?: string;
+  password?: string;
   deliverFee: number;
   driverStatus: string;
   bank: string;
@@ -73,6 +75,17 @@ export const driverApi = {
   // Delete driver
   deleteDriver: async (id: string): Promise<{ message: string }> => {
     const response = await api.delete(`/drivers/${id}`);
+    return response.data;
+  },
+
+  // Change driver password
+  changeDriverPassword: async (
+    id: string,
+    newPassword: string
+  ): Promise<{ message: string }> => {
+    const response = await api.patch(`/drivers/${id}/change-password`, {
+      newPassword,
+    });
     return response.data;
   },
 };

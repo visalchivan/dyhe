@@ -146,6 +146,12 @@ export const rolePermissions: Record<string, Record<string, Permission>> = {
     packages: {
       canView: true,
       canCreate: false,
+      canEdit: true, // Can update status
+      canDelete: false,
+    },
+    "my-deliveries": {
+      canView: true,
+      canCreate: false,
       canEdit: true,
       canDelete: false,
     },

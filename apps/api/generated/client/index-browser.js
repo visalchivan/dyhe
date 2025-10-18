@@ -136,6 +136,7 @@ exports.Prisma.UserScalarFieldEnum = {
 
 exports.Prisma.DriverScalarFieldEnum = {
   id: 'id',
+  userId: 'userId',
   name: 'name',
   email: 'email',
   phone: 'phone',

@@ -1589,6 +1589,7 @@ export namespace Prisma {
     role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    driver?: boolean | User$driverArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -1634,10 +1635,17 @@ export namespace Prisma {
   }
 
   export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "username" | "name" | "email" | "phone" | "status" | "gender" | "password" | "role" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    driver?: boolean | User$driverArgs<ExtArgs>
+  }
+  export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type UserIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "User"
-    objects: {}
+    objects: {
+      driver: Prisma.$DriverPayload<ExtArgs> | null
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       username: string
@@ -2044,6 +2052,7 @@ export namespace Prisma {
    */
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    driver<T extends User$driverArgs<ExtArgs> = {}>(args?: Subset<T, User$driverArgs<ExtArgs>>): Prisma__DriverClient<$Result.GetResult<Prisma.$DriverPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2101,6 +2110,10 @@ export namespace Prisma {
      */
     omit?: UserOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
      * Filter, which User to fetch.
      */
     where: UserWhereUniqueInput
@@ -2119,6 +2132,10 @@ export namespace Prisma {
      */
     omit?: UserOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
      * Filter, which User to fetch.
      */
     where: UserWhereUniqueInput
@@ -2136,6 +2153,10 @@ export namespace Prisma {
      * Omit specific fields from the User
      */
     omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
     /**
      * Filter, which User to fetch.
      */
@@ -2185,6 +2206,10 @@ export namespace Prisma {
      */
     omit?: UserOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
      * Filter, which User to fetch.
      */
     where?: UserWhereInput
@@ -2233,6 +2258,10 @@ export namespace Prisma {
      */
     omit?: UserOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
      * Filter, which Users to fetch.
      */
     where?: UserWhereInput
@@ -2275,6 +2304,10 @@ export namespace Prisma {
      * Omit specific fields from the User
      */
     omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
     /**
      * The data needed to create a User.
      */
@@ -2323,6 +2356,10 @@ export namespace Prisma {
      * Omit specific fields from the User
      */
     omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
     /**
      * The data needed to update a User.
      */
@@ -2390,6 +2427,10 @@ export namespace Prisma {
      */
     omit?: UserOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
      * The filter to search for the User to update in case it exists.
      */
     where: UserWhereUniqueInput
@@ -2416,6 +2457,10 @@ export namespace Prisma {
      */
     omit?: UserOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
      * Filter which User to delete.
      */
     where: UserWhereUniqueInput
@@ -2436,6 +2481,25 @@ export namespace Prisma {
   }
 
   /**
+   * User.driver
+   */
+  export type User$driverArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Driver
+     */
+    select?: DriverSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Driver
+     */
+    omit?: DriverOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverInclude<ExtArgs> | null
+    where?: DriverWhereInput
+  }
+
+  /**
    * User without action
    */
   export type UserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2447,6 +2511,10 @@ export namespace Prisma {
      * Omit specific fields from the User
      */
     omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
   }
 
 
@@ -2472,6 +2540,7 @@ export namespace Prisma {
 
   export type DriverMinAggregateOutputType = {
     id: string | null
+    userId: string | null
     name: string | null
     email: string | null
     phone: string | null
@@ -2488,6 +2557,7 @@ export namespace Prisma {
 
   export type DriverMaxAggregateOutputType = {
     id: string | null
+    userId: string | null
     name: string | null
     email: string | null
     phone: string | null
@@ -2504,6 +2574,7 @@ export namespace Prisma {
 
   export type DriverCountAggregateOutputType = {
     id: number
+    userId: number
     name: number
     email: number
     phone: number
@@ -2530,6 +2601,7 @@ export namespace Prisma {
 
   export type DriverMinAggregateInputType = {
     id?: true
+    userId?: true
     name?: true
     email?: true
     phone?: true
@@ -2546,6 +2618,7 @@ export namespace Prisma {
 
   export type DriverMaxAggregateInputType = {
     id?: true
+    userId?: true
     name?: true
     email?: true
     phone?: true
@@ -2562,6 +2635,7 @@ export namespace Prisma {
 
   export type DriverCountAggregateInputType = {
     id?: true
+    userId?: true
     name?: true
     email?: true
     phone?: true
@@ -2665,6 +2739,7 @@ export namespace Prisma {
 
   export type DriverGroupByOutputType = {
     id: string
+    userId: string | null
     name: string
     email: string | null
     phone: string
@@ -2700,6 +2775,7 @@ export namespace Prisma {
 
   export type DriverSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    userId?: boolean
     name?: boolean
     email?: boolean
     phone?: boolean
@@ -2712,12 +2788,14 @@ export namespace Prisma {
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    user?: boolean | Driver$userArgs<ExtArgs>
     packages?: boolean | Driver$packagesArgs<ExtArgs>
     _count?: boolean | DriverCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["driver"]>
 
   export type DriverSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    userId?: boolean
     name?: boolean
     email?: boolean
     phone?: boolean
@@ -2730,10 +2808,12 @@ export namespace Prisma {
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    user?: boolean | Driver$userArgs<ExtArgs>
   }, ExtArgs["result"]["driver"]>
 
   export type DriverSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    userId?: boolean
     name?: boolean
     email?: boolean
     phone?: boolean
@@ -2746,10 +2826,12 @@ export namespace Prisma {
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    user?: boolean | Driver$userArgs<ExtArgs>
   }, ExtArgs["result"]["driver"]>
 
   export type DriverSelectScalar = {
     id?: boolean
+    userId?: boolean
     name?: boolean
     email?: boolean
     phone?: boolean
@@ -2764,21 +2846,28 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type DriverOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "phone" | "deliverFee" | "driverStatus" | "bank" | "bankAccountNumber" | "bankAccountName" | "googleMapsUrl" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["driver"]>
+  export type DriverOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "name" | "email" | "phone" | "deliverFee" | "driverStatus" | "bank" | "bankAccountNumber" | "bankAccountName" | "googleMapsUrl" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["driver"]>
   export type DriverInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | Driver$userArgs<ExtArgs>
     packages?: boolean | Driver$packagesArgs<ExtArgs>
     _count?: boolean | DriverCountOutputTypeDefaultArgs<ExtArgs>
   }
-  export type DriverIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type DriverIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type DriverIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | Driver$userArgs<ExtArgs>
+  }
+  export type DriverIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | Driver$userArgs<ExtArgs>
+  }
 
   export type $DriverPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Driver"
     objects: {
+      user: Prisma.$UserPayload<ExtArgs> | null
       packages: Prisma.$PackagePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
+      userId: string | null
       name: string
       email: string | null
       phone: string
@@ -3185,6 +3274,7 @@ export namespace Prisma {
    */
   export interface Prisma__DriverClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends Driver$userArgs<ExtArgs> = {}>(args?: Subset<T, Driver$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     packages<T extends Driver$packagesArgs<ExtArgs> = {}>(args?: Subset<T, Driver$packagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PackagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -3216,6 +3306,7 @@ export namespace Prisma {
    */
   interface DriverFieldRefs {
     readonly id: FieldRef<"Driver", 'String'>
+    readonly userId: FieldRef<"Driver", 'String'>
     readonly name: FieldRef<"Driver", 'String'>
     readonly email: FieldRef<"Driver", 'String'>
     readonly phone: FieldRef<"Driver", 'String'>
@@ -3477,6 +3568,10 @@ export namespace Prisma {
      */
     data: DriverCreateManyInput | DriverCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -3547,6 +3642,10 @@ export namespace Prisma {
      * Limit how many Drivers to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DriverIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -3613,6 +3712,25 @@ export namespace Prisma {
      * Limit how many Drivers to delete.
      */
     limit?: number
+  }
+
+  /**
+   * Driver.user
+   */
+  export type Driver$userArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
   }
 
   /**
@@ -7224,6 +7342,7 @@ export namespace Prisma {
 
   export const DriverScalarFieldEnum: {
     id: 'id',
+    userId: 'userId',
     name: 'name',
     email: 'email',
     phone: 'phone',
@@ -7505,6 +7624,7 @@ export namespace Prisma {
     role?: EnumRoleFilter<"User"> | $Enums.Role
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    driver?: XOR<DriverNullableScalarRelationFilter, DriverWhereInput> | null
   }
 
   export type UserOrderByWithRelationInput = {
@@ -7519,6 +7639,7 @@ export namespace Prisma {
     role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    driver?: DriverOrderByWithRelationInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -7536,6 +7657,7 @@ export namespace Prisma {
     role?: EnumRoleFilter<"User"> | $Enums.Role
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    driver?: XOR<DriverNullableScalarRelationFilter, DriverWhereInput> | null
   }, "id" | "username" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -7577,6 +7699,7 @@ export namespace Prisma {
     OR?: DriverWhereInput[]
     NOT?: DriverWhereInput | DriverWhereInput[]
     id?: StringFilter<"Driver"> | string
+    userId?: StringNullableFilter<"Driver"> | string | null
     name?: StringFilter<"Driver"> | string
     email?: StringNullableFilter<"Driver"> | string | null
     phone?: StringFilter<"Driver"> | string
@@ -7589,11 +7712,13 @@ export namespace Prisma {
     status?: EnumStatusFilter<"Driver"> | $Enums.Status
     createdAt?: DateTimeFilter<"Driver"> | Date | string
     updatedAt?: DateTimeFilter<"Driver"> | Date | string
+    user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     packages?: PackageListRelationFilter
   }
 
   export type DriverOrderByWithRelationInput = {
     id?: SortOrder
+    userId?: SortOrderInput | SortOrder
     name?: SortOrder
     email?: SortOrderInput | SortOrder
     phone?: SortOrder
@@ -7606,19 +7731,21 @@ export namespace Prisma {
     status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
     packages?: PackageOrderByRelationAggregateInput
   }
 
   export type DriverWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    userId?: string
     email?: string
+    phone?: string
     bankAccountNumber?: string
     bankAccountName?: string
     AND?: DriverWhereInput | DriverWhereInput[]
     OR?: DriverWhereInput[]
     NOT?: DriverWhereInput | DriverWhereInput[]
     name?: StringFilter<"Driver"> | string
-    phone?: StringFilter<"Driver"> | string
     deliverFee?: DecimalFilter<"Driver"> | Decimal | DecimalJsLike | number | string
     driverStatus?: EnumDriverStatusFilter<"Driver"> | $Enums.DriverStatus
     bank?: EnumBankFilter<"Driver"> | $Enums.Bank
@@ -7626,11 +7753,13 @@ export namespace Prisma {
     status?: EnumStatusFilter<"Driver"> | $Enums.Status
     createdAt?: DateTimeFilter<"Driver"> | Date | string
     updatedAt?: DateTimeFilter<"Driver"> | Date | string
+    user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     packages?: PackageListRelationFilter
-  }, "id" | "email" | "bankAccountNumber" | "bankAccountName">
+  }, "id" | "userId" | "email" | "phone" | "bankAccountNumber" | "bankAccountName">
 
   export type DriverOrderByWithAggregationInput = {
     id?: SortOrder
+    userId?: SortOrderInput | SortOrder
     name?: SortOrder
     email?: SortOrderInput | SortOrder
     phone?: SortOrder
@@ -7655,6 +7784,7 @@ export namespace Prisma {
     OR?: DriverScalarWhereWithAggregatesInput[]
     NOT?: DriverScalarWhereWithAggregatesInput | DriverScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Driver"> | string
+    userId?: StringNullableWithAggregatesFilter<"Driver"> | string | null
     name?: StringWithAggregatesFilter<"Driver"> | string
     email?: StringNullableWithAggregatesFilter<"Driver"> | string | null
     phone?: StringWithAggregatesFilter<"Driver"> | string
@@ -7965,6 +8095,7 @@ export namespace Prisma {
     role?: $Enums.Role
     createdAt?: Date | string
     updatedAt?: Date | string
+    driver?: DriverCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -7979,6 +8110,7 @@ export namespace Prisma {
     role?: $Enums.Role
     createdAt?: Date | string
     updatedAt?: Date | string
+    driver?: DriverUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -7993,6 +8125,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    driver?: DriverUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -8007,6 +8140,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    driver?: DriverUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -8065,11 +8199,13 @@ export namespace Prisma {
     status?: $Enums.Status
     createdAt?: Date | string
     updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutDriverInput
     packages?: PackageCreateNestedManyWithoutDriverInput
   }
 
   export type DriverUncheckedCreateInput = {
     id?: string
+    userId?: string | null
     name: string
     email?: string | null
     phone: string
@@ -8099,11 +8235,13 @@ export namespace Prisma {
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutDriverNestedInput
     packages?: PackageUpdateManyWithoutDriverNestedInput
   }
 
   export type DriverUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
     name?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: StringFieldUpdateOperationsInput | string
@@ -8121,6 +8259,7 @@ export namespace Prisma {
 
   export type DriverCreateManyInput = {
     id?: string
+    userId?: string | null
     name: string
     email?: string | null
     phone: string
@@ -8153,6 +8292,7 @@ export namespace Prisma {
 
   export type DriverUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
     name?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: StringFieldUpdateOperationsInput | string
@@ -8545,6 +8685,11 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type DriverNullableScalarRelationFilter = {
+    is?: DriverWhereInput | null
+    isNot?: DriverWhereInput | null
+  }
+
   export type UserCountOrderByAggregateInput = {
     id?: SortOrder
     username?: SortOrder
@@ -8689,6 +8834,11 @@ export namespace Prisma {
     not?: NestedEnumBankFilter<$PrismaModel> | $Enums.Bank
   }
 
+  export type UserNullableScalarRelationFilter = {
+    is?: UserWhereInput | null
+    isNot?: UserWhereInput | null
+  }
+
   export type PackageListRelationFilter = {
     every?: PackageWhereInput
     some?: PackageWhereInput
@@ -8706,6 +8856,7 @@ export namespace Prisma {
 
   export type DriverCountOrderByAggregateInput = {
     id?: SortOrder
+    userId?: SortOrder
     name?: SortOrder
     email?: SortOrder
     phone?: SortOrder
@@ -8726,6 +8877,7 @@ export namespace Prisma {
 
   export type DriverMaxOrderByAggregateInput = {
     id?: SortOrder
+    userId?: SortOrder
     name?: SortOrder
     email?: SortOrder
     phone?: SortOrder
@@ -8742,6 +8894,7 @@ export namespace Prisma {
 
   export type DriverMinOrderByAggregateInput = {
     id?: SortOrder
+    userId?: SortOrder
     name?: SortOrder
     email?: SortOrder
     phone?: SortOrder
@@ -8893,11 +9046,6 @@ export namespace Prisma {
     isNot?: MerchantWhereInput
   }
 
-  export type DriverNullableScalarRelationFilter = {
-    is?: DriverWhereInput | null
-    isNot?: DriverWhereInput | null
-  }
-
   export type PackageCountOrderByAggregateInput = {
     id?: SortOrder
     packageNumber?: SortOrder
@@ -9046,6 +9194,18 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type DriverCreateNestedOneWithoutUserInput = {
+    create?: XOR<DriverCreateWithoutUserInput, DriverUncheckedCreateWithoutUserInput>
+    connectOrCreate?: DriverCreateOrConnectWithoutUserInput
+    connect?: DriverWhereUniqueInput
+  }
+
+  export type DriverUncheckedCreateNestedOneWithoutUserInput = {
+    create?: XOR<DriverCreateWithoutUserInput, DriverUncheckedCreateWithoutUserInput>
+    connectOrCreate?: DriverCreateOrConnectWithoutUserInput
+    connect?: DriverWhereUniqueInput
+  }
+
   export type StringFieldUpdateOperationsInput = {
     set?: string
   }
@@ -9064,6 +9224,32 @@ export namespace Prisma {
 
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
+  }
+
+  export type DriverUpdateOneWithoutUserNestedInput = {
+    create?: XOR<DriverCreateWithoutUserInput, DriverUncheckedCreateWithoutUserInput>
+    connectOrCreate?: DriverCreateOrConnectWithoutUserInput
+    upsert?: DriverUpsertWithoutUserInput
+    disconnect?: DriverWhereInput | boolean
+    delete?: DriverWhereInput | boolean
+    connect?: DriverWhereUniqueInput
+    update?: XOR<XOR<DriverUpdateToOneWithWhereWithoutUserInput, DriverUpdateWithoutUserInput>, DriverUncheckedUpdateWithoutUserInput>
+  }
+
+  export type DriverUncheckedUpdateOneWithoutUserNestedInput = {
+    create?: XOR<DriverCreateWithoutUserInput, DriverUncheckedCreateWithoutUserInput>
+    connectOrCreate?: DriverCreateOrConnectWithoutUserInput
+    upsert?: DriverUpsertWithoutUserInput
+    disconnect?: DriverWhereInput | boolean
+    delete?: DriverWhereInput | boolean
+    connect?: DriverWhereUniqueInput
+    update?: XOR<XOR<DriverUpdateToOneWithWhereWithoutUserInput, DriverUpdateWithoutUserInput>, DriverUncheckedUpdateWithoutUserInput>
+  }
+
+  export type UserCreateNestedOneWithoutDriverInput = {
+    create?: XOR<UserCreateWithoutDriverInput, UserUncheckedCreateWithoutDriverInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDriverInput
+    connect?: UserWhereUniqueInput
   }
 
   export type PackageCreateNestedManyWithoutDriverInput = {
@@ -9098,6 +9284,16 @@ export namespace Prisma {
 
   export type EnumBankFieldUpdateOperationsInput = {
     set?: $Enums.Bank
+  }
+
+  export type UserUpdateOneWithoutDriverNestedInput = {
+    create?: XOR<UserCreateWithoutDriverInput, UserUncheckedCreateWithoutDriverInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDriverInput
+    upsert?: UserUpsertWithoutDriverInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutDriverInput, UserUpdateWithoutDriverInput>, UserUncheckedUpdateWithoutDriverInput>
   }
 
   export type PackageUpdateManyWithoutDriverNestedInput = {
@@ -9494,6 +9690,123 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type DriverCreateWithoutUserInput = {
+    id?: string
+    name: string
+    email?: string | null
+    phone: string
+    deliverFee?: Decimal | DecimalJsLike | number | string
+    driverStatus?: $Enums.DriverStatus
+    bank?: $Enums.Bank
+    bankAccountNumber: string
+    bankAccountName: string
+    googleMapsUrl?: string | null
+    status?: $Enums.Status
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    packages?: PackageCreateNestedManyWithoutDriverInput
+  }
+
+  export type DriverUncheckedCreateWithoutUserInput = {
+    id?: string
+    name: string
+    email?: string | null
+    phone: string
+    deliverFee?: Decimal | DecimalJsLike | number | string
+    driverStatus?: $Enums.DriverStatus
+    bank?: $Enums.Bank
+    bankAccountNumber: string
+    bankAccountName: string
+    googleMapsUrl?: string | null
+    status?: $Enums.Status
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    packages?: PackageUncheckedCreateNestedManyWithoutDriverInput
+  }
+
+  export type DriverCreateOrConnectWithoutUserInput = {
+    where: DriverWhereUniqueInput
+    create: XOR<DriverCreateWithoutUserInput, DriverUncheckedCreateWithoutUserInput>
+  }
+
+  export type DriverUpsertWithoutUserInput = {
+    update: XOR<DriverUpdateWithoutUserInput, DriverUncheckedUpdateWithoutUserInput>
+    create: XOR<DriverCreateWithoutUserInput, DriverUncheckedCreateWithoutUserInput>
+    where?: DriverWhereInput
+  }
+
+  export type DriverUpdateToOneWithWhereWithoutUserInput = {
+    where?: DriverWhereInput
+    data: XOR<DriverUpdateWithoutUserInput, DriverUncheckedUpdateWithoutUserInput>
+  }
+
+  export type DriverUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    deliverFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    driverStatus?: EnumDriverStatusFieldUpdateOperationsInput | $Enums.DriverStatus
+    bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
+    bankAccountNumber?: StringFieldUpdateOperationsInput | string
+    bankAccountName?: StringFieldUpdateOperationsInput | string
+    googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    packages?: PackageUpdateManyWithoutDriverNestedInput
+  }
+
+  export type DriverUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    deliverFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    driverStatus?: EnumDriverStatusFieldUpdateOperationsInput | $Enums.DriverStatus
+    bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
+    bankAccountNumber?: StringFieldUpdateOperationsInput | string
+    bankAccountName?: StringFieldUpdateOperationsInput | string
+    googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    packages?: PackageUncheckedUpdateManyWithoutDriverNestedInput
+  }
+
+  export type UserCreateWithoutDriverInput = {
+    id?: string
+    username: string
+    name: string
+    email: string
+    phone: string
+    status?: $Enums.Status
+    gender?: $Enums.Gender
+    password: string
+    role?: $Enums.Role
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserUncheckedCreateWithoutDriverInput = {
+    id?: string
+    username: string
+    name: string
+    email: string
+    phone: string
+    status?: $Enums.Status
+    gender?: $Enums.Gender
+    password: string
+    role?: $Enums.Role
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserCreateOrConnectWithoutDriverInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutDriverInput, UserUncheckedCreateWithoutDriverInput>
+  }
+
   export type PackageCreateWithoutDriverInput = {
     id?: string
     packageNumber: string
@@ -9540,6 +9853,45 @@ export namespace Prisma {
   export type PackageCreateManyDriverInputEnvelope = {
     data: PackageCreateManyDriverInput | PackageCreateManyDriverInput[]
     skipDuplicates?: boolean
+  }
+
+  export type UserUpsertWithoutDriverInput = {
+    update: XOR<UserUpdateWithoutDriverInput, UserUncheckedUpdateWithoutDriverInput>
+    create: XOR<UserCreateWithoutDriverInput, UserUncheckedCreateWithoutDriverInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutDriverInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutDriverInput, UserUncheckedUpdateWithoutDriverInput>
+  }
+
+  export type UserUpdateWithoutDriverInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserUncheckedUpdateWithoutDriverInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type PackageUpsertWithWhereUniqueWithoutDriverInput = {
@@ -9696,10 +10048,12 @@ export namespace Prisma {
     status?: $Enums.Status
     createdAt?: Date | string
     updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutDriverInput
   }
 
   export type DriverUncheckedCreateWithoutPackagesInput = {
     id?: string
+    userId?: string | null
     name: string
     email?: string | null
     phone: string
@@ -9787,10 +10141,12 @@ export namespace Prisma {
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutDriverNestedInput
   }
 
   export type DriverUncheckedUpdateWithoutPackagesInput = {
     id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
     name?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: StringFieldUpdateOperationsInput | string

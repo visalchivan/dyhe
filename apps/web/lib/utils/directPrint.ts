@@ -296,13 +296,14 @@ function generateLabelCSS(): string {
 
       .remarks-title {
         font-weight: bold;
-        font-size: 6pt;
+        font-size: 8pt;
         margin-bottom: 1mm;
       }
 
       .remarks-text {
-        font-size: 4pt;
+        font-size: 7pt;
         line-height: 1.4;
+        font-weight: 500;
       }
 
       @media print {

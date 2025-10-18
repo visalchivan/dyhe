@@ -13,6 +13,7 @@ import {
 import { DriverService } from './driver.service';
 import { CreateDriverDto } from './dto/create-driver.dto';
 import { UpdateDriverDto } from './dto/update-driver.dto';
+import { ChangeDriverPasswordDto } from './dto/change-driver-password.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('drivers')
@@ -47,5 +48,13 @@ export class DriverController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.driverService.remove(id);
+  }
+
+  @Patch(':id/change-password')
+  changePassword(
+    @Param('id') id: string,
+    @Body() changePasswordDto: ChangeDriverPasswordDto,
+  ) {
+    return this.driverService.changePassword(id, changePasswordDto.newPassword);
   }
 }

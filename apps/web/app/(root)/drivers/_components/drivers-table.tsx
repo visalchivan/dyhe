@@ -20,6 +20,7 @@ import {
   DeleteOutlined,
   SearchOutlined,
   ReloadOutlined,
+  LockOutlined,
 } from "@ant-design/icons";
 import { Driver } from "../../../../lib/api/drivers";
 import { useDrivers, useDeleteDriver } from "../../../../hooks/useDrivers";
@@ -34,12 +35,14 @@ interface DriversTableProps {
   onCreateDriver: () => void;
   onEditDriver: (driver: Driver) => void;
   onViewDriver: (driver: Driver) => void;
+  onChangePassword: (driver: Driver) => void;
 }
 
 export const DriversTable: React.FC<DriversTableProps> = ({
   onCreateDriver,
   onEditDriver,
   onViewDriver,
+  onChangePassword,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -177,7 +180,7 @@ export const DriversTable: React.FC<DriversTableProps> = ({
       title: "Actions",
       key: "actions",
       fixed: "right",
-      width: 250,
+      width: 300,
       render: (_: unknown, record: Driver) => (
         <Space size="small">
           <Tooltip title="View Details">
@@ -195,6 +198,16 @@ export const DriversTable: React.FC<DriversTableProps> = ({
                 type="text"
                 icon={<EditOutlined />}
                 onClick={() => onEditDriver(record)}
+              />
+            </Tooltip>
+          )}
+          {canEditDrivers && (
+            <Tooltip title="Change Password">
+              <Button
+                size="large"
+                type="text"
+                icon={<LockOutlined />}
+                onClick={() => onChangePassword(record)}
               />
             </Tooltip>
           )}

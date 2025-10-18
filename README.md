@@ -1,10 +1,25 @@
-# DYHE Platform
+# 🚚 DYHE Delivery Platform
 
-Monorepo for DYHE delivery platform.
+Complete delivery management system with admin panel, driver mobile portal, package tracking, and label printing.
 
-- `apps/api`: NestJS + Prisma API
-- `apps/web`: Next.js dashboard (client-side PDF label printing)
-- `packages/*`: Shared configs and UI
+## 🎯 Features
+
+- ✅ **Multi-role System** - Super Admin, Admin, User, Driver, Merchant
+- ✅ **Driver Mobile Portal** - Mobile-optimized delivery management
+- ✅ **Package Management** - Create, assign, track packages
+- ✅ **Direct Label Printing** - 80mm x 100mm thermal printer support
+- ✅ **QR Code Generation** - Package tracking with QR codes
+- ✅ **Real-time Updates** - Live package status tracking
+- ✅ **Reports & Analytics** - Comprehensive delivery reports
+- ✅ **Settings Management** - Dynamic company information
+- ✅ **PWA Support** - Installable mobile app
+- ✅ **Google Maps Integration** - Navigation for drivers
+
+## 📦 Project Structure
+
+- `apps/api` - NestJS + Prisma backend API
+- `apps/web` - Next.js frontend dashboard
+- `packages/*` - Shared configs and UI components
 
 ## Requirements
 
@@ -58,29 +73,48 @@ pnpm build
 pnpm start
 ```
 
-## Docker (local & VPS)
+## 🚀 Deployment
 
-We provide a compose stack for Postgres + API + Web.
+### ⚡ One-Command Deployment:
 
 ```bash
-docker compose build
-docker compose up -d
+./docker-deploy.sh
 ```
 
-- Web: http://localhost:3000
-- API: http://localhost:8000
+**That's it! Live in 5 minutes!** 🎉
 
-API runs `prisma migrate deploy` on startup. Edit `docker-compose.yml` to set secrets like `JWT_SECRET`.
+### 📖 Documentation:
 
-More details: see `DEPLOY_DOCKER.md`.
+- ⭐ **`DEPLOYMENT.md`** - **Complete deployment guide (everything in one file!)**
+- 🚚 **`DRIVER_SYSTEM_EXPLAINED.md`** - Driver system architecture
 
-## PDF Label Printing (Thermal printer friendly)
+### 🎯 What Gets Deployed:
 
-The app generates 4x6in PDF labels client-side (jsPDF) and opens them in a new tab for printing via macOS system dialog. This avoids thermal printers outputting raw bytes from HTML.
+- ✅ PostgreSQL Database
+- ✅ NestJS API Backend
+- ✅ Next.js Frontend
+- ✅ Nginx Reverse Proxy
+- ✅ Certbot (SSL auto-renewal)
+- ✅ Health checks & auto-restart
+- ✅ Log management
+- ✅ Data persistence
 
-- From the Packages table: use the printer icon → PDF opens → print
-- From `/packages/print`: single or bulk → generate PDFs → print
-- Printer setup: choose paper size 4" x 6" and appropriate scaling per your device
+## 🖨️ Label Printing
+
+Direct thermal printer support (80mm x 100mm):
+
+- **Direct printing** - No PDF, instant print
+- **QR code generation** - Automatic package tracking
+- **Dynamic settings** - Company info from Settings page
+- **Bulk printing** - Print multiple labels at once
+- **Mobile-friendly** - Print from any device
+
+Print from:
+
+- Packages table (quick print button)
+- Package creation (optional after creation)
+- Bulk creation (optional after bulk creation)
+- Print Packages page (single or bulk)
 
 ## Tech Stack
 
@@ -100,7 +134,57 @@ packages/
   ui/
 ```
 
-## Notes
+## 🔐 Default Credentials
 
-- Prefer pnpm for package management.
-- For production, set strong secrets and consider a reverse proxy (Caddy/Nginx) for TLS.
+After deployment:
+
+- **Username:** `superadmin`
+- **Password:** `admin123`
+- ⚠️ **CHANGE IMMEDIATELY AFTER FIRST LOGIN!**
+
+## 📱 Mobile Support
+
+- ✅ Fully responsive design
+- ✅ PWA (Progressive Web App)
+- ✅ Installable on home screen
+- ✅ Driver portal optimized for mobile
+- ✅ Touch-friendly interface (44px buttons)
+- ✅ Works on 3G/4G
+
+## 🎯 Quick Start
+
+### Local Development:
+
+```bash
+pnpm install
+pnpm dev
+```
+
+### Production Deployment:
+
+```bash
+./docker-deploy.sh
+```
+
+## 📖 Documentation
+
+- **Development:** This README
+- **Deployment:** `DEPLOYMENT.md` ⭐ **Everything you need!**
+- **Driver System:** `DRIVER_SYSTEM_EXPLAINED.md`
+
+## 💰 Estimated Costs
+
+- VPS (4GB): $20-40/month
+- Domain: $10-15/year
+- **Total: ~$21-41/month**
+
+## 🆘 Support
+
+- **Deployment help:** Check `DEPLOYMENT.md` (has everything!)
+- **View logs:** `docker-compose logs -f`
+- **Check status:** `docker-compose ps`
+- **Restart:** `docker-compose restart`
+
+---
+
+**Ready to deploy? Just run `./docker-deploy.sh`!** 🐳🚀

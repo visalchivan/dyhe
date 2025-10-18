@@ -4,6 +4,7 @@ import {
   IsNumber,
   IsOptional,
   IsEnum,
+  MinLength,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
@@ -37,6 +38,16 @@ export class CreateDriverDto {
 
   @IsString()
   phone: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(3)
+  username?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(6)
+  password?: string;
 
   @Transform(({ value }) => parseFloat(value as string))
   @IsNumber()

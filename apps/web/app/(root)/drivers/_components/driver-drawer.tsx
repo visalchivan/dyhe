@@ -10,7 +10,7 @@ import {
   Button,
   Divider,
 } from "antd";
-import { EditOutlined, CloseOutlined } from "@ant-design/icons";
+import { EditOutlined, CloseOutlined, LockOutlined } from "@ant-design/icons";
 import { Driver } from "../../../../lib/api/drivers";
 
 const { Title, Text } = Typography;
@@ -20,6 +20,7 @@ interface DriverDrawerProps {
   visible: boolean;
   onClose: () => void;
   onEdit: () => void;
+  onChangePassword: () => void;
 }
 
 export const DriverDrawer: React.FC<DriverDrawerProps> = ({
@@ -27,6 +28,7 @@ export const DriverDrawer: React.FC<DriverDrawerProps> = ({
   visible,
   onClose,
   onEdit,
+  onChangePassword,
 }) => {
   if (!driver) return null;
 
@@ -77,6 +79,9 @@ export const DriverDrawer: React.FC<DriverDrawerProps> = ({
         <Space>
           <Button icon={<EditOutlined />} onClick={onEdit}>
             Edit
+          </Button>
+          <Button icon={<LockOutlined />} onClick={onChangePassword}>
+            Change Password
           </Button>
           <Button icon={<CloseOutlined />} onClick={onClose}>
             Close

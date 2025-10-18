@@ -72,14 +72,18 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  driver Driver?
+
   @@map("users")
 }
 
 model Driver {
   id                String       @id @default(uuid())
+  userId            String?      @unique @map("user_id")
+  user              User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
   name              String
   email             String?      @unique
-  phone             String
+  phone             String       @unique
   deliverFee        Decimal      @default(0) @map("delivery_fee")
   driverStatus      DriverStatus @default(ACTIVE)
   bank              Bank         @default(ABA)
