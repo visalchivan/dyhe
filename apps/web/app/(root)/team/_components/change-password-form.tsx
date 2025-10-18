@@ -17,8 +17,10 @@ export const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({
 }) => {
   const [form] = Form.useForm();
 
-  const handleSubmit = (values: ChangePasswordDto) => {
-    onSubmit(values);
+  const handleSubmit = (values: any) => {
+    // Remove confirmPassword before sending to API
+    const { confirmPassword, ...apiData } = values;
+    onSubmit(apiData);
   };
 
   return (

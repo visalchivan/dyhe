@@ -128,7 +128,7 @@ export const rolePermissions: Record<string, Record<string, Permission>> = {
       canDelete: false,
     },
     settings: {
-      canView: true,
+      canView: false,
       canCreate: false,
       canEdit: false,
       canDelete: false,
@@ -174,7 +174,7 @@ export const rolePermissions: Record<string, Record<string, Permission>> = {
       canDelete: false,
     },
     settings: {
-      canView: true,
+      canView: false,
       canCreate: false,
       canEdit: false,
       canDelete: false,
@@ -220,7 +220,7 @@ export const rolePermissions: Record<string, Record<string, Permission>> = {
       canDelete: false,
     },
     settings: {
-      canView: true,
+      canView: false,
       canCreate: false,
       canEdit: false,
       canDelete: false,

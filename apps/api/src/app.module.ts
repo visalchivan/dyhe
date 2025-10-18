@@ -11,6 +11,7 @@ import { PackagesModule } from './modules/packages/packages.module';
 import { UsersModule } from './modules/users/users.module';
 import { CustomersModule } from './modules/customers/customers.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { SettingsModule } from './modules/settings/settings.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -25,6 +26,7 @@ import { ReportsModule } from './modules/reports/reports.module';
     UsersModule,
     CustomersModule,
     ReportsModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

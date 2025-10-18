@@ -186,6 +186,17 @@ exports.Prisma.PackageScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.SettingsScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  value: 'value',
+  description: 'description',
+  category: 'category',
+  isPublic: 'isPublic',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -249,7 +260,8 @@ exports.Prisma.ModelName = {
   User: 'User',
   Driver: 'Driver',
   Merchant: 'Merchant',
-  Package: 'Package'
+  Package: 'Package',
+  Settings: 'Settings'
 };
 
 /**

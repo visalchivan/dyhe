@@ -1,5 +1,6 @@
 import { jsPDF } from "jspdf";
 import { generateQRCode } from "./qrcode";
+import { settingsApi } from "../api/settings";
 
 export interface PdfLabelPackage {
   id: string;
@@ -12,10 +13,41 @@ export interface PdfLabelPackage {
   merchant: { name: string };
 }
 
+// Cache for settings to avoid repeated API calls
+let settingsCache: Record<string, string> | null = null;
+let settingsCacheTime = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+async function getSettings(): Promise<Record<string, string>> {
+  const now = Date.now();
+  if (settingsCache && now - settingsCacheTime < CACHE_DURATION) {
+    return settingsCache;
+  }
+
+  try {
+    settingsCache = await settingsApi.getSettingsAsObject();
+    settingsCacheTime = now;
+    return settingsCache;
+  } catch (error) {
+    console.warn("Failed to load settings, using defaults:", error);
+    // Return default values if API fails
+    return {
+      company_name: "DYHE DELIVERY",
+      company_phone: "Tel: +855 12 345 678",
+      company_address: "#123, Street 456, Phnom Penh",
+      label_remarks:
+        "DYHE Express does not accept illegal goods or animals.\nWe reserve the right to refuse delivery if goods are suspected to be illegal.",
+    };
+  }
+}
+
 const PAGE_W = 80; // mm - paper width
 const PAGE_H = 100; // mm - paper height
 
 async function drawLabelOnDoc(doc: jsPDF, pkg: PdfLabelPackage) {
+  // Get settings
+  const settings = await getSettings();
+
   // Use full paper size
   const labelWidth = 76; // mm - actual label width (80mm - 4mm margin)
   const labelHeight = 96; // mm - actual label height (100mm - 4mm margin)
@@ -42,12 +74,20 @@ async function drawLabelOnDoc(doc: jsPDF, pkg: PdfLabelPackage) {
   // Company info on left
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
-  doc.text("DYHE DELIVERY", marginX + 4, headerY + 5);
+  doc.text(settings.company_name || "DYHE DELIVERY", marginX + 4, headerY + 5);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(5);
-  doc.text("#123, Street 456, Phnom Penh", marginX + 4, headerY + 9);
-  doc.text("Tel: +855 12 345 678", marginX + 4, headerY + 12);
+  doc.text(
+    settings.company_address || "#123, Street 456, Phnom Penh",
+    marginX + 4,
+    headerY + 9
+  );
+  doc.text(
+    settings.company_phone || "Tel: +855 12 345 678",
+    marginX + 4,
+    headerY + 12
+  );
 
   // Tracking info on right
   doc.setFont("helvetica", "bold");
@@ -153,18 +193,17 @@ async function drawLabelOnDoc(doc: jsPDF, pkg: PdfLabelPackage) {
   doc.text("REMARKS", marginX + 4, footerY + 4);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(4);
-  doc.text(
-    "DYHE Express does not accept illegal goods or animals.",
-    marginX + 4,
-    footerY + 7,
-    { maxWidth: contentWidth - 4 }
-  );
-  doc.text(
-    "We reserve the right to refuse delivery if goods are suspected to be illegal.",
-    marginX + 4,
-    footerY + 10,
-    { maxWidth: contentWidth - 4 }
-  );
+
+  const remarks =
+    settings.label_remarks ||
+    "DYHE Express does not accept illegal goods or animals.\nWe reserve the right to refuse delivery if goods are suspected to be illegal.";
+  const remarksLines = remarks.split("\n");
+
+  remarksLines.forEach((line, index) => {
+    doc.text(line, marginX + 4, footerY + 7 + index * 3, {
+      maxWidth: contentWidth - 4,
+    });
+  });
 }
 
 export async function createLabelPdf(pkg: PdfLabelPackage): Promise<jsPDF> {

@@ -1,4 +1,5 @@
 import { generateQRCode } from "./qrcode";
+import { settingsApi } from "../api/settings";
 
 export interface PrintLabelPackage {
   id: string;
@@ -11,10 +12,41 @@ export interface PrintLabelPackage {
   merchant: { name: string };
 }
 
+// Cache for settings to avoid repeated API calls
+let settingsCache: Record<string, string> | null = null;
+let settingsCacheTime = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+async function getSettings(): Promise<Record<string, string>> {
+  const now = Date.now();
+  if (settingsCache && now - settingsCacheTime < CACHE_DURATION) {
+    return settingsCache;
+  }
+
+  try {
+    settingsCache = await settingsApi.getSettingsAsObject();
+    settingsCacheTime = now;
+    return settingsCache;
+  } catch (error) {
+    console.warn("Failed to load settings, using defaults:", error);
+    // Return default values if API fails
+    return {
+      company_name: "DYHE DELIVERY",
+      company_phone: "Tel: +855 12 345 678",
+      company_address: "#123, Street 456, Phnom Penh",
+      label_remarks:
+        "DYHE Express does not accept illegal goods or animals.\nWe reserve the right to refuse delivery if goods are suspected to be illegal.",
+    };
+  }
+}
+
 /**
  * Generate HTML for a single label
  */
 async function generateLabelHTML(pkg: PrintLabelPackage): Promise<string> {
+  // Get settings
+  const settings = await getSettings();
+
   // Generate QR code as base64 image
   const qrCode = await generateQRCode(pkg.packageNumber, {
     width: 120,
@@ -27,9 +59,9 @@ async function generateLabelHTML(pkg: PrintLabelPackage): Promise<string> {
         <!-- Header Section -->
         <div class="header">
           <div class="company-info">
-            <div class="company-name">DYHE DELIVERY</div>
-            <div class="company-address">#123, Street 456, Phnom Penh</div>
-            <div class="company-phone">Tel: +855 12 345 678</div>
+            <div class="company-name">${settings.company_name || "DYHE DELIVERY"}</div>
+            <div class="company-address">${settings.company_address || "#123, Street 456, Phnom Penh"}</div>
+            <div class="company-phone">${settings.company_phone || "Tel: +855 12 345 678"}</div>
           </div>
           <div class="tracking-info">
             <div class="tracking-label">Tracking#:</div>
@@ -78,8 +110,7 @@ async function generateLabelHTML(pkg: PrintLabelPackage): Promise<string> {
         <div class="footer">
           <div class="remarks-title">REMARKS</div>
           <div class="remarks-text">
-            DYHE Express does not accept illegal goods or animals.
-            We reserve the right to refuse delivery if goods are suspected to be illegal.
+            ${settings.label_remarks || "DYHE Express does not accept illegal goods or animals.\nWe reserve the right to refuse delivery if goods are suspected to be illegal."}
           </div>
         </div>
       </div>
