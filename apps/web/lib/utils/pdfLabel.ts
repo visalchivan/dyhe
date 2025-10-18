@@ -70,7 +70,6 @@ async function drawLabelOnDoc(doc: jsPDF, pkg: PdfLabelPackage) {
 
   // Vertical divider for two columns
   const leftColWidth = contentWidth * 0.4; // Left column ~40%
-  const rightColWidth = contentWidth * 0.6; // Right column ~60%
   doc.setLineWidth(0.8);
   doc.line(
     marginX + 5 + leftColWidth,
