@@ -23,11 +23,7 @@ import {
 } from "@ant-design/icons";
 import { PackageLabel } from "./_components/package-label";
 import { usePackages } from "../../../../hooks/usePackages";
-import {
-  createLabelPdf,
-  createBulkLabelsPdf,
-  openPdfInNewTab,
-} from "../../../../lib/utils/pdfLabel";
+import { printLabel, printBulkLabels } from "../../../../lib/utils/directPrint";
 // import { useMerchants } from "../../../../hooks/useMerchants";
 
 const { Title, Text } = Typography;
@@ -64,7 +60,7 @@ const PackagePrintPage = () => {
         return;
       }
 
-      const doc = await createLabelPdf({
+      await printLabel({
         id: packageToPrint.id,
         packageNumber: packageToPrint.packageNumber,
         name: packageToPrint.name,
@@ -75,7 +71,6 @@ const PackagePrintPage = () => {
         merchant: { name: packageToPrint.merchant.name },
       });
 
-      await openPdfInNewTab(doc);
       setIsPrinting(false);
     } catch (error) {
       console.error("Error printing label:", error);
@@ -100,7 +95,7 @@ const PackagePrintPage = () => {
         return;
       }
 
-      const doc = await createBulkLabelsPdf(
+      await printBulkLabels(
         packagesToPrint.map((p: any) => ({
           id: p.id,
           packageNumber: p.packageNumber,
@@ -113,7 +108,6 @@ const PackagePrintPage = () => {
         }))
       );
 
-      await openPdfInNewTab(doc);
       setIsBulkPrinting(false);
     } catch (error) {
       console.error("Bulk print failed:", error);
@@ -152,7 +146,7 @@ const PackagePrintPage = () => {
           <PrinterOutlined /> Package Label Printer
         </Title>
         <Text type="secondary">
-          Generate and print package labels as 4x6in PDFs with QR codes
+          Print package labels directly - 4x6in labels with QR codes
         </Text>
 
         <div style={{ marginTop: 16 }}>
@@ -207,7 +201,7 @@ const PackagePrintPage = () => {
                 <Space direction="vertical" style={{ width: "100%" }}>
                   <Alert
                     message="Package Selected"
-                    description="Ready to generate PDF label for the selected package"
+                    description="Ready to print label for the selected package"
                     type="success"
                     showIcon
                   />
@@ -220,7 +214,7 @@ const PackagePrintPage = () => {
                     size="large"
                     style={{ width: "100%" }}
                   >
-                    {isPrinting ? "Generating PDF..." : "Generate PDF Label"}
+                    {isPrinting ? "Opening Print Dialog..." : "Print Label"}
                   </Button>
                 </Space>
               )}
@@ -316,8 +310,8 @@ const PackagePrintPage = () => {
                     style={{ width: "100%" }}
                   >
                     {isBulkPrinting
-                      ? "Generating PDFs..."
-                      : `Generate ${selectedPackages.length} PDF Label(s)`}
+                      ? "Opening Print Dialog..."
+                      : `Print ${selectedPackages.length} Label(s)`}
                   </Button>
                 )}
               </Space>
@@ -395,18 +389,23 @@ const PackagePrintPage = () => {
         <Space direction="vertical" size="middle">
           <div>
             <Text strong style={{ fontSize: 16 }}>
-              Single/Bulk Printing:
+              Direct Printing:
             </Text>
             <ul style={{ marginTop: 8, paddingLeft: 20 }}>
               <li>
                 <Text>Select package(s) from the dropdown or list</Text>
               </li>
               <li>
-                <Text>Click &quot;Generate PDF Label(s)&quot; button</Text>
+                <Text>Click &quot;Print Label(s)&quot; button</Text>
               </li>
               <li>
                 <Text>
-                  Print from the PDF viewer using your system print dialog
+                  Your browser&apos;s print dialog will open automatically
+                </Text>
+              </li>
+              <li>
+                <Text>
+                  Select your printer and click Print (no PDF step needed!)
                 </Text>
               </li>
             </ul>

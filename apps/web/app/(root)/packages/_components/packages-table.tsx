@@ -28,10 +28,7 @@ import { useAuth } from "../../../../contexts/AuthContext";
 import { useDeletePackage, usePackages } from "../../../../hooks/usePackages";
 import { Package } from "../../../../lib/api/packages";
 import { canCreate, canDelete, canEdit } from "../../../../lib/rbac";
-import {
-  createLabelPdf,
-  openPdfInNewTab,
-} from "../../../../lib/utils/pdfLabel";
+import { printLabel } from "../../../../lib/utils/directPrint";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -79,7 +76,7 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
 
   const handlePrintLabel = useCallback(async (packageData: Package) => {
     try {
-      const doc = await createLabelPdf({
+      await printLabel({
         id: packageData.id,
         packageNumber: packageData.packageNumber,
         name: packageData.name,
@@ -89,9 +86,8 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
         codAmount: packageData.codAmount,
         merchant: { name: packageData.merchant.name },
       });
-      await openPdfInNewTab(doc);
     } catch (error) {
-      console.error("Error creating PDF label:", error);
+      console.error("Error printing label:", error);
     }
   }, []);
 
@@ -250,7 +246,7 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
                   onClick={() => onViewPackage(record)}
                 />
               </Tooltip>
-              <Tooltip title="Print Label (PDF)">
+              <Tooltip title="Print Label">
                 <Button
                   size="large"
                   type="text"
