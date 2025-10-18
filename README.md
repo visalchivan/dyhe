@@ -99,6 +99,28 @@ pnpm start
 - ✅ Log management
 - ✅ Data persistence
 
+### ⚠️ Important Notes:
+
+**After deployment, you MUST run database setup:**
+
+```bash
+# Push database schema (creates tables)
+docker-compose exec api sh -c "cd apps/api && npx prisma db push"
+
+# Seed super admin and settings
+docker-compose exec api node apps/api/dist/setup.js
+```
+
+**Environment Variables (Turborepo):**
+
+This monorepo has separate `.env` files:
+
+- **Root `.env`** - Used by Docker (database, JWT secrets, API URL)
+- **`apps/web/.env`** - Only for local dev with `pnpm dev`
+- **`apps/api/.env`** - Only for local dev with `pnpm dev`
+
+For Docker: Set `NEXT_PUBLIC_API_URL=http://localhost/api` in **root `.env`**
+
 ## 🖨️ Label Printing
 
 Direct thermal printer support (80mm x 100mm):

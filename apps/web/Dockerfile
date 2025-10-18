@@ -17,6 +17,10 @@ RUN pnpm install --frozen-lockfile --filter web...
 
 # 3) Build
 FROM deps AS builder
+# Accept build arg for API URL
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 COPY apps/web ./apps/web
 # Next.js build
 WORKDIR /app/apps/web
@@ -28,11 +32,15 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Copy standalone output if available, else .next
+# Copy everything needed
+COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/apps/web/.next ./apps/web/.next
 COPY --from=builder /app/apps/web/node_modules ./apps/web/node_modules
 COPY --from=builder /app/apps/web/package.json ./apps/web/package.json
+COPY --from=builder /app/apps/web/public ./apps/web/public
 COPY --from=builder /app/packages ./packages
 
+WORKDIR /app/apps/web
+
 EXPOSE 3000
-CMD ["node", "./apps/web/node_modules/next/dist/bin/next", "start", "-p", "3000"]
+CMD ["node", "node_modules/next/dist/bin/next", "start", "-p", "3000"]

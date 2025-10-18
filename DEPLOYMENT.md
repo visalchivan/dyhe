@@ -4,25 +4,75 @@
 
 ---
 
-## ⚡ QUICK START (5 Minutes)
+## ⚡ QUICK START (10 Minutes)
 
-### Local or VPS - Same 3 Commands:
+### Local or VPS - Same Commands:
 
 ```bash
 # 1. Setup environment
 cp docker.env.example .env
 nano .env  # Add your passwords & secrets
 
-# 2. Deploy
+# 2. Deploy containers
 chmod +x docker-deploy.sh
 ./docker-deploy.sh
 
-# 3. Access
-# Web: http://localhost:3000
+# 3. Setup database (REQUIRED!)
+docker-compose exec api sh -c "cd apps/api && npx prisma db push"
+docker-compose exec api node apps/api/dist/setup.js
+
+# 4. Access
+# Web: http://localhost
 # Login: superadmin / admin123
 ```
 
 **Done! 🎉**
+
+---
+
+## ⚠️ IMPORTANT: Turborepo & Environment Variables
+
+This is a **Turborepo monorepo** - environment variables work differently than normal projects!
+
+### Environment Files:
+
+```
+dyhe-platform/
+├── .env                    ← Docker uses this! ⭐
+├── apps/
+│   ├── web/
+│   │   └── .env           ← Only for local dev (pnpm dev)
+│   └── api/
+│       └── .env           ← Only for local dev (pnpm dev)
+```
+
+### For Docker Deployment:
+
+**Use ONLY the root `.env` file!**
+
+- Docker Compose reads: **root `.env`**
+- Passes as build args to containers
+- Individual app `.env` files are **IGNORED** in Docker!
+
+**Critical setting:**
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost/api  # Via nginx proxy
+```
+
+**For production with domain:**
+
+```env
+NEXT_PUBLIC_API_URL=https://your-domain.com/api
+```
+
+### For Local Development (`pnpm dev`):
+
+**Use individual app `.env` files:**
+
+- `apps/web/.env` - Set `NEXT_PUBLIC_API_URL=http://localhost:8000`
+- `apps/api/.env` - Set `DATABASE_URL` and `JWT_SECRET`
+- Root `.env` is ignored
 
 ---
 
@@ -167,9 +217,7 @@ chmod +x docker-deploy.sh
 - Build Docker images
 - Start all containers
 - Create database
-- Run migrations
-- Seed superadmin & settings
-- Health check everything
+- Wait for services to be healthy
 
 **You'll see:**
 
@@ -178,29 +226,82 @@ chmod +x docker-deploy.sh
 ║     🎉 Deployment Complete!           ║
 ╚════════════════════════════════════════╝
 
-📍 Access your application:
-   🌐 Web: http://123.45.67.89:3000
-   🔌 API: http://123.45.67.89:8000
+📍 Your containers are running!
+```
 
-🔐 Default Login:
+#### 10. Setup Database (IMPORTANT!)
+
+The script does NOT automatically run migrations. You must do this manually:
+
+```bash
+# Step 1: Push database schema (creates all tables)
+docker-compose exec api sh -c "cd apps/api && npx prisma db push"
+
+# Step 2: Seed super admin and settings
+docker-compose exec api node apps/api/dist/setup.js
+```
+
+**You'll see:**
+
+```
+🚀 Starting DYHE Platform setup...
+
+📋 Setting up system settings...
+✅ Settings configured
+
+👤 Setting up super admin...
+✅ Super admin created successfully!
+   Username: superadmin
+   Email: admin@dyhe.com
+   Role: SUPER_ADMIN
+
+🔐 Login Credentials:
    Username: superadmin
    Password: admin123
 ```
 
-#### 10. Test It!
+**What this does:**
+
+- ✅ Creates all database tables (users, packages, drivers, etc.)
+- ✅ Seeds super admin account
+- ✅ Seeds default company settings
+
+#### 11. Verify Everything Works
+
+```bash
+# Check all containers are healthy
+docker-compose ps
+
+# Should show:
+# dyhe-db       healthy
+# dyhe-api      healthy
+# dyhe-web      healthy
+# dyhe-nginx    running
+# dyhe-certbot  running
+```
+
+#### 12. Test It!
 
 On your computer, open browser:
 
 ```
-http://123.45.67.89:3000
+http://123.45.67.89
 ```
 
-Login:
+Or:
+
+```
+http://123.45.67.89:80
+```
+
+**Login:**
 
 - Username: `superadmin`
 - Password: `admin123`
 
 **YOU'RE LIVE! ✅**
+
+**⚠️ IMPORTANT:** Change the password immediately after first login!
 
 ---
 
@@ -486,16 +587,20 @@ docker volume prune
 
 ## 🐛 TROUBLESHOOTING
 
-### Container Won't Start:
+### 1. Container Won't Start ❌
+
+**Problem:** Container keeps restarting or shows "unhealthy"
 
 ```bash
-# Check logs
+# Check logs to see the error
 docker-compose logs api
+docker-compose logs web
 
-# Check port conflicts
-lsof -i :8000
+# Check if port is in use
+lsof -i :8000  # For API
+lsof -i :3000  # For Web
 
-# Restart
+# Restart specific service
 docker-compose restart api
 
 # Full rebuild
@@ -503,62 +608,480 @@ docker-compose down
 docker-compose up -d --build
 ```
 
-### Database Errors:
+---
+
+### 2. Prisma Client Error 🔴
+
+**Error:** `Cannot find module '../../generated/client'`
+
+**Why:** Prisma client wasn't copied to Docker runtime container
+
+**Solution:** Already fixed in `apps/api/Dockerfile`! But if you see this:
 
 ```bash
-# Check database running
+# Rebuild API container
+docker-compose down
+docker-compose up -d --build api
+```
+
+**What was fixed:**
+
+```dockerfile
+# Added this line to Dockerfile:
+COPY --from=builder /app/apps/api/generated ./apps/api/generated
+```
+
+---
+
+### 3. Database Tables Don't Exist 💾
+
+**Error:** `The table 'public.settings' does not exist`
+
+**Why:** Database schema wasn't pushed
+
+**Solution:**
+
+```bash
+# Step 1: Push database schema (creates tables)
+docker-compose exec api sh -c "cd apps/api && npx prisma db push"
+
+# Step 2: Run setup (seeds data)
+docker-compose exec api node apps/api/dist/setup.js
+```
+
+**What this does:**
+
+- ✅ Creates all database tables
+- ✅ Seeds super admin (`superadmin` / `admin123`)
+- ✅ Seeds default settings
+
+---
+
+### 4. Web Container Restart Loop 🔄
+
+**Error:** `Cannot find module 'next/dist/bin/next'`
+
+**Why:** Next.js wasn't properly copied to container
+
+**Solution:** Already fixed in `apps/web/Dockerfile`!
+
+```bash
+# If you still see this, rebuild:
+docker-compose down
+docker-compose up -d --build web
+```
+
+**What was fixed:**
+
+```dockerfile
+# Added these lines:
+COPY --from=deps /app/node_modules ./node_modules
+WORKDIR /app/apps/web
+CMD ["node", "node_modules/next/dist/bin/next", "start", "-p", "3000"]
+```
+
+---
+
+### 5. Health Check Failing ❤️‍🩹
+
+**Problem:** Container shows "unhealthy" status
+
+**Why:** Missing `curl` or `/health` endpoint
+
+**Solution:** Already fixed!
+
+```bash
+# Check health endpoint
+docker-compose exec api curl http://localhost:8000/health
+
+# Should return:
+# {"status":"ok","timestamp":"...","uptime":123}
+```
+
+**What was fixed:**
+
+- Added `curl` to `apps/api/Dockerfile`
+- Added `/health` endpoint to `apps/api/src/app.controller.ts`
+
+---
+
+### 6. Docker Compose Version Warning ⚠️
+
+**Warning:** `the attribute version is obsolete`
+
+**Solution:** Already fixed! Removed `version: "3.9"` from `docker-compose.yml`.
+
+---
+
+### 7. Can't Access localhost:3000 🌐
+
+**Problem:** Browser can't reach the application
+
+**Check 1:** Are all containers running?
+
+```bash
+docker-compose ps
+
+# All should show "Up" or "healthy"
+```
+
+**Check 2:** Try accessing through Nginx
+
+```bash
+# Access via Nginx on port 80
+http://localhost
+
+# Or explicit port
+http://localhost:80
+```
+
+**Note:** Services are accessed through Nginx by default!
+
+---
+
+### 8. Database Connection Errors 🗄️
+
+**Problem:** API can't connect to database
+
+```bash
+# Check database is running
 docker-compose ps db
+# Should show "healthy"
 
 # View database logs
 docker-compose logs db
 
-# Access database
-docker-compose exec db psql -U dyhe_user -d dyhe_production
-
 # Verify DATABASE_URL
 docker-compose exec api env | grep DATABASE_URL
+
+# Access database manually
+docker-compose exec db psql -U dyhe_user -d dyhe_production
+
+# List tables
+\dt
+
+# Exit
+\q
 ```
 
-### Can't Access Web:
+---
+
+### 9. Out of Disk Space 💽
+
+**Problem:** Docker runs out of space
 
 ```bash
-# Check web logs
-docker-compose logs web
+# Check disk usage
+docker system df
 
-# Check API URL
-docker-compose exec web env | grep NEXT_PUBLIC_API_URL
+# Clean up (safe)
+docker system prune -f
 
-# Restart web
-docker-compose restart web
-```
-
-### Out of Disk Space:
-
-```bash
-# Clean Docker
+# Clean up everything (removes unused images)
 docker system prune -a -f
 
-# Remove old images
-docker image prune -a
+# Remove old containers
+docker container prune
 
-# Check disk usage
-df -h
+# Remove unused volumes (⚠️ deletes data!)
+docker volume prune
 ```
 
-### SSL Issues:
+---
+
+### 10. SSL Certificate Issues 🔒
+
+**Problem:** HTTPS not working after getting certificate
 
 ```bash
-# Check certificates
+# Check certificates exist
 docker-compose run certbot certificates
 
 # Renew manually
 docker-compose run certbot renew
 
-# Check nginx config
+# Check nginx config is valid
 docker-compose exec nginx nginx -t
 
 # Restart nginx
 docker-compose restart nginx
+
+# View nginx logs
+docker-compose logs nginx
+```
+
+---
+
+### 11. Port Already in Use 🚪
+
+**Error:** `bind: address already in use`
+
+```bash
+# Find what's using port 80
+lsof -i :80
+
+# Find what's using port 443
+lsof -i :443
+
+# Kill the process
+sudo kill -9 <PID>
+
+# Or stop your local web server (Apache, Nginx, etc.)
+
+# Then restart Docker
+docker-compose down
+docker-compose up -d
+```
+
+---
+
+### 12. Can't Login After Setup 🔐
+
+**Problem:** Login doesn't work
+
+**Check credentials:**
+
+- Username: `superadmin` (case-sensitive!)
+- Password: `admin123` (case-sensitive!)
+
+**Clear browser cache:**
+
+- Chrome: `Cmd+Shift+Delete` (Mac) or `Ctrl+Shift+Delete` (Windows)
+- Or use Incognito/Private mode
+
+**Check API is responding:**
+
+```bash
+# Check API health
+docker-compose logs -f api
+
+# Test health endpoint
+docker-compose exec api curl http://localhost:8000/health
+```
+
+---
+
+### 13. Environment Variables Not Loading 📝
+
+**Problem:** App can't read .env file
+
+```bash
+# Check .env exists
+ls -la .env
+
+# View docker-compose config
+docker-compose config
+
+# Restart to reload env
+docker-compose down
+docker-compose up -d
+```
+
+---
+
+## 🔧 COMPLETE REBUILD (Nuclear Option)
+
+If nothing works, start fresh:
+
+```bash
+# 1. Stop and remove everything
+docker-compose down -v
+
+# 2. Remove all Docker data
+docker system prune -a -f
+
+# 3. Recreate .env
+rm .env
+cp docker.env.example .env
+nano .env  # Add your secrets
+
+# 4. Rebuild from scratch
+docker-compose up -d --build
+
+# 5. Wait for database
+sleep 30
+
+# 6. Push schema
+docker-compose exec api sh -c "cd apps/api && npx prisma db push"
+
+# 7. Run setup
+docker-compose exec api node apps/api/dist/setup.js
+
+# 8. Check status
+docker-compose ps
+
+# 9. Access app
+# http://localhost
+```
+
+---
+
+## 📋 PRE-FLIGHT CHECKLIST
+
+Before deploying, verify:
+
+- [ ] Docker installed: `docker --version`
+- [ ] Docker Compose installed: `docker compose version`
+- [ ] `.env` file exists: `ls -la .env`
+- [ ] JWT secrets generated (not default values!)
+- [ ] Strong database password set
+- [ ] Ports 80 & 443 available: `lsof -i :80 :443`
+- [ ] At least 10GB free disk space: `df -h`
+
+---
+
+## 🆘 DEBUG COMMANDS
+
+### View Logs:
+
+```bash
+# All services
+docker-compose logs -f
+
+# Last 100 lines
+docker-compose logs --tail=100
+
+# Specific service
+docker-compose logs -f api
+docker-compose logs -f web
+docker-compose logs -f db
+
+# Since specific time
+docker-compose logs --since 10m
+```
+
+### Container Inspection:
+
+```bash
+# List containers
+docker-compose ps
+
+# Detailed info
+docker inspect dyhe-api
+
+# Resource usage
+docker stats
+
+# Execute commands inside
+docker-compose exec api sh
+docker-compose exec web sh
+docker-compose exec db sh
+```
+
+### Debug API:
+
+```bash
+# Enter API container
+docker-compose exec api sh
+
+# Check environment
+env | grep -i db
+env | grep -i jwt
+
+# Check Prisma
+cd apps/api
+npx prisma --version
+ls -la generated/
+
+# Test database connection
+npx prisma db pull
+
+# Exit
+exit
+```
+
+### Debug Web:
+
+```bash
+# Enter web container
+docker-compose exec web sh
+
+# Check Next.js
+ls -la node_modules/next/
+ls -la .next/
+
+# Check environment
+env | grep NEXT_PUBLIC
+
+# Exit
+exit
+```
+
+### Debug Database:
+
+```bash
+# Enter database
+docker-compose exec db psql -U dyhe_user -d dyhe_production
+
+# List tables
+\dt
+
+# Count users
+SELECT COUNT(*) FROM users;
+
+# List users
+SELECT id, username, role FROM users;
+
+# Exit
+\q
+```
+
+---
+
+## 🎯 COMMON ERROR SOLUTIONS
+
+| Error                        | Solution                                                                 |
+| ---------------------------- | ------------------------------------------------------------------------ |
+| `MODULE_NOT_FOUND` (Prisma)  | Rebuild API: `docker-compose up -d --build api`                          |
+| `MODULE_NOT_FOUND` (Next.js) | Rebuild web: `docker-compose up -d --build web`                          |
+| `table does not exist`       | Run: `docker-compose exec api sh -c "cd apps/api && npx prisma db push"` |
+| `unhealthy` container        | Check logs: `docker-compose logs <service>`                              |
+| `address already in use`     | Stop conflicting service: `lsof -i :<port>`                              |
+| Can't login                  | Check credentials (case-sensitive!)                                      |
+| SSL not working              | Check nginx config, restart nginx                                        |
+
+---
+
+## 💡 TIPS & TRICKS
+
+### Quick Restart:
+
+```bash
+# Restart everything quickly
+docker-compose restart
+
+# Restart specific service
+docker-compose restart api
+```
+
+### Force Rebuild:
+
+```bash
+# Rebuild without cache
+docker-compose build --no-cache
+
+# Then start
+docker-compose up -d
+```
+
+### Clean Start:
+
+```bash
+# Remove containers but keep volumes (keeps data!)
+docker-compose down
+
+# Remove containers AND volumes (fresh start!)
+docker-compose down -v
+```
+
+### Monitor Resources:
+
+```bash
+# Live resource usage
+docker stats
+
+# Disk usage
+docker system df
 ```
 
 ---
