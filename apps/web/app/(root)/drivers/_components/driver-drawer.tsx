@@ -93,9 +93,11 @@ export const DriverDrawer: React.FC<DriverDrawerProps> = ({
         <div>
           <Title level={5}>Contact Information</Title>
           <Descriptions column={1} size="small">
-            <Descriptions.Item label="Email">
-              <Text copyable>{driver.email}</Text>
-            </Descriptions.Item>
+            {driver.email && (
+              <Descriptions.Item label="Email">
+                <Text copyable>{driver.email}</Text>
+              </Descriptions.Item>
+            )}
             <Descriptions.Item label="Phone">
               <Text copyable>{driver.phone}</Text>
             </Descriptions.Item>
@@ -138,9 +140,11 @@ export const DriverDrawer: React.FC<DriverDrawerProps> = ({
             <Descriptions.Item label="Account Number">
               <Text copyable>{driver.bankAccountNumber}</Text>
             </Descriptions.Item>
-            <Descriptions.Item label="Account Name">
-              <Text>{driver.bankAccountName}</Text>
-            </Descriptions.Item>
+            {driver.bankAccountName && (
+              <Descriptions.Item label="Account Name">
+                <Text>{driver.bankAccountName}</Text>
+              </Descriptions.Item>
+            )}
           </Descriptions>
         </div>
 

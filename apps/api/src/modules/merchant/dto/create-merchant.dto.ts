@@ -4,6 +4,7 @@ import {
   IsNumber,
   IsOptional,
   IsEnum,
+  MinLength,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
@@ -25,8 +26,9 @@ export class CreateMerchantDto {
   @IsString()
   name: string;
 
+  @IsOptional()
   @IsEmail()
-  email: string;
+  email?: string;
 
   @IsString()
   phone: string;
@@ -39,10 +41,12 @@ export class CreateMerchantDto {
   bank: Bank;
 
   @IsString()
+  @MinLength(8, { message: 'Bank account number must be at least 8 digits' })
   bankAccountNumber: string;
 
+  @IsOptional()
   @IsString()
-  bankAccountName: string;
+  bankAccountName?: string;
 
   @IsString()
   address: string;

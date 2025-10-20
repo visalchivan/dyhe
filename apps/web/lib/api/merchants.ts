@@ -3,12 +3,12 @@ import api from "../api";
 export interface Merchant {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   phone: string;
   deliverFee: number;
   bank: string;
   bankAccountNumber: string;
-  bankAccountName: string;
+  bankAccountName?: string;
   address: string;
   googleMapsUrl?: string;
   status: string;
@@ -18,12 +18,12 @@ export interface Merchant {
 
 export interface CreateMerchantDto {
   name: string;
-  email: string;
+  email?: string;
   phone: string;
   deliverFee: number;
   bank: string;
   bankAccountNumber: string;
-  bankAccountName: string;
+  bankAccountName?: string;
   address: string;
   googleMapsUrl?: string;
   status?: string;

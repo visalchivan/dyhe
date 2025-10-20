@@ -118,6 +118,7 @@ export const DriversTable: React.FC<DriversTableProps> = ({
       title: "Email",
       dataIndex: "email",
       key: "email",
+      render: (email: string | undefined) => email || <span style={{ color: "#999" }}>N/A</span>,
     },
     {
       title: "Phone",

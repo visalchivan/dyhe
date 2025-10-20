@@ -71,9 +71,11 @@ export const MerchantDrawer: React.FC<MerchantDrawerProps> = ({
         <div>
           <Title level={5}>Contact Information</Title>
           <Descriptions column={1} size="small">
-            <Descriptions.Item label="Email">
-              <Text copyable>{merchant.email}</Text>
-            </Descriptions.Item>
+            {merchant.email && (
+              <Descriptions.Item label="Email">
+                <Text copyable>{merchant.email}</Text>
+              </Descriptions.Item>
+            )}
             <Descriptions.Item label="Phone">
               <Text copyable>{merchant.phone}</Text>
             </Descriptions.Item>
@@ -127,9 +129,11 @@ export const MerchantDrawer: React.FC<MerchantDrawerProps> = ({
             <Descriptions.Item label="Account Number">
               <Text copyable>{merchant.bankAccountNumber}</Text>
             </Descriptions.Item>
-            <Descriptions.Item label="Account Name">
-              <Text>{merchant.bankAccountName}</Text>
-            </Descriptions.Item>
+            {merchant.bankAccountName && (
+              <Descriptions.Item label="Account Name">
+                <Text>{merchant.bankAccountName}</Text>
+              </Descriptions.Item>
+            )}
           </Descriptions>
         </div>
 

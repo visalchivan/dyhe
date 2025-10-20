@@ -14,11 +14,11 @@ export class DriverService {
   constructor(private prisma: PrismaService) {}
 
   async create(createDriverDto: CreateDriverDto) {
-    // Check if driver with email or phone already exists
+    // Check if driver with email, phone, or bank account number already exists
     const existingDriver = await this.prisma.driver.findFirst({
       where: {
         OR: [
-          { email: createDriverDto.email },
+          ...(createDriverDto.email ? [{ email: createDriverDto.email }] : []),
           { phone: createDriverDto.phone },
           { bankAccountNumber: createDriverDto.bankAccountNumber },
         ],
@@ -47,11 +47,16 @@ export class DriverService {
     if (createDriverDto.username && createDriverDto.password) {
       const hashedPassword = await bcrypt.hash(createDriverDto.password, 10);
 
+      // Generate email if not provided (for user account creation)
+      const userEmail =
+        createDriverDto.email ||
+        `${createDriverDto.username}@driver.local`;
+
       const user = await this.prisma.user.create({
         data: {
           username: createDriverDto.username,
           name: createDriverDto.name,
-          email: createDriverDto.email,
+          email: userEmail,
           phone: createDriverDto.phone,
           password: hashedPassword,
           role: 'DRIVER',

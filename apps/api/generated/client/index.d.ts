@@ -2747,7 +2747,7 @@ export namespace Prisma {
     driverStatus: $Enums.DriverStatus
     bank: $Enums.Bank
     bankAccountNumber: string
-    bankAccountName: string
+    bankAccountName: string | null
     googleMapsUrl: string | null
     status: $Enums.Status
     createdAt: Date
@@ -2875,7 +2875,7 @@ export namespace Prisma {
       driverStatus: $Enums.DriverStatus
       bank: $Enums.Bank
       bankAccountNumber: string
-      bankAccountName: string
+      bankAccountName: string | null
       googleMapsUrl: string | null
       status: $Enums.Status
       createdAt: Date
@@ -3997,7 +3997,7 @@ export namespace Prisma {
     deliverFee: Decimal
     bank: $Enums.Bank
     bankAccountNumber: string
-    bankAccountName: string
+    bankAccountName: string | null
     address: string
     googleMapsUrl: string | null
     status: $Enums.Status
@@ -4111,7 +4111,7 @@ export namespace Prisma {
       deliverFee: Prisma.Decimal
       bank: $Enums.Bank
       bankAccountNumber: string
-      bankAccountName: string
+      bankAccountName: string | null
       address: string
       googleMapsUrl: string | null
       status: $Enums.Status
@@ -7707,7 +7707,7 @@ export namespace Prisma {
     driverStatus?: EnumDriverStatusFilter<"Driver"> | $Enums.DriverStatus
     bank?: EnumBankFilter<"Driver"> | $Enums.Bank
     bankAccountNumber?: StringFilter<"Driver"> | string
-    bankAccountName?: StringFilter<"Driver"> | string
+    bankAccountName?: StringNullableFilter<"Driver"> | string | null
     googleMapsUrl?: StringNullableFilter<"Driver"> | string | null
     status?: EnumStatusFilter<"Driver"> | $Enums.Status
     createdAt?: DateTimeFilter<"Driver"> | Date | string
@@ -7726,7 +7726,7 @@ export namespace Prisma {
     driverStatus?: SortOrder
     bank?: SortOrder
     bankAccountNumber?: SortOrder
-    bankAccountName?: SortOrder
+    bankAccountName?: SortOrderInput | SortOrder
     googleMapsUrl?: SortOrderInput | SortOrder
     status?: SortOrder
     createdAt?: SortOrder
@@ -7767,7 +7767,7 @@ export namespace Prisma {
     driverStatus?: SortOrder
     bank?: SortOrder
     bankAccountNumber?: SortOrder
-    bankAccountName?: SortOrder
+    bankAccountName?: SortOrderInput | SortOrder
     googleMapsUrl?: SortOrderInput | SortOrder
     status?: SortOrder
     createdAt?: SortOrder
@@ -7792,7 +7792,7 @@ export namespace Prisma {
     driverStatus?: EnumDriverStatusWithAggregatesFilter<"Driver"> | $Enums.DriverStatus
     bank?: EnumBankWithAggregatesFilter<"Driver"> | $Enums.Bank
     bankAccountNumber?: StringWithAggregatesFilter<"Driver"> | string
-    bankAccountName?: StringWithAggregatesFilter<"Driver"> | string
+    bankAccountName?: StringNullableWithAggregatesFilter<"Driver"> | string | null
     googleMapsUrl?: StringNullableWithAggregatesFilter<"Driver"> | string | null
     status?: EnumStatusWithAggregatesFilter<"Driver"> | $Enums.Status
     createdAt?: DateTimeWithAggregatesFilter<"Driver"> | Date | string
@@ -7810,7 +7810,7 @@ export namespace Prisma {
     deliverFee?: DecimalFilter<"Merchant"> | Decimal | DecimalJsLike | number | string
     bank?: EnumBankFilter<"Merchant"> | $Enums.Bank
     bankAccountNumber?: StringFilter<"Merchant"> | string
-    bankAccountName?: StringFilter<"Merchant"> | string
+    bankAccountName?: StringNullableFilter<"Merchant"> | string | null
     address?: StringFilter<"Merchant"> | string
     googleMapsUrl?: StringNullableFilter<"Merchant"> | string | null
     status?: EnumStatusFilter<"Merchant"> | $Enums.Status
@@ -7827,7 +7827,7 @@ export namespace Prisma {
     deliverFee?: SortOrder
     bank?: SortOrder
     bankAccountNumber?: SortOrder
-    bankAccountName?: SortOrder
+    bankAccountName?: SortOrderInput | SortOrder
     address?: SortOrder
     googleMapsUrl?: SortOrderInput | SortOrder
     status?: SortOrder
@@ -7864,7 +7864,7 @@ export namespace Prisma {
     deliverFee?: SortOrder
     bank?: SortOrder
     bankAccountNumber?: SortOrder
-    bankAccountName?: SortOrder
+    bankAccountName?: SortOrderInput | SortOrder
     address?: SortOrder
     googleMapsUrl?: SortOrderInput | SortOrder
     status?: SortOrder
@@ -7888,7 +7888,7 @@ export namespace Prisma {
     deliverFee?: DecimalWithAggregatesFilter<"Merchant"> | Decimal | DecimalJsLike | number | string
     bank?: EnumBankWithAggregatesFilter<"Merchant"> | $Enums.Bank
     bankAccountNumber?: StringWithAggregatesFilter<"Merchant"> | string
-    bankAccountName?: StringWithAggregatesFilter<"Merchant"> | string
+    bankAccountName?: StringNullableWithAggregatesFilter<"Merchant"> | string | null
     address?: StringWithAggregatesFilter<"Merchant"> | string
     googleMapsUrl?: StringNullableWithAggregatesFilter<"Merchant"> | string | null
     status?: EnumStatusWithAggregatesFilter<"Merchant"> | $Enums.Status
@@ -8194,7 +8194,7 @@ export namespace Prisma {
     driverStatus?: $Enums.DriverStatus
     bank?: $Enums.Bank
     bankAccountNumber: string
-    bankAccountName: string
+    bankAccountName?: string | null
     googleMapsUrl?: string | null
     status?: $Enums.Status
     createdAt?: Date | string
@@ -8213,7 +8213,7 @@ export namespace Prisma {
     driverStatus?: $Enums.DriverStatus
     bank?: $Enums.Bank
     bankAccountNumber: string
-    bankAccountName: string
+    bankAccountName?: string | null
     googleMapsUrl?: string | null
     status?: $Enums.Status
     createdAt?: Date | string
@@ -8230,7 +8230,7 @@ export namespace Prisma {
     driverStatus?: EnumDriverStatusFieldUpdateOperationsInput | $Enums.DriverStatus
     bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
     bankAccountNumber?: StringFieldUpdateOperationsInput | string
-    bankAccountName?: StringFieldUpdateOperationsInput | string
+    bankAccountName?: NullableStringFieldUpdateOperationsInput | string | null
     googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8249,7 +8249,7 @@ export namespace Prisma {
     driverStatus?: EnumDriverStatusFieldUpdateOperationsInput | $Enums.DriverStatus
     bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
     bankAccountNumber?: StringFieldUpdateOperationsInput | string
-    bankAccountName?: StringFieldUpdateOperationsInput | string
+    bankAccountName?: NullableStringFieldUpdateOperationsInput | string | null
     googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8267,7 +8267,7 @@ export namespace Prisma {
     driverStatus?: $Enums.DriverStatus
     bank?: $Enums.Bank
     bankAccountNumber: string
-    bankAccountName: string
+    bankAccountName?: string | null
     googleMapsUrl?: string | null
     status?: $Enums.Status
     createdAt?: Date | string
@@ -8283,7 +8283,7 @@ export namespace Prisma {
     driverStatus?: EnumDriverStatusFieldUpdateOperationsInput | $Enums.DriverStatus
     bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
     bankAccountNumber?: StringFieldUpdateOperationsInput | string
-    bankAccountName?: StringFieldUpdateOperationsInput | string
+    bankAccountName?: NullableStringFieldUpdateOperationsInput | string | null
     googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8300,7 +8300,7 @@ export namespace Prisma {
     driverStatus?: EnumDriverStatusFieldUpdateOperationsInput | $Enums.DriverStatus
     bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
     bankAccountNumber?: StringFieldUpdateOperationsInput | string
-    bankAccountName?: StringFieldUpdateOperationsInput | string
+    bankAccountName?: NullableStringFieldUpdateOperationsInput | string | null
     googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8315,7 +8315,7 @@ export namespace Prisma {
     deliverFee?: Decimal | DecimalJsLike | number | string
     bank?: $Enums.Bank
     bankAccountNumber: string
-    bankAccountName: string
+    bankAccountName?: string | null
     address: string
     googleMapsUrl?: string | null
     status?: $Enums.Status
@@ -8332,7 +8332,7 @@ export namespace Prisma {
     deliverFee?: Decimal | DecimalJsLike | number | string
     bank?: $Enums.Bank
     bankAccountNumber: string
-    bankAccountName: string
+    bankAccountName?: string | null
     address: string
     googleMapsUrl?: string | null
     status?: $Enums.Status
@@ -8349,7 +8349,7 @@ export namespace Prisma {
     deliverFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
     bankAccountNumber?: StringFieldUpdateOperationsInput | string
-    bankAccountName?: StringFieldUpdateOperationsInput | string
+    bankAccountName?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
     googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
@@ -8366,7 +8366,7 @@ export namespace Prisma {
     deliverFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
     bankAccountNumber?: StringFieldUpdateOperationsInput | string
-    bankAccountName?: StringFieldUpdateOperationsInput | string
+    bankAccountName?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
     googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
@@ -8383,7 +8383,7 @@ export namespace Prisma {
     deliverFee?: Decimal | DecimalJsLike | number | string
     bank?: $Enums.Bank
     bankAccountNumber: string
-    bankAccountName: string
+    bankAccountName?: string | null
     address: string
     googleMapsUrl?: string | null
     status?: $Enums.Status
@@ -8399,7 +8399,7 @@ export namespace Prisma {
     deliverFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
     bankAccountNumber?: StringFieldUpdateOperationsInput | string
-    bankAccountName?: StringFieldUpdateOperationsInput | string
+    bankAccountName?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
     googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
@@ -8415,7 +8415,7 @@ export namespace Prisma {
     deliverFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
     bankAccountNumber?: StringFieldUpdateOperationsInput | string
-    bankAccountName?: StringFieldUpdateOperationsInput | string
+    bankAccountName?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
     googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
@@ -9699,7 +9699,7 @@ export namespace Prisma {
     driverStatus?: $Enums.DriverStatus
     bank?: $Enums.Bank
     bankAccountNumber: string
-    bankAccountName: string
+    bankAccountName?: string | null
     googleMapsUrl?: string | null
     status?: $Enums.Status
     createdAt?: Date | string
@@ -9716,7 +9716,7 @@ export namespace Prisma {
     driverStatus?: $Enums.DriverStatus
     bank?: $Enums.Bank
     bankAccountNumber: string
-    bankAccountName: string
+    bankAccountName?: string | null
     googleMapsUrl?: string | null
     status?: $Enums.Status
     createdAt?: Date | string
@@ -9749,7 +9749,7 @@ export namespace Prisma {
     driverStatus?: EnumDriverStatusFieldUpdateOperationsInput | $Enums.DriverStatus
     bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
     bankAccountNumber?: StringFieldUpdateOperationsInput | string
-    bankAccountName?: StringFieldUpdateOperationsInput | string
+    bankAccountName?: NullableStringFieldUpdateOperationsInput | string | null
     googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -9766,7 +9766,7 @@ export namespace Prisma {
     driverStatus?: EnumDriverStatusFieldUpdateOperationsInput | $Enums.DriverStatus
     bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
     bankAccountNumber?: StringFieldUpdateOperationsInput | string
-    bankAccountName?: StringFieldUpdateOperationsInput | string
+    bankAccountName?: NullableStringFieldUpdateOperationsInput | string | null
     googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10005,7 +10005,7 @@ export namespace Prisma {
     deliverFee?: Decimal | DecimalJsLike | number | string
     bank?: $Enums.Bank
     bankAccountNumber: string
-    bankAccountName: string
+    bankAccountName?: string | null
     address: string
     googleMapsUrl?: string | null
     status?: $Enums.Status
@@ -10021,7 +10021,7 @@ export namespace Prisma {
     deliverFee?: Decimal | DecimalJsLike | number | string
     bank?: $Enums.Bank
     bankAccountNumber: string
-    bankAccountName: string
+    bankAccountName?: string | null
     address: string
     googleMapsUrl?: string | null
     status?: $Enums.Status
@@ -10043,7 +10043,7 @@ export namespace Prisma {
     driverStatus?: $Enums.DriverStatus
     bank?: $Enums.Bank
     bankAccountNumber: string
-    bankAccountName: string
+    bankAccountName?: string | null
     googleMapsUrl?: string | null
     status?: $Enums.Status
     createdAt?: Date | string
@@ -10061,7 +10061,7 @@ export namespace Prisma {
     driverStatus?: $Enums.DriverStatus
     bank?: $Enums.Bank
     bankAccountNumber: string
-    bankAccountName: string
+    bankAccountName?: string | null
     googleMapsUrl?: string | null
     status?: $Enums.Status
     createdAt?: Date | string
@@ -10092,7 +10092,7 @@ export namespace Prisma {
     deliverFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
     bankAccountNumber?: StringFieldUpdateOperationsInput | string
-    bankAccountName?: StringFieldUpdateOperationsInput | string
+    bankAccountName?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
     googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
@@ -10108,7 +10108,7 @@ export namespace Prisma {
     deliverFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
     bankAccountNumber?: StringFieldUpdateOperationsInput | string
-    bankAccountName?: StringFieldUpdateOperationsInput | string
+    bankAccountName?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
     googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
@@ -10136,7 +10136,7 @@ export namespace Prisma {
     driverStatus?: EnumDriverStatusFieldUpdateOperationsInput | $Enums.DriverStatus
     bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
     bankAccountNumber?: StringFieldUpdateOperationsInput | string
-    bankAccountName?: StringFieldUpdateOperationsInput | string
+    bankAccountName?: NullableStringFieldUpdateOperationsInput | string | null
     googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10154,7 +10154,7 @@ export namespace Prisma {
     driverStatus?: EnumDriverStatusFieldUpdateOperationsInput | $Enums.DriverStatus
     bank?: EnumBankFieldUpdateOperationsInput | $Enums.Bank
     bankAccountNumber?: StringFieldUpdateOperationsInput | string
-    bankAccountName?: StringFieldUpdateOperationsInput | string
+    bankAccountName?: NullableStringFieldUpdateOperationsInput | string | null
     googleMapsUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumStatusFieldUpdateOperationsInput | $Enums.Status
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string

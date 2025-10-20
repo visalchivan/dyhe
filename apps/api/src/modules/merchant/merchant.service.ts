@@ -13,11 +13,13 @@ export class MerchantService {
   constructor(private prisma: PrismaService) {}
 
   async create(createMerchantDto: CreateMerchantDto) {
-    // Check if merchant with email already exists
+    // Check if merchant with email or bank account number already exists
     const existingMerchant = await this.prisma.merchant.findFirst({
       where: {
         OR: [
-          { email: createMerchantDto.email },
+          ...(createMerchantDto.email
+            ? [{ email: createMerchantDto.email }]
+            : []),
           { bankAccountNumber: createMerchantDto.bankAccountNumber },
         ],
       },

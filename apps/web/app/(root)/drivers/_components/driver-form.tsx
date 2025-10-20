@@ -98,13 +98,12 @@ export const DriverForm: React.FC<DriverFormProps> = ({
         <Col span={12}>
           <Form.Item
             name="email"
-            label="Email"
+            label="Email (Optional)"
             rules={[
-              { required: true, message: "Please enter email" },
               { type: "email", message: "Please enter a valid email" },
             ]}
           >
-            <Input placeholder="Enter email address" />
+            <Input placeholder="Enter email address (optional)" />
           </Form.Item>
         </Col>
       </Row>
@@ -227,22 +226,21 @@ export const DriverForm: React.FC<DriverFormProps> = ({
             label="Account Number"
             rules={[
               { required: true, message: "Please enter account number" },
-              { min: 10, message: "Account number must be at least 10 digits" },
+              { min: 8, message: "Account number must be at least 8 digits" },
             ]}
           >
-            <Input placeholder="Enter account number" />
+            <Input placeholder="Enter account number (min 8 digits)" />
           </Form.Item>
         </Col>
         <Col span={8}>
           <Form.Item
             name="bankAccountName"
-            label="Account Name"
+            label="Account Name (Optional)"
             rules={[
-              { required: true, message: "Please enter account name" },
               { min: 2, message: "Account name must be at least 2 characters" },
             ]}
           >
-            <Input placeholder="Enter account name" />
+            <Input placeholder="Enter account name (optional)" />
           </Form.Item>
         </Col>
       </Row>

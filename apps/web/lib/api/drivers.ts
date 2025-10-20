@@ -3,13 +3,13 @@ import api from "../api";
 export interface Driver {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   phone: string;
   deliverFee: number;
   driverStatus: string;
   bank: string;
   bankAccountNumber: string;
-  bankAccountName: string;
+  bankAccountName?: string;
   googleMapsUrl?: string;
   status: string;
   createdAt: string;
@@ -18,7 +18,7 @@ export interface Driver {
 
 export interface CreateDriverDto {
   name: string;
-  email: string;
+  email?: string;
   phone: string;
   username?: string;
   password?: string;
@@ -26,7 +26,7 @@ export interface CreateDriverDto {
   driverStatus: string;
   bank: string;
   bankAccountNumber: string;
-  bankAccountName: string;
+  bankAccountName?: string;
   googleMapsUrl?: string;
   status?: string;
 }

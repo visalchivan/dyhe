@@ -33,8 +33,9 @@ export class CreateDriverDto {
   @IsString()
   name: string;
 
+  @IsOptional()
   @IsEmail()
-  email: string;
+  email?: string;
 
   @IsString()
   phone: string;
@@ -60,10 +61,12 @@ export class CreateDriverDto {
   bank: Bank;
 
   @IsString()
+  @MinLength(8, { message: 'Bank account number must be at least 8 digits' })
   bankAccountNumber: string;
 
+  @IsOptional()
   @IsString()
-  bankAccountName: string;
+  bankAccountName?: string;
 
   @IsOptional()
   @IsString()
