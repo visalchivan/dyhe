@@ -22,6 +22,20 @@ export class PackagesService {
     return `DYHE${timestamp}${random}`;
   }
 
+  private generatePackageName(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const random = Math.random().toString(36).substring(2, 5).toUpperCase();
+    
+    // Format: PKG-2024-01-15-14:30:45-ABC
+    return `PKG-${year}-${month}-${day}-${hours}:${minutes}:${seconds}-${random}`;
+  }
+
   async create(createPackageDto: CreatePackageDto) {
     // Verify merchant exists
     const merchant = await this.prisma.merchant.findUnique({
@@ -48,11 +62,12 @@ export class PackagesService {
     }
 
     const packageNumber = this.generatePackageNumber();
+    const packageName = this.generatePackageName();
 
     const packageData = await this.prisma.package.create({
       data: {
         packageNumber,
-        name: `Package ${packageNumber}`, // Auto-generate name from package number
+        name: packageName, // Auto-generate name with date format
         price: createPackageDto.codAmount || 0, // Using codAmount as price, default to 0
         customerName: createPackageDto.customerName,
         customerPhone: createPackageDto.customerPhone,
@@ -128,11 +143,12 @@ export class PackagesService {
 
       for (const packageData of bulkCreateDto.packages) {
         const packageNumber = this.generatePackageNumber();
+        const packageName = this.generatePackageName();
 
         const createdPackage = await prisma.package.create({
           data: {
             packageNumber,
-            name: `Package ${packageNumber}`, // Auto-generate name from package number
+            name: packageName, // Auto-generate name with date format
             price: packageData.codAmount || 0, // Using codAmount as price, default to 0
             customerName: packageData.customerName,
             customerPhone: packageData.customerPhone,

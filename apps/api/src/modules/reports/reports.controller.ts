@@ -182,30 +182,26 @@ export class ReportsController {
     try {
       const reports = await this.reportsService.getReports(query);
 
+      // Helper to format date like 22-06-25 12:06 PM
+      const formatDateTime = (isoDate?: string | Date) => {
+        if (!isoDate) return '';
+        const d = new Date(isoDate);
+        const yy = String(d.getFullYear()).slice(-2);
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        let hours = d.getHours();
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        if (hours === 0) hours = 12;
+        const hh = String(hours).padStart(2, '0');
+        return `${dd}-${mm}-${yy} ${hh}:${minutes} ${ampm}`;
+      };
+
       // Create a new workbook
       const workbook = XLSX.utils.book_new();
 
-      // Create summary data
-      const summaryData = [
-        ['DYHE DELIVERY REPORT'],
-        [
-          `Generated on: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`,
-        ],
-        [''],
-        ['SUMMARY STATISTICS:'],
-        ['Metric', 'Value'],
-        ['Total Package', reports.analytics.totalPackages],
-        ['Total Amount', `$${reports.analytics.totalCOD.toFixed(2)}`],
-        ['Delivered Packages', reports.analytics.deliveredPackages],
-        ['Pending Packages', reports.analytics.pendingPackages],
-        ['Cancelled Packages', reports.analytics.cancelledPackages],
-        ['Returned Packages', reports.analytics.returnedPackages],
-        [''],
-        ['DETAILED PACKAGE LIST:'],
-        [''],
-      ];
-
-      // Create main data
+      // Minimal headers as requested
       const headers = [
         'ID',
         'Shipment Create Date',
@@ -215,41 +211,29 @@ export class ReportsController {
         'Contact',
         'Tracking#',
         'Cash Collection Amount',
-        'Driver',
-        'Merchant',
-        'Status',
       ];
 
       const dataRows = reports.data.map(
         (item: DriverReportDto | MerchantReportDto, index: number) => {
           const deliveryDate = item.shipmentDeliveryDate
-            ? new Date(item.shipmentDeliveryDate).toLocaleDateString() +
-              ' ' +
-              new Date(item.shipmentDeliveryDate).toLocaleTimeString()
+            ? formatDateTime(item.shipmentDeliveryDate)
             : 'Not Delivered';
 
           return [
             index + 1,
-            new Date(item.shipmentCreateDate).toLocaleDateString() +
-              ' ' +
-              new Date(item.shipmentCreateDate).toLocaleTimeString(),
+            formatDateTime(item.shipmentCreateDate),
             deliveryDate,
             item.receiverName,
             item.address,
             item.contact,
             item.trackingNumber,
             item.cashCollectionAmount,
-            item.driverName || 'Not Assigned',
-            item.merchantName,
-            item.status,
           ];
         },
       );
 
-      // Combine all data
-      const allData = [...summaryData, headers, ...dataRows];
-
-      // Create worksheet
+      // Create worksheet just with the table (no top summary)
+      const allData = [headers, ...dataRows];
       const worksheet = XLSX.utils.aoa_to_sheet(allData);
 
       // Set column widths
@@ -257,98 +241,20 @@ export class ReportsController {
         { wch: 5 }, // ID
         { wch: 20 }, // Shipment Create Date
         { wch: 20 }, // Shipment Delivery Date
-        { wch: 15 }, // Receiver Name
-        { wch: 25 }, // Address
-        { wch: 15 }, // Contact
-        { wch: 15 }, // Tracking#
-        { wch: 18 }, // Cash Collection Amount
-        { wch: 15 }, // Driver
-        { wch: 15 }, // Merchant
-        { wch: 12 }, // Status
+        { wch: 18 }, // Receiver Name
+        { wch: 30 }, // Address
+        { wch: 16 }, // Contact
+        { wch: 22 }, // Tracking#
+        { wch: 20 }, // Cash Collection Amount
       ];
       worksheet['!cols'] = columnWidths;
 
-      // Add styling and colors
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      // Add styling and totals similar to screenshot
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       const range = XLSX.utils.decode_range((worksheet as any)['!ref'] || 'A1');
 
-      // Style the header row (DYHE DELIVERY REPORT)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-      (worksheet['A1'] as any).s = {
-        font: { bold: true, size: 16, color: { rgb: 'FFFFFF' } },
-        fill: { fgColor: { rgb: '2E86AB' } },
-        alignment: { horizontal: 'center', vertical: 'center' },
-      };
-
-      // Merge cells for title
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-      (worksheet as any)['!merges'] = [
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 10 } },
-      ];
-
-      // Style the generation date
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-      (worksheet['A2'] as any).s = {
-        font: { italic: true, size: 10 },
-        fill: { fgColor: { rgb: 'F8F9FA' } },
-      };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-      (worksheet as any)['!merges'].push({
-        s: { r: 1, c: 0 },
-        e: { r: 1, c: 10 },
-      });
-
-      // Style the summary section
-      const summaryStartRow = 4;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-      (worksheet[`A${summaryStartRow}`] as any).s = {
-        font: { bold: true, size: 12, color: { rgb: 'FFFFFF' } },
-        fill: { fgColor: { rgb: '28A745' } },
-      };
-
-      // Style summary headers (Metric, Value)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-      (worksheet[`A${summaryStartRow + 1}`] as any).s = {
-        font: { bold: true },
-        fill: { fgColor: { rgb: 'E9ECEF' } },
-      };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-      (worksheet[`B${summaryStartRow + 1}`] as any).s = {
-        font: { bold: true },
-        fill: { fgColor: { rgb: 'E9ECEF' } },
-      };
-
-      // Style summary values
-      for (let i = 0; i < 5; i++) {
-        const row = summaryStartRow + 2 + i;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-        (worksheet[`A${row}`] as any).s = {
-          fill: { fgColor: { rgb: 'F8F9FA' } },
-        };
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-        (worksheet[`B${row}`] as any).s = {
-          font: { bold: true },
-          fill: { fgColor: { rgb: 'F8F9FA' } },
-        };
-      }
-
-      // Style the detailed list header
-      const dataStartRow = summaryStartRow + 8;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-      (worksheet[`A${dataStartRow}`] as any).s = {
-        font: { bold: true, size: 12, color: { rgb: 'FFFFFF' } },
-        fill: { fgColor: { rgb: '6C757D' } },
-      };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-      (worksheet as any)['!merges'].push({
-        s: { r: dataStartRow - 1, c: 0 },
-        e: { r: dataStartRow - 1, c: 10 },
-      });
-
       // Style column headers
-      const headerRow = dataStartRow + 2;
+      const headerRow = 1; // first row
       for (let col = 0; col < headers.length; col++) {
         const cellRef = XLSX.utils.encode_cell({ r: headerRow - 1, c: col });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
@@ -360,7 +266,7 @@ export class ReportsController {
       }
 
       // Style data rows with alternating colors
-      for (let row = headerRow; row <= range.e.r; row++) {
+      for (let row = headerRow + 1; row <= range.e.r; row++) {
         const isEvenRow = (row - headerRow) % 2 === 0;
         const fillColor = isEvenRow ? 'FFFFFF' : 'F8F9FA';
 
@@ -380,6 +286,54 @@ export class ReportsController {
           };
         }
       }
+
+      // Add totals at the bottom like the screenshot (in G/H columns)
+      const totalsRowStart = range.e.r + 2; // one blank row after data
+      const totalPackageCellLabel = `G${totalsRowStart}`;
+      const totalPackageCellValue = `H${totalsRowStart}`;
+      const totalAmountCellLabel = `G${totalsRowStart + 1}`;
+      const totalAmountCellValue = `H${totalsRowStart + 1}`;
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (worksheet as any)[totalPackageCellLabel] = { v: 'Total Package' };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (worksheet as any)[totalPackageCellValue] = {
+        v: reports.analytics.totalPackages,
+      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (worksheet as any)[totalAmountCellLabel] = { v: 'Total Amount' };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (worksheet as any)[totalAmountCellValue] = {
+        v: Number(reports.analytics.totalCOD.toFixed(2)),
+      };
+
+      // Apply styles (yellow background)
+      const totalsCells = [
+        totalPackageCellLabel,
+        totalPackageCellValue,
+        totalAmountCellLabel,
+        totalAmountCellValue,
+      ];
+      for (const ref of totalsCells) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        (worksheet[ref] as any).s = {
+          fill: { fgColor: { rgb: 'FFF59D' } },
+          font: { bold: true },
+          border: {
+            top: { style: 'thin', color: { rgb: 'BDBDBD' } },
+            bottom: { style: 'thin', color: { rgb: 'BDBDBD' } },
+            left: { style: 'thin', color: { rgb: 'BDBDBD' } },
+            right: { style: 'thin', color: { rgb: 'BDBDBD' } },
+          },
+        };
+      }
+
+      // Ensure totals are inside the worksheet range/ref so they appear in the file
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (worksheet as any)['!ref'] = XLSX.utils.encode_range({
+        s: { r: 0, c: 0 },
+        e: { r: totalsRowStart + 1, c: headers.length - 1 },
+      });
 
       // Add the worksheet to workbook
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Delivery Report');

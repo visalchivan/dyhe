@@ -110,7 +110,7 @@ const ReportsPage = () => {
     }
 
     try {
-      const blob = await reportsApi.exportToCSV(reportsQuery as ReportsQuery);
+      const blob = await reportsApi.exportToExcel(reportsQuery as ReportsQuery);
 
       // Create and download file
       const link = document.createElement("a");
@@ -118,7 +118,7 @@ const ReportsPage = () => {
       link.setAttribute("href", url);
       link.setAttribute(
         "download",
-        `delivery_report_${dayjs().format("YYYY-MM-DD")}.csv`
+        `delivery_report_${dayjs().format("YYYY-MM-DD")}.xlsx`
       );
       link.style.visibility = "hidden";
       document.body.appendChild(link);
@@ -349,6 +349,16 @@ const ReportsPage = () => {
             </Space>
           </Col>
         </Row>
+      </Card>
+
+      {/* Simple Totals Bar */}
+      <Card style={{ marginBottom: 16 }}>
+        <Space size={24}>
+          <Text strong>Total Package:</Text>
+          <Text>{totalPackages}</Text>
+          <Text strong>Total Amount:</Text>
+          <Text>${Number(totalCOD).toFixed(2)}</Text>
+        </Space>
       </Card>
 
       {/* Reports Tabs */}
