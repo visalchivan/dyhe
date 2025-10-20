@@ -52,8 +52,16 @@ export class PackagesController {
     @Query('page', new ParseIntPipe({ optional: true })) page?: number,
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('search') search?: string,
+    @Query('merchantId') merchantId?: string,
+    @Query('driverId') driverId?: string,
   ) {
-    return this.packagesService.findAll(page || 1, limit || 10, search);
+    return this.packagesService.findAll(
+      page || 1,
+      limit || 10,
+      search,
+      merchantId,
+      driverId,
+    );
   }
 
   @Get(':id')

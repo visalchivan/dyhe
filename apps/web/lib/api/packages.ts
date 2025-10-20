@@ -91,6 +91,8 @@ export const packagesApi = {
     page?: number;
     limit?: number;
     search?: string;
+    merchantId?: string;
+    driverId?: string;
   }): Promise<PackageListResponse> => {
     const response = await api.get("/packages", { params });
     return response.data;

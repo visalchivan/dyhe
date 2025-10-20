@@ -175,33 +175,54 @@ export class PackagesService {
     };
   }
 
-  async findAll(page: number = 1, limit: number = 10, search?: string) {
+  async findAll(
+    page: number = 1,
+    limit: number = 10,
+    search?: string,
+    merchantId?: string,
+    driverId?: string,
+  ) {
     const skip = (page - 1) * limit;
 
-    const where = search
-      ? {
-          OR: [
-            {
-              packageNumber: {
-                contains: search,
-                mode: 'insensitive' as const,
-              },
-            },
-            {
-              name: { contains: search, mode: 'insensitive' as const },
-            },
-            {
-              customerPhone: { contains: search, mode: 'insensitive' as const },
-            },
-            {
-              customerAddress: {
-                contains: search,
-                mode: 'insensitive' as const,
-              },
-            },
-          ],
-        }
-      : {};
+    const where: any = {};
+
+    // Add search filter
+    if (search) {
+      where.OR = [
+        {
+          packageNumber: {
+            contains: search,
+            mode: 'insensitive' as const,
+          },
+        },
+        {
+          name: { contains: search, mode: 'insensitive' as const },
+        },
+        {
+          customerPhone: { contains: search, mode: 'insensitive' as const },
+        },
+        {
+          customerAddress: {
+            contains: search,
+            mode: 'insensitive' as const,
+          },
+        },
+      ];
+    }
+
+    // Add merchant filter
+    if (merchantId) {
+      where.merchantId = merchantId;
+    }
+
+    // Add driver filter
+    if (driverId) {
+      if (driverId === 'unassigned') {
+        where.driverId = null;
+      } else {
+        where.driverId = driverId;
+      }
+    }
 
     const [packages, total] = await Promise.all([
       this.prisma.package.findMany({

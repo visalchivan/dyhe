@@ -47,6 +47,7 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
       deliveryFee: 0, // Optional
     },
   ]);
+  const [rowCount, setRowCount] = useState<number>(1);
 
   const { data: merchantsData } = useMerchants({ limit: 100 });
 
@@ -67,6 +68,30 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
     if (packages.length > 1) {
       setPackages(packages.filter((_, i) => i !== index));
     }
+  };
+
+  const generateRows = () => {
+    if (rowCount < 1 || rowCount > 100) {
+      notification.warning({
+        message: "Invalid Number",
+        description: "Please enter a number between 1 and 100.",
+      });
+      return;
+    }
+
+    const newPackages = Array.from({ length: rowCount }, () => ({
+      customerName: "",
+      customerPhone: "",
+      customerAddress: "",
+      codAmount: 0,
+      deliveryFee: 0,
+    }));
+
+    setPackages(newPackages);
+    notification.success({
+      message: "Rows Generated",
+      description: `Successfully generated ${rowCount} empty rows.`,
+    });
   };
 
   const updatePackage = (
@@ -211,6 +236,38 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
         status: "READY",
       }}
     >
+      <Card style={{ marginBottom: 16, background: "#f6f8fa" }}>
+        <Title level={5}>Quick Generate Rows</Title>
+        <Row gutter={16} align="middle">
+          <Col span={12}>
+            <Space.Compact style={{ width: "100%" }}>
+              <InputNumber
+                size="large"
+                placeholder="How many packages?"
+                min={1}
+                max={100}
+                value={rowCount}
+                onChange={(val) => setRowCount(val || 1)}
+                style={{ width: "100%" }}
+              />
+              <Button
+                type="primary"
+                size="large"
+                onClick={generateRows}
+                disabled={loading}
+              >
+                Generate Rows
+              </Button>
+            </Space.Compact>
+          </Col>
+          <Col span={12}>
+            <Typography.Text type="secondary">
+              Enter a number (1-100) to generate empty rows quickly
+            </Typography.Text>
+          </Col>
+        </Row>
+      </Card>
+
       <Card style={{ marginBottom: 16 }}>
         <Title level={4}>Package Settings</Title>
         <Row gutter={16}>

@@ -11,6 +11,8 @@ export const usePackages = (params?: {
   page?: number;
   limit?: number;
   search?: string;
+  merchantId?: string;
+  driverId?: string;
 }) => {
   return useQuery({
     queryKey: ["packages", params],

@@ -20,18 +20,22 @@ import {
   Tag,
   Tooltip,
   Typography,
+  Select,
 } from "antd";
 import { ColumnType } from "antd/es/table";
 import Link from "next/link";
 import React, { useCallback, useMemo, useState } from "react";
 import { useAuth } from "../../../../contexts/AuthContext";
 import { useDeletePackage, usePackages } from "../../../../hooks/usePackages";
+import { useMerchants } from "../../../../hooks/useMerchants";
+import { useDrivers } from "../../../../hooks/useDrivers";
 import { Package } from "../../../../lib/api/packages";
 import { canCreate, canDelete, canEdit } from "../../../../lib/rbac";
 import { printLabel } from "../../../../lib/utils/directPrint";
 
 const { Title } = Typography;
 const { Search } = Input;
+const { Option } = Select;
 
 interface PackagesTableProps {
   onCreatePackage: () => void;
@@ -48,12 +52,24 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchText, setSearchText] = useState("");
+  const [merchantFilter, setMerchantFilter] = useState<string | undefined>(
+    undefined
+  );
+  const [driverFilter, setDriverFilter] = useState<string | undefined>(
+    undefined
+  );
 
   const { data, isLoading, refetch } = usePackages({
     page: currentPage,
     limit: pageSize,
     search: searchText || undefined,
+    merchantId: merchantFilter,
+    driverId: driverFilter,
   });
+
+  // Fetch merchants and drivers for filters
+  const { data: merchantsData } = useMerchants({ page: 1, limit: 1000 });
+  const { data: driversData } = useDrivers({ page: 1, limit: 1000 });
 
   const deletePackageMutation = useDeletePackage();
   const { user } = useAuth();
@@ -310,7 +326,7 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
           </Title>
         </Col>
         <Col>
-          <Space>
+          <Space wrap>
             <Search
               placeholder="Search packages..."
               size="large"
@@ -318,6 +334,55 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
               onSearch={handleSearch}
               style={{ width: 300 }}
             />
+            <Select
+              placeholder="Filter by Merchant"
+              allowClear
+              size="large"
+              style={{ width: 200 }}
+              value={merchantFilter}
+              onChange={(value) => {
+                setMerchantFilter(value);
+                setCurrentPage(1);
+              }}
+              showSearch
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                (option?.children as unknown as string)
+                  ?.toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+            >
+              {merchantsData?.merchants.map((merchant) => (
+                <Option key={merchant.id} value={merchant.id}>
+                  {merchant.name}
+                </Option>
+              ))}
+            </Select>
+            <Select
+              placeholder="Filter by Driver"
+              allowClear
+              size="large"
+              style={{ width: 200 }}
+              value={driverFilter}
+              onChange={(value) => {
+                setDriverFilter(value);
+                setCurrentPage(1);
+              }}
+              showSearch
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                (option?.children as unknown as string)
+                  ?.toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+            >
+              <Option value="unassigned">Unassigned</Option>
+              {driversData?.drivers.map((driver) => (
+                <Option key={driver.id} value={driver.id}>
+                  {driver.name}
+                </Option>
+              ))}
+            </Select>
             <Button
               size="large"
               icon={<ReloadOutlined />}
