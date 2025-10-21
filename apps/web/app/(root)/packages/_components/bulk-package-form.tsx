@@ -51,6 +51,18 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
 
   const { data: merchantsData } = useMerchants({ limit: 100 });
 
+  // Auto-fill delivery fee when merchant is selected
+  const handleMerchantChange = (merchantId: string) => {
+    const selectedMerchant = merchantsData?.merchants.find(
+      (m) => m.id === merchantId
+    );
+    if (selectedMerchant) {
+      const deliveryFee = Number(selectedMerchant.deliverFee);
+      // Update all packages with merchant's delivery fee
+      setPackages(packages.map((pkg) => ({ ...pkg, deliveryFee })));
+    }
+  };
+
   const addPackage = () => {
     setPackages([
       ...packages,
@@ -71,10 +83,10 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
   };
 
   const generateRows = () => {
-    if (rowCount < 1 || rowCount > 100) {
+    if (rowCount < 1 || rowCount > 500) {
       notification.warning({
         message: "Invalid Number",
-        description: "Please enter a number between 1 and 100.",
+        description: "Please enter a number between 1 and 500.",
       });
       return;
     }
@@ -158,10 +170,11 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
         <Input
           value={value}
           size="large"
-          placeholder="Customer phone"
-          onChange={(e) =>
-            updatePackage(index, "customerPhone", e.target.value)
-          }
+          placeholder="Customer phone (digits only)"
+          onChange={(e) => {
+            const numericValue = e.target.value.replace(/[^0-9]/g, "");
+            updatePackage(index, "customerPhone", numericValue);
+          }}
         />
       ),
     },
@@ -245,7 +258,7 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
                 size="large"
                 placeholder="How many packages?"
                 min={1}
-                max={100}
+                max={500}
                 value={rowCount}
                 onChange={(val) => setRowCount(val || 1)}
                 style={{ width: "100%" }}
@@ -262,7 +275,7 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
           </Col>
           <Col span={12}>
             <Typography.Text type="secondary">
-              Enter a number (1-100) to generate empty rows quickly
+              Enter a number (1-500) to generate empty rows quickly
             </Typography.Text>
           </Col>
         </Row>
@@ -282,10 +295,11 @@ export const BulkPackageForm: React.FC<BulkPackageFormProps> = ({
                 placeholder="Select merchant"
                 showSearch
                 optionFilterProp="children"
+                onChange={handleMerchantChange}
               >
                 {merchantsData?.merchants.map((merchant) => (
                   <Option key={merchant.id} value={merchant.id}>
-                    {merchant.name} ({merchant.email})
+                    {merchant.name} - {merchant.phone}
                   </Option>
                 ))}
               </Select>

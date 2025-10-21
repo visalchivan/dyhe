@@ -116,12 +116,12 @@ export const DriverForm: React.FC<DriverFormProps> = ({
             rules={[
               { required: true, message: "Please enter phone number" },
               {
-                pattern: /^[+]?[0-9\s-()]+$/,
-                message: "Please enter a valid phone number",
+                pattern: /^[0-9]+$/,
+                message: "Phone number must contain only digits",
               },
             ]}
           >
-            <Input placeholder="Enter phone number" />
+            <Input placeholder="Enter phone number (digits only)" />
           </Form.Item>
         </Col>
         <Col span={12}>

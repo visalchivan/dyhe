@@ -108,12 +108,12 @@ export const MerchantForm: React.FC<MerchantFormProps> = ({
             rules={[
               { required: true, message: "Please enter phone number" },
               {
-                pattern: /^[+]?[0-9\s-()]+$/,
-                message: "Please enter a valid phone number",
+                pattern: /^[0-9]+$/,
+                message: "Phone number must contain only digits",
               },
             ]}
           >
-            <Input placeholder="Enter phone number" />
+            <Input placeholder="Enter phone number (digits only)" />
           </Form.Item>
         </Col>
         <Col span={12}>
@@ -155,7 +155,7 @@ export const MerchantForm: React.FC<MerchantFormProps> = ({
         label="Address"
         rules={[
           { required: true, message: "Please enter address" },
-          { min: 10, message: "Address must be at least 10 characters" },
+          { min: 5, message: "Address must be at least 5 characters" },
         ]}
       >
         <Input.TextArea rows={2} placeholder="Enter full address" />

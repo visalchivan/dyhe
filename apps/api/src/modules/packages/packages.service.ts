@@ -90,6 +90,7 @@ export class PackagesService {
             id: true,
             name: true,
             email: true,
+            phone: true,
           },
         },
         driver: {
@@ -223,6 +224,16 @@ export class PackagesService {
             mode: 'insensitive' as const,
           },
         },
+        {
+          merchant: {
+            name: { contains: search, mode: 'insensitive' as const },
+          },
+        },
+        {
+          merchant: {
+            phone: { contains: search, mode: 'insensitive' as const },
+          },
+        },
       ];
     }
 
@@ -252,6 +263,7 @@ export class PackagesService {
               id: true,
               name: true,
               email: true,
+              phone: true,
             },
           },
           driver: {
@@ -286,6 +298,7 @@ export class PackagesService {
             id: true,
             name: true,
             email: true,
+            phone: true,
           },
         },
         driver: {
@@ -369,6 +382,7 @@ export class PackagesService {
             id: true,
             name: true,
             email: true,
+            phone: true,
           },
         },
         driver: {

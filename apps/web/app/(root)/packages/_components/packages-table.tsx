@@ -194,11 +194,12 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
       {
         title: "Merchant",
         key: "merchant",
-        width: 150,
+        width: 200,
         render: (_: unknown, record: Package) => {
           return (
             <div>
               <div style={{ fontWeight: 500 }}>{record.merchant.name}</div>
+              <div style={{ fontSize: 12, color: "#666" }}>{record.merchant.phone}</div>
             </div>
           );
         },

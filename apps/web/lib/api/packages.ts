@@ -14,13 +14,14 @@ export interface Package {
   merchant: {
     id: string;
     name: string;
-    email: string;
+    email?: string;
+    phone: string;
   };
   driverId?: string;
   driver?: {
     id: string;
     name: string;
-    email: string;
+    email?: string;
   };
   createdAt: string;
   updatedAt: string;

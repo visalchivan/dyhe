@@ -46,6 +46,16 @@ export const PackageForm: React.FC<PackageFormProps> = ({
   const [form] = Form.useForm();
   const { data: merchantsData } = useMerchants({ limit: 100 });
 
+  // Auto-fill delivery fee when merchant is selected
+  const handleMerchantChange = (merchantId: string) => {
+    const selectedMerchant = merchantsData?.merchants.find(
+      (m) => m.id === merchantId
+    );
+    if (selectedMerchant) {
+      form.setFieldValue("deliveryFee", Number(selectedMerchant.deliverFee));
+    }
+  };
+
   React.useEffect(() => {
     if (packageData) {
       // Convert numeric fields to numbers for proper validation
@@ -98,12 +108,12 @@ export const PackageForm: React.FC<PackageFormProps> = ({
             rules={[
               { required: true, message: "Please enter phone number" },
               {
-                pattern: /^[+]?[0-9\s-()]+$/,
-                message: "Please enter a valid phone number",
+                pattern: /^[0-9]+$/,
+                message: "Phone number must contain only digits",
               },
             ]}
           >
-            <Input placeholder="Enter phone number" />
+            <Input placeholder="Enter phone number (digits only)" />
           </Form.Item>
         </Col>
         <Col span={12}>
@@ -128,7 +138,7 @@ export const PackageForm: React.FC<PackageFormProps> = ({
         label="Customer Address"
         rules={[
           { required: true, message: "Please enter customer address" },
-          { min: 10, message: "Address must be at least 10 characters" },
+          { min: 5, message: "Address must be at least 5 characters" },
         ]}
       >
         <Input.TextArea
@@ -193,10 +203,11 @@ export const PackageForm: React.FC<PackageFormProps> = ({
               placeholder="Select merchant"
               showSearch
               optionFilterProp="children"
+              onChange={handleMerchantChange}
             >
               {merchantsData?.merchants.map((merchant) => (
                 <Option key={merchant.id} value={merchant.id}>
-                  {merchant.name} ({merchant.email})
+                  {merchant.name} - {merchant.phone}
                 </Option>
               ))}
             </Select>
