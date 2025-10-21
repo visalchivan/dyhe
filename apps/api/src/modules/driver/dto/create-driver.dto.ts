@@ -34,7 +34,8 @@ export class CreateDriverDto {
   name: string;
 
   @IsOptional()
-  @IsEmail()
+  @IsEmail({}, { message: 'Please enter a valid email' })
+  @Transform(({ value }) => (value === '' ? undefined : value))
   email?: string;
 
   @IsString()
