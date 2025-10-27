@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as TeamIndexRouteImport } from './routes/team/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as ScanIndexRouteImport } from './routes/scan/index'
@@ -18,6 +19,11 @@ import { Route as MerchantsIndexRouteImport } from './routes/merchants/index'
 import { Route as DriversIndexRouteImport } from './routes/drivers/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TeamIndexRoute = TeamIndexRouteImport.update({
   id: '/team/',
   path: '/team/',
@@ -60,6 +66,7 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/login': typeof LoginRoute
   '/dashboard': typeof DashboardIndexRoute
   '/drivers': typeof DriversIndexRoute
   '/merchants': typeof MerchantsIndexRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/team': typeof TeamIndexRoute
 }
 export interface FileRoutesByTo {
+  '/login': typeof LoginRoute
   '/dashboard': typeof DashboardIndexRoute
   '/drivers': typeof DriversIndexRoute
   '/merchants': typeof MerchantsIndexRoute
@@ -81,6 +89,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/login': typeof LoginRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/drivers/': typeof DriversIndexRoute
   '/merchants/': typeof MerchantsIndexRoute
@@ -93,6 +102,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/login'
     | '/dashboard'
     | '/drivers'
     | '/merchants'
@@ -103,6 +113,7 @@ export interface FileRouteTypes {
     | '/team'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/login'
     | '/dashboard'
     | '/drivers'
     | '/merchants'
@@ -113,6 +124,7 @@ export interface FileRouteTypes {
     | '/team'
   id:
     | '__root__'
+    | '/login'
     | '/dashboard/'
     | '/drivers/'
     | '/merchants/'
@@ -124,6 +136,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  LoginRoute: typeof LoginRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   DriversIndexRoute: typeof DriversIndexRoute
   MerchantsIndexRoute: typeof MerchantsIndexRoute
@@ -136,6 +149,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/team/': {
       id: '/team/'
       path: '/team'
@@ -196,6 +216,7 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  LoginRoute: LoginRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   DriversIndexRoute: DriversIndexRoute,
   MerchantsIndexRoute: MerchantsIndexRoute,
