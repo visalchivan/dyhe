@@ -18,6 +18,7 @@ import { Route as PackagesIndexRouteImport } from './routes/packages/index'
 import { Route as MerchantsIndexRouteImport } from './routes/merchants/index'
 import { Route as DriversIndexRouteImport } from './routes/drivers/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as PackagesBulkCreateRouteImport } from './routes/packages/bulk-create'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -64,9 +65,15 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/dashboard/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PackagesBulkCreateRoute = PackagesBulkCreateRouteImport.update({
+  id: '/packages/bulk-create',
+  path: '/packages/bulk-create',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
+  '/packages/bulk-create': typeof PackagesBulkCreateRoute
   '/dashboard': typeof DashboardIndexRoute
   '/drivers': typeof DriversIndexRoute
   '/merchants': typeof MerchantsIndexRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/packages/bulk-create': typeof PackagesBulkCreateRoute
   '/dashboard': typeof DashboardIndexRoute
   '/drivers': typeof DriversIndexRoute
   '/merchants': typeof MerchantsIndexRoute
@@ -90,6 +98,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/login': typeof LoginRoute
+  '/packages/bulk-create': typeof PackagesBulkCreateRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/drivers/': typeof DriversIndexRoute
   '/merchants/': typeof MerchantsIndexRoute
@@ -103,6 +112,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/login'
+    | '/packages/bulk-create'
     | '/dashboard'
     | '/drivers'
     | '/merchants'
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
+    | '/packages/bulk-create'
     | '/dashboard'
     | '/drivers'
     | '/merchants'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/login'
+    | '/packages/bulk-create'
     | '/dashboard/'
     | '/drivers/'
     | '/merchants/'
@@ -137,6 +149,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
+  PackagesBulkCreateRoute: typeof PackagesBulkCreateRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   DriversIndexRoute: typeof DriversIndexRoute
   MerchantsIndexRoute: typeof MerchantsIndexRoute
@@ -212,11 +225,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/packages/bulk-create': {
+      id: '/packages/bulk-create'
+      path: '/packages/bulk-create'
+      fullPath: '/packages/bulk-create'
+      preLoaderRoute: typeof PackagesBulkCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
+  PackagesBulkCreateRoute: PackagesBulkCreateRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   DriversIndexRoute: DriversIndexRoute,
   MerchantsIndexRoute: MerchantsIndexRoute,
