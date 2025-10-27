@@ -63,7 +63,7 @@ export function DashboardRecentPackages({ packages, loading = false }: RecentPac
                 {packages.map((pkg) => (
                   <TableRow key={pkg.id}>
                     <TableCell className="font-mono text-sm">
-                      {pkg.trackingNumber}
+                      {pkg.packageNumber}
                     </TableCell>
                     <TableCell>
                       <div>

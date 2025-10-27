@@ -11,7 +11,7 @@ export interface DashboardStats {
 
 export interface RecentPackage {
   id: string;
-  trackingNumber: string;
+  packageNumber: string;
   status: string;
   createdAt: string;
   merchant: {

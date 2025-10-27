@@ -66,8 +66,8 @@ const data = {
       isActive: true,
     },
     {
-      title: "Scan",
-      url: "/scan",
+      title: "Assign Packages",
+      url: "/assign",
       icon: Scan,
       isActive: true,
     },

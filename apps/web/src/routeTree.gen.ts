@@ -18,7 +18,9 @@ import { Route as PackagesIndexRouteImport } from './routes/packages/index'
 import { Route as MerchantsIndexRouteImport } from './routes/merchants/index'
 import { Route as DriversIndexRouteImport } from './routes/drivers/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as AssignIndexRouteImport } from './routes/assign/index'
 import { Route as PackagesBulkCreateRouteImport } from './routes/packages/bulk-create'
+import { Route as PackagesPrintIndexRouteImport } from './routes/packages/print/index'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -65,15 +67,26 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/dashboard/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AssignIndexRoute = AssignIndexRouteImport.update({
+  id: '/assign/',
+  path: '/assign/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PackagesBulkCreateRoute = PackagesBulkCreateRouteImport.update({
   id: '/packages/bulk-create',
   path: '/packages/bulk-create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PackagesPrintIndexRoute = PackagesPrintIndexRouteImport.update({
+  id: '/packages/print/',
+  path: '/packages/print/',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/packages/bulk-create': typeof PackagesBulkCreateRoute
+  '/assign': typeof AssignIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/drivers': typeof DriversIndexRoute
   '/merchants': typeof MerchantsIndexRoute
@@ -82,10 +95,12 @@ export interface FileRoutesByFullPath {
   '/scan': typeof ScanIndexRoute
   '/settings': typeof SettingsIndexRoute
   '/team': typeof TeamIndexRoute
+  '/packages/print': typeof PackagesPrintIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/packages/bulk-create': typeof PackagesBulkCreateRoute
+  '/assign': typeof AssignIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/drivers': typeof DriversIndexRoute
   '/merchants': typeof MerchantsIndexRoute
@@ -94,11 +109,13 @@ export interface FileRoutesByTo {
   '/scan': typeof ScanIndexRoute
   '/settings': typeof SettingsIndexRoute
   '/team': typeof TeamIndexRoute
+  '/packages/print': typeof PackagesPrintIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/login': typeof LoginRoute
   '/packages/bulk-create': typeof PackagesBulkCreateRoute
+  '/assign/': typeof AssignIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/drivers/': typeof DriversIndexRoute
   '/merchants/': typeof MerchantsIndexRoute
@@ -107,12 +124,14 @@ export interface FileRoutesById {
   '/scan/': typeof ScanIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/team/': typeof TeamIndexRoute
+  '/packages/print/': typeof PackagesPrintIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/login'
     | '/packages/bulk-create'
+    | '/assign'
     | '/dashboard'
     | '/drivers'
     | '/merchants'
@@ -121,10 +140,12 @@ export interface FileRouteTypes {
     | '/scan'
     | '/settings'
     | '/team'
+    | '/packages/print'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/packages/bulk-create'
+    | '/assign'
     | '/dashboard'
     | '/drivers'
     | '/merchants'
@@ -133,10 +154,12 @@ export interface FileRouteTypes {
     | '/scan'
     | '/settings'
     | '/team'
+    | '/packages/print'
   id:
     | '__root__'
     | '/login'
     | '/packages/bulk-create'
+    | '/assign/'
     | '/dashboard/'
     | '/drivers/'
     | '/merchants/'
@@ -145,11 +168,13 @@ export interface FileRouteTypes {
     | '/scan/'
     | '/settings/'
     | '/team/'
+    | '/packages/print/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PackagesBulkCreateRoute: typeof PackagesBulkCreateRoute
+  AssignIndexRoute: typeof AssignIndexRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   DriversIndexRoute: typeof DriversIndexRoute
   MerchantsIndexRoute: typeof MerchantsIndexRoute
@@ -158,6 +183,7 @@ export interface RootRouteChildren {
   ScanIndexRoute: typeof ScanIndexRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
   TeamIndexRoute: typeof TeamIndexRoute
+  PackagesPrintIndexRoute: typeof PackagesPrintIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -225,11 +251,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/assign/': {
+      id: '/assign/'
+      path: '/assign'
+      fullPath: '/assign'
+      preLoaderRoute: typeof AssignIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/packages/bulk-create': {
       id: '/packages/bulk-create'
       path: '/packages/bulk-create'
       fullPath: '/packages/bulk-create'
       preLoaderRoute: typeof PackagesBulkCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/packages/print/': {
+      id: '/packages/print/'
+      path: '/packages/print'
+      fullPath: '/packages/print'
+      preLoaderRoute: typeof PackagesPrintIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -238,6 +278,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PackagesBulkCreateRoute: PackagesBulkCreateRoute,
+  AssignIndexRoute: AssignIndexRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   DriversIndexRoute: DriversIndexRoute,
   MerchantsIndexRoute: MerchantsIndexRoute,
@@ -246,6 +287,7 @@ const rootRouteChildren: RootRouteChildren = {
   ScanIndexRoute: ScanIndexRoute,
   SettingsIndexRoute: SettingsIndexRoute,
   TeamIndexRoute: TeamIndexRoute,
+  PackagesPrintIndexRoute: PackagesPrintIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

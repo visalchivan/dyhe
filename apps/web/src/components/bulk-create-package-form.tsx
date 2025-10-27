@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -18,10 +19,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Printer } from "lucide-react";
 import { useBulkCreatePackages } from "@/hooks/usePackages";
 import { useMerchants } from "@/hooks/useMerchants";
 import type { PackageDataDto, BulkCreatePackagesDto } from "@/lib/api/packages";
+import { printBulkLabels } from "@/lib/utils/directPrint";
 import { toast } from "sonner";
 
 interface BulkCreatePackageFormProps {
@@ -35,6 +37,7 @@ export function BulkCreatePackageForm({
 }: BulkCreatePackageFormProps) {
   const [merchantId, setMerchantId] = useState("");
   const [status, setStatus] = useState("READY");
+  const [shouldPrint, setShouldPrint] = useState(false);
   const [packages, setPackages] = useState<PackageDataDto[]>([
     {
       customerName: "",
@@ -124,7 +127,36 @@ export function BulkCreatePackageForm({
     };
 
     try {
-      await bulkCreatePackagesMutation.mutateAsync(bulkData);
+      const response = await bulkCreatePackagesMutation.mutateAsync(bulkData);
+      
+      // If print is checked and packages were created successfully, print labels
+      if (shouldPrint && response.packages && response.packages.length > 0) {
+        toast.info("Printing labels...");
+        
+        // Get the merchant name for printing
+        const merchant = merchantsData?.merchants.find(m => m.id === merchantId);
+        
+        // Transform the created packages to print format
+        const packagesToPrint = response.packages.map((pkg) => ({
+          id: pkg.id,
+          packageNumber: pkg.packageNumber,
+          name: pkg.name || pkg.packageNumber,
+          customerName: pkg.customerName,
+          customerPhone: pkg.customerPhone,
+          customerAddress: pkg.customerAddress,
+          codAmount: pkg.codAmount,
+          merchant: { name: merchant?.name || "Unknown Merchant" },
+        }));
+        
+        try {
+          await printBulkLabels(packagesToPrint);
+          toast.success(`${packagesToPrint.length} labels opened for printing`);
+        } catch (printError) {
+          console.error("Error printing labels:", printError);
+          toast.error("Failed to print labels");
+        }
+      }
+      
       onSuccess();
     } catch (error) {
       // Error handled by mutation
@@ -320,15 +352,29 @@ export function BulkCreatePackageForm({
       </Card>
 
       {/* Actions */}
-      <div className="flex justify-end gap-2 pt-4 border-t">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={bulkCreatePackagesMutation.isPending}>
-          {bulkCreatePackagesMutation.isPending
-            ? "Creating..."
-            : `Create ${packages.length} Packages`}
-        </Button>
+      <div className="flex flex-col gap-4 pt-4 border-t">
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="print-labels"
+            checked={shouldPrint}
+            onCheckedChange={(checked) => setShouldPrint(checked as boolean)}
+          />
+          <Label htmlFor="print-labels" className="font-normal cursor-pointer flex items-center gap-2">
+            <Printer className="h-4 w-4" />
+            Print labels after creating packages
+          </Label>
+        </div>
+        
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={bulkCreatePackagesMutation.isPending}>
+            {bulkCreatePackagesMutation.isPending
+              ? "Creating..."
+              : `Create ${packages.length} Packages`}
+          </Button>
+        </div>
       </div>
     </form>
   );

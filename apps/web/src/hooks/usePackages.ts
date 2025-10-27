@@ -5,6 +5,7 @@ import {
   type CreatePackageDto,
   type BulkCreatePackagesDto,
   type UpdatePackageDto,
+  type BulkAssignPackagesDto,
 } from "../lib/api/packages";
 
 export const usePackages = (params?: {
@@ -59,6 +60,23 @@ export const useBulkCreatePackages = () => {
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to create packages");
+    },
+  });
+};
+
+export const useBulkAssignPackages = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: BulkAssignPackagesDto) =>
+      packagesApi.bulkAssignPackages(data),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["packages"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      toast.success(`Successfully assigned ${data.count} packages to driver!`);
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to assign packages");
     },
   });
 };

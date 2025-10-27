@@ -5,6 +5,10 @@ import {
   CreditCard,
   LogOut,
   Sparkles,
+  Moon,
+  Sun,
+  Monitor,
+  Palette,
 } from "lucide-react"
 
 import {
@@ -20,6 +24,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
   SidebarMenu,
@@ -27,6 +34,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useTheme } from "@/theme-provider"
 
 export function NavUser({
   user,
@@ -38,6 +46,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const { theme, setTheme } = useTheme()
 
   return (
     <SidebarMenu>
@@ -86,6 +95,35 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <Palette />
+                  Theme
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuItem onClick={() => setTheme("light")}>
+                    <Sun className="mr-2 h-4 w-4" />
+                    <span>Light</span>
+                    {theme === "light" && (
+                      <span className="ml-auto">✓</span>
+                    )}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("dark")}>
+                    <Moon className="mr-2 h-4 w-4" />
+                    <span>Dark</span>
+                    {theme === "dark" && (
+                      <span className="ml-auto">✓</span>
+                    )}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("system")}>
+                    <Monitor className="mr-2 h-4 w-4" />
+                    <span>System</span>
+                    {theme === "system" && (
+                      <span className="ml-auto">✓</span>
+                    )}
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
               <DropdownMenuItem>
                 <BadgeCheck />
                 Account
