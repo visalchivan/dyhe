@@ -1,82 +1,34 @@
-import { createFileRoute } from '@tanstack/react-router'
-import MainLayout from '@/layouts/MainLayout'
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { Printer, Trash2 } from 'lucide-react'
 import { usePackages } from '@/hooks/usePackages'
-import { printLabel, printBulkLabels } from '@/lib/utils/directPrint'
-import { toast } from 'sonner'
+import MainLayout from '@/layouts/MainLayout'
 import type { Package } from '@/lib/api/packages'
+import { printBulkLabels } from '@/lib/utils/directPrint'
+import { toast } from 'sonner'
+import { Printer, Trash2 } from 'lucide-react'
+import { useState } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/packages/print/')({
-  component: PackagePrintPage,
+  component: PrintPackagesPage,
 })
 
-function PackagePrintPage() {
-  const [selectedPackage, setSelectedPackage] = useState<string | null>(null)
+function PrintPackagesPage() {
   const [selectedPackages, setSelectedPackages] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState<string>('')
-  const [isPrinting, setIsPrinting] = useState(false)
-  const [isBulkPrinting, setIsBulkPrinting] = useState(false)
-  const [printMode, setPrintMode] = useState<'single' | 'bulk'>('single')
 
-  const { data: packagesData, isLoading: packagesLoading } = usePackages({
+  const { data: packagesData } = usePackages({
     page: 1,
     limit: 100,
     search: searchTerm,
   })
 
   const handlePrint = async () => {
-    if (!selectedPackage) return
-
-    setIsPrinting(true)
-
-    try {
-      // Find the selected package
-      const packageToPrint = packagesData?.packages.find(
-        (pkg) => pkg.id === selectedPackage
-      )
-      if (!packageToPrint) {
-        setIsPrinting(false)
-        return
-      }
-
-      await printLabel({
-        id: packageToPrint.id,
-        packageNumber: packageToPrint.packageNumber,
-        name: packageToPrint.name,
-        customerName: packageToPrint.customerName,
-        customerPhone: packageToPrint.customerPhone,
-        customerAddress: packageToPrint.customerAddress,
-        codAmount: packageToPrint.codAmount,
-        merchant: { name: packageToPrint.merchant.name },
-      })
-
-      toast.success('Print dialog opened')
-      setIsPrinting(false)
-    } catch (error) {
-      console.error('Error printing label:', error)
-      toast.error('Failed to print label')
-      setIsPrinting(false)
-    }
-  }
-
-  const handleBulkPrint = async () => {
     if (selectedPackages.length === 0) return
-
-    setIsBulkPrinting(true)
 
     try {
       // Find all selected packages
@@ -85,16 +37,10 @@ function PackagePrintPage() {
           selectedPackages.includes(pkg.id)
         ) || []
 
-      if (packagesToPrint.length === 0) {
-        setIsBulkPrinting(false)
-        return
-      }
-
       await printBulkLabels(
         packagesToPrint.map((p: Package) => ({
           id: p.id,
           packageNumber: p.packageNumber,
-          name: p.name,
           customerName: p.customerName,
           customerPhone: p.customerPhone,
           customerAddress: p.customerAddress,
@@ -103,12 +49,10 @@ function PackagePrintPage() {
         }))
       )
 
-      toast.success(`Print dialog opened for ${packagesToPrint.length} labels`)
-      setIsBulkPrinting(false)
+      toast.success(`${packagesToPrint.length} labels opened for printing`)
     } catch (error) {
       console.error('Bulk print failed:', error)
       toast.error('Failed to print labels')
-      setIsBulkPrinting(false)
     }
   }
 
@@ -135,103 +79,19 @@ function PackagePrintPage() {
 
   return (
     <MainLayout>
-      <div className="space-y-6 max-w-7xl mx-auto">
+      <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Printer className="h-8 w-8" />
             Package Label Printer
           </h1>
           <p className="text-muted-foreground">
             Print package labels directly - 80mm x 100mm labels with QR codes
           </p>
-
-          <div className="flex gap-2 mt-4">
-            <Button
-              variant={printMode === 'single' ? 'default' : 'outline'}
-              onClick={() => setPrintMode('single')}
-            >
-              Single Print
-            </Button>
-            <Button
-              variant={printMode === 'bulk' ? 'default' : 'outline'}
-              onClick={() => setPrintMode('bulk')}
-            >
-              Bulk Print
-            </Button>
-          </div>
         </div>
 
-        {printMode === 'single' ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Select Package to Print</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Select a package</Label>
-                  <Select
-                    value={selectedPackage || ''}
-                    onValueChange={setSelectedPackage}
-                  >
-                    <SelectTrigger disabled={packagesLoading}>
-                      <SelectValue placeholder="Select a package to print" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {packagesData?.packages.map((pkg) => (
-                        <SelectItem key={pkg.id} value={pkg.id}>
-                          {pkg.packageNumber} - {pkg.name} ({pkg.customerName})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {selectedPackage && (
-                  <div className="space-y-4">
-                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                      <p className="text-sm text-green-700 font-medium">
-                        Package Selected
-                      </p>
-                      <p className="text-sm text-green-600">
-                        Ready to print label for the selected package
-                      </p>
-                    </div>
-
-                    <Button
-                      onClick={handlePrint}
-                      disabled={isPrinting}
-                      className="w-full"
-                      size="lg"
-                    >
-                      <Printer className="h-4 w-4 mr-2" />
-                      {isPrinting ? 'Opening Print Dialog...' : 'Print Label'}
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Label Preview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12 text-muted-foreground">
-                  <p className="font-semibold mb-2">No package selected</p>
-                  <p className="text-sm">
-                    Select a package from the dropdown to print its label
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        ) : (
+        
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Select Packages (Bulk)</CardTitle>
-              </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>Search packages</Label>
@@ -267,7 +127,7 @@ function PackagePrintPage() {
                         <div className="space-y-1 flex-1">
                           <div className="flex items-center gap-2">
                             <span className="font-semibold">
-                              {pkg.packageNumber} - {pkg.name}
+                              {pkg.packageNumber}
                             </span>
                             <Badge variant="default">{pkg.status}</Badge>
                           </div>
@@ -291,15 +151,12 @@ function PackagePrintPage() {
 
                 {selectedPackages.length > 0 && (
                   <Button
-                    onClick={handleBulkPrint}
-                    disabled={isBulkPrinting}
+                    onClick={handlePrint}
                     className="w-full"
                     size="lg"
                   >
                     <Printer className="h-4 w-4 mr-2" />
-                    {isBulkPrinting
-                      ? 'Opening Print Dialog...'
-                      : `Print ${selectedPackages.length} Label(s)`}
+                    Print {selectedPackages.length} Label(s)
                   </Button>
                 )}
               </CardContent>
@@ -321,7 +178,7 @@ function PackagePrintPage() {
                         >
                           <div className="space-y-1 flex-1">
                             <span className="font-semibold text-sm">
-                              {pkg.packageNumber} - {pkg.name}
+                              {pkg.packageNumber}
                             </span>
                             <p className="text-sm text-muted-foreground">
                               {pkg.customerName}
@@ -348,7 +205,6 @@ function PackagePrintPage() {
               </CardContent>
             </Card>
           </div>
-        )}
 
         <Card>
           <CardHeader>

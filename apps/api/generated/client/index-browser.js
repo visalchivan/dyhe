@@ -170,7 +170,6 @@ exports.Prisma.MerchantScalarFieldEnum = {
 exports.Prisma.PackageScalarFieldEnum = {
   id: 'id',
   packageNumber: 'packageNumber',
-  name: 'name',
   price: 'price',
   codAmount: 'codAmount',
   deliveryFee: 'deliveryFee',

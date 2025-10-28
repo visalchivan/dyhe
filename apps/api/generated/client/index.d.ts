@@ -5015,7 +5015,6 @@ export namespace Prisma {
   export type PackageMinAggregateOutputType = {
     id: string | null
     packageNumber: string | null
-    name: string | null
     price: Decimal | null
     codAmount: Decimal | null
     deliveryFee: Decimal | null
@@ -5035,7 +5034,6 @@ export namespace Prisma {
   export type PackageMaxAggregateOutputType = {
     id: string | null
     packageNumber: string | null
-    name: string | null
     price: Decimal | null
     codAmount: Decimal | null
     deliveryFee: Decimal | null
@@ -5055,7 +5053,6 @@ export namespace Prisma {
   export type PackageCountAggregateOutputType = {
     id: number
     packageNumber: number
-    name: number
     price: number
     codAmount: number
     deliveryFee: number
@@ -5093,7 +5090,6 @@ export namespace Prisma {
   export type PackageMinAggregateInputType = {
     id?: true
     packageNumber?: true
-    name?: true
     price?: true
     codAmount?: true
     deliveryFee?: true
@@ -5113,7 +5109,6 @@ export namespace Prisma {
   export type PackageMaxAggregateInputType = {
     id?: true
     packageNumber?: true
-    name?: true
     price?: true
     codAmount?: true
     deliveryFee?: true
@@ -5133,7 +5128,6 @@ export namespace Prisma {
   export type PackageCountAggregateInputType = {
     id?: true
     packageNumber?: true
-    name?: true
     price?: true
     codAmount?: true
     deliveryFee?: true
@@ -5240,7 +5234,6 @@ export namespace Prisma {
   export type PackageGroupByOutputType = {
     id: string
     packageNumber: string
-    name: string
     price: Decimal
     codAmount: Decimal
     deliveryFee: Decimal
@@ -5279,7 +5272,6 @@ export namespace Prisma {
   export type PackageSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     packageNumber?: boolean
-    name?: boolean
     price?: boolean
     codAmount?: boolean
     deliveryFee?: boolean
@@ -5301,7 +5293,6 @@ export namespace Prisma {
   export type PackageSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     packageNumber?: boolean
-    name?: boolean
     price?: boolean
     codAmount?: boolean
     deliveryFee?: boolean
@@ -5323,7 +5314,6 @@ export namespace Prisma {
   export type PackageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     packageNumber?: boolean
-    name?: boolean
     price?: boolean
     codAmount?: boolean
     deliveryFee?: boolean
@@ -5345,7 +5335,6 @@ export namespace Prisma {
   export type PackageSelectScalar = {
     id?: boolean
     packageNumber?: boolean
-    name?: boolean
     price?: boolean
     codAmount?: boolean
     deliveryFee?: boolean
@@ -5362,7 +5351,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type PackageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "packageNumber" | "name" | "price" | "codAmount" | "deliveryFee" | "status" | "customerName" | "customerPhone" | "customerAddress" | "customerLatitude" | "customerLongitude" | "customerGoogleMapsUrl" | "merchantId" | "driverId" | "createdAt" | "updatedAt", ExtArgs["result"]["package"]>
+  export type PackageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "packageNumber" | "price" | "codAmount" | "deliveryFee" | "status" | "customerName" | "customerPhone" | "customerAddress" | "customerLatitude" | "customerLongitude" | "customerGoogleMapsUrl" | "merchantId" | "driverId" | "createdAt" | "updatedAt", ExtArgs["result"]["package"]>
   export type PackageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     merchant?: boolean | MerchantDefaultArgs<ExtArgs>
     driver?: boolean | Package$driverArgs<ExtArgs>
@@ -5385,7 +5374,6 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       packageNumber: string
-      name: string
       price: Prisma.Decimal
       codAmount: Prisma.Decimal
       deliveryFee: Prisma.Decimal
@@ -5827,7 +5815,6 @@ export namespace Prisma {
   interface PackageFieldRefs {
     readonly id: FieldRef<"Package", 'String'>
     readonly packageNumber: FieldRef<"Package", 'String'>
-    readonly name: FieldRef<"Package", 'String'>
     readonly price: FieldRef<"Package", 'Decimal'>
     readonly codAmount: FieldRef<"Package", 'Decimal'>
     readonly deliveryFee: FieldRef<"Package", 'Decimal'>
@@ -7382,7 +7369,6 @@ export namespace Prisma {
   export const PackageScalarFieldEnum: {
     id: 'id',
     packageNumber: 'packageNumber',
-    name: 'name',
     price: 'price',
     codAmount: 'codAmount',
     deliveryFee: 'deliveryFee',
@@ -7902,7 +7888,6 @@ export namespace Prisma {
     NOT?: PackageWhereInput | PackageWhereInput[]
     id?: StringFilter<"Package"> | string
     packageNumber?: StringFilter<"Package"> | string
-    name?: StringFilter<"Package"> | string
     price?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
@@ -7924,7 +7909,6 @@ export namespace Prisma {
   export type PackageOrderByWithRelationInput = {
     id?: SortOrder
     packageNumber?: SortOrder
-    name?: SortOrder
     price?: SortOrder
     codAmount?: SortOrder
     deliveryFee?: SortOrder
@@ -7949,7 +7933,6 @@ export namespace Prisma {
     AND?: PackageWhereInput | PackageWhereInput[]
     OR?: PackageWhereInput[]
     NOT?: PackageWhereInput | PackageWhereInput[]
-    name?: StringFilter<"Package"> | string
     price?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
@@ -7971,7 +7954,6 @@ export namespace Prisma {
   export type PackageOrderByWithAggregationInput = {
     id?: SortOrder
     packageNumber?: SortOrder
-    name?: SortOrder
     price?: SortOrder
     codAmount?: SortOrder
     deliveryFee?: SortOrder
@@ -7999,7 +7981,6 @@ export namespace Prisma {
     NOT?: PackageScalarWhereWithAggregatesInput | PackageScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Package"> | string
     packageNumber?: StringWithAggregatesFilter<"Package"> | string
-    name?: StringWithAggregatesFilter<"Package"> | string
     price?: DecimalWithAggregatesFilter<"Package"> | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalWithAggregatesFilter<"Package"> | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalWithAggregatesFilter<"Package"> | Decimal | DecimalJsLike | number | string
@@ -8426,7 +8407,6 @@ export namespace Prisma {
   export type PackageCreateInput = {
     id?: string
     packageNumber: string
-    name: string
     price?: Decimal | DecimalJsLike | number | string
     codAmount?: Decimal | DecimalJsLike | number | string
     deliveryFee?: Decimal | DecimalJsLike | number | string
@@ -8446,7 +8426,6 @@ export namespace Prisma {
   export type PackageUncheckedCreateInput = {
     id?: string
     packageNumber: string
-    name: string
     price?: Decimal | DecimalJsLike | number | string
     codAmount?: Decimal | DecimalJsLike | number | string
     deliveryFee?: Decimal | DecimalJsLike | number | string
@@ -8466,7 +8445,6 @@ export namespace Prisma {
   export type PackageUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     packageNumber?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -8486,7 +8464,6 @@ export namespace Prisma {
   export type PackageUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     packageNumber?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -8506,7 +8483,6 @@ export namespace Prisma {
   export type PackageCreateManyInput = {
     id?: string
     packageNumber: string
-    name: string
     price?: Decimal | DecimalJsLike | number | string
     codAmount?: Decimal | DecimalJsLike | number | string
     deliveryFee?: Decimal | DecimalJsLike | number | string
@@ -8526,7 +8502,6 @@ export namespace Prisma {
   export type PackageUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     packageNumber?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -8544,7 +8519,6 @@ export namespace Prisma {
   export type PackageUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     packageNumber?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -9049,7 +9023,6 @@ export namespace Prisma {
   export type PackageCountOrderByAggregateInput = {
     id?: SortOrder
     packageNumber?: SortOrder
-    name?: SortOrder
     price?: SortOrder
     codAmount?: SortOrder
     deliveryFee?: SortOrder
@@ -9077,7 +9050,6 @@ export namespace Prisma {
   export type PackageMaxOrderByAggregateInput = {
     id?: SortOrder
     packageNumber?: SortOrder
-    name?: SortOrder
     price?: SortOrder
     codAmount?: SortOrder
     deliveryFee?: SortOrder
@@ -9097,7 +9069,6 @@ export namespace Prisma {
   export type PackageMinOrderByAggregateInput = {
     id?: SortOrder
     packageNumber?: SortOrder
-    name?: SortOrder
     price?: SortOrder
     codAmount?: SortOrder
     deliveryFee?: SortOrder
@@ -9810,7 +9781,6 @@ export namespace Prisma {
   export type PackageCreateWithoutDriverInput = {
     id?: string
     packageNumber: string
-    name: string
     price?: Decimal | DecimalJsLike | number | string
     codAmount?: Decimal | DecimalJsLike | number | string
     deliveryFee?: Decimal | DecimalJsLike | number | string
@@ -9829,7 +9799,6 @@ export namespace Prisma {
   export type PackageUncheckedCreateWithoutDriverInput = {
     id?: string
     packageNumber: string
-    name: string
     price?: Decimal | DecimalJsLike | number | string
     codAmount?: Decimal | DecimalJsLike | number | string
     deliveryFee?: Decimal | DecimalJsLike | number | string
@@ -9916,7 +9885,6 @@ export namespace Prisma {
     NOT?: PackageScalarWhereInput | PackageScalarWhereInput[]
     id?: StringFilter<"Package"> | string
     packageNumber?: StringFilter<"Package"> | string
-    name?: StringFilter<"Package"> | string
     price?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
@@ -9936,7 +9904,6 @@ export namespace Prisma {
   export type PackageCreateWithoutMerchantInput = {
     id?: string
     packageNumber: string
-    name: string
     price?: Decimal | DecimalJsLike | number | string
     codAmount?: Decimal | DecimalJsLike | number | string
     deliveryFee?: Decimal | DecimalJsLike | number | string
@@ -9955,7 +9922,6 @@ export namespace Prisma {
   export type PackageUncheckedCreateWithoutMerchantInput = {
     id?: string
     packageNumber: string
-    name: string
     price?: Decimal | DecimalJsLike | number | string
     codAmount?: Decimal | DecimalJsLike | number | string
     deliveryFee?: Decimal | DecimalJsLike | number | string
@@ -10164,7 +10130,6 @@ export namespace Prisma {
   export type PackageCreateManyDriverInput = {
     id?: string
     packageNumber: string
-    name: string
     price?: Decimal | DecimalJsLike | number | string
     codAmount?: Decimal | DecimalJsLike | number | string
     deliveryFee?: Decimal | DecimalJsLike | number | string
@@ -10183,7 +10148,6 @@ export namespace Prisma {
   export type PackageUpdateWithoutDriverInput = {
     id?: StringFieldUpdateOperationsInput | string
     packageNumber?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -10202,7 +10166,6 @@ export namespace Prisma {
   export type PackageUncheckedUpdateWithoutDriverInput = {
     id?: StringFieldUpdateOperationsInput | string
     packageNumber?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -10221,7 +10184,6 @@ export namespace Prisma {
   export type PackageUncheckedUpdateManyWithoutDriverInput = {
     id?: StringFieldUpdateOperationsInput | string
     packageNumber?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -10240,7 +10202,6 @@ export namespace Prisma {
   export type PackageCreateManyMerchantInput = {
     id?: string
     packageNumber: string
-    name: string
     price?: Decimal | DecimalJsLike | number | string
     codAmount?: Decimal | DecimalJsLike | number | string
     deliveryFee?: Decimal | DecimalJsLike | number | string
@@ -10259,7 +10220,6 @@ export namespace Prisma {
   export type PackageUpdateWithoutMerchantInput = {
     id?: StringFieldUpdateOperationsInput | string
     packageNumber?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -10278,7 +10238,6 @@ export namespace Prisma {
   export type PackageUncheckedUpdateWithoutMerchantInput = {
     id?: StringFieldUpdateOperationsInput | string
     packageNumber?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -10297,7 +10256,6 @@ export namespace Prisma {
   export type PackageUncheckedUpdateManyWithoutMerchantInput = {
     id?: StringFieldUpdateOperationsInput | string
     packageNumber?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string

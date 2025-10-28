@@ -3,7 +3,6 @@ import api from "../api";
 export interface Package {
   id: string;
   packageNumber: string;
-  name: string;
   customerName: string;
   customerPhone: string;
   customerAddress: string;
@@ -28,7 +27,6 @@ export interface Package {
 }
 
 export interface CreatePackageDto {
-  name: string;
   customerName: string;
   customerPhone: string;
   customerAddress: string;
@@ -40,7 +38,6 @@ export interface CreatePackageDto {
 }
 
 export interface PackageDataDto {
-  name?: string;
   customerName: string;
   customerPhone: string;
   customerAddress: string;
@@ -51,6 +48,7 @@ export interface PackageDataDto {
 export interface BulkCreatePackagesDto {
   merchantId: string;
   status?: string;
+  driverId?: string;
   packages: PackageDataDto[];
 }
 

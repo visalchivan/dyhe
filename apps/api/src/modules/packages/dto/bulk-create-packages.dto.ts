@@ -13,10 +13,6 @@ import { Type } from 'class-transformer';
 import { PackageStatus } from 'generated/client';
 
 export class PackageDataDto {
-  @IsOptional()
-  @IsString()
-  name?: string; // Auto-generated, optional in input
-
   @IsString()
   customerName: string;
 
@@ -42,6 +38,10 @@ export class BulkCreatePackagesDto {
   @IsOptional()
   @IsEnum(PackageStatus)
   status?: PackageStatus;
+
+  @IsOptional()
+  @IsString()
+  driverId?: string;
 
   @IsArray()
   @ValidateNested({ each: true })

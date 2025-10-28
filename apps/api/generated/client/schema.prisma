@@ -122,7 +122,6 @@ model Merchant {
 model Package {
   id                    String        @id @default(uuid())
   packageNumber         String        @unique @map("package_number")
-  name                  String
   price                 Decimal       @default(0)
   codAmount             Decimal       @default(0) @map("cod_amount")
   deliveryFee           Decimal       @default(0) @map("delivery_fee")

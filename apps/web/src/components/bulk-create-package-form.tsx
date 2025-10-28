@@ -4,6 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from "@/components/ui/field";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -22,6 +28,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Trash2, Printer } from "lucide-react";
 import { useBulkCreatePackages } from "@/hooks/usePackages";
 import { useMerchants } from "@/hooks/useMerchants";
+import { useDrivers } from "@/hooks/useDrivers";
 import type { PackageDataDto, BulkCreatePackagesDto } from "@/lib/api/packages";
 import { printBulkLabels } from "@/lib/utils/directPrint";
 import { toast } from "sonner";
@@ -37,7 +44,13 @@ export function BulkCreatePackageForm({
 }: BulkCreatePackageFormProps) {
   const [merchantId, setMerchantId] = useState("");
   const [status, setStatus] = useState("READY");
-  const [shouldPrint, setShouldPrint] = useState(false);
+  const [driverId, setDriverId] = useState("");
+  
+  // Load print preference from localStorage on mount
+  const [shouldPrint, setShouldPrint] = useState(() => {
+    const saved = localStorage.getItem("bulk-create-print-labels");
+    return saved === "true";
+  });
   const [packages, setPackages] = useState<PackageDataDto[]>([
     {
       customerName: "",
@@ -50,6 +63,7 @@ export function BulkCreatePackageForm({
   const [rowCount, setRowCount] = useState(1);
 
   const { data: merchantsData } = useMerchants({ page: 1, limit: 1000 });
+  const { data: driversData } = useDrivers({ page: 1, limit: 1000 });
   const bulkCreatePackagesMutation = useBulkCreatePackages();
 
   const addPackage = () => {
@@ -123,6 +137,7 @@ export function BulkCreatePackageForm({
     const bulkData: BulkCreatePackagesDto = {
       merchantId,
       status,
+      driverId: driverId && driverId !== "none" ? driverId : undefined,
       packages: validPackages,
     };
 
@@ -140,7 +155,7 @@ export function BulkCreatePackageForm({
         const packagesToPrint = response.packages.map((pkg) => ({
           id: pkg.id,
           packageNumber: pkg.packageNumber,
-          name: pkg.name || pkg.packageNumber,
+          name: pkg.packageNumber,
           customerName: pkg.customerName,
           customerPhone: pkg.customerPhone,
           customerAddress: pkg.customerAddress,
@@ -172,6 +187,12 @@ export function BulkCreatePackageForm({
       const deliveryFee = Number(selectedMerchant.deliverFee);
       setPackages(packages.map((pkg) => ({ ...pkg, deliveryFee })));
     }
+  };
+
+  const handlePrintToggle = (checked: boolean) => {
+    setShouldPrint(checked);
+    // Save to localStorage
+    localStorage.setItem("bulk-create-print-labels", checked.toString());
   };
 
   return (
@@ -208,36 +229,56 @@ export function BulkCreatePackageForm({
           <CardTitle>Package Settings</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="merchant">Merchant *</Label>
-              <Select value={merchantId} onValueChange={handleMerchantChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select merchant" />
-                </SelectTrigger>
-                <SelectContent>
-                  {merchantsData?.merchants.map((merchant) => (
-                    <SelectItem key={merchant.id} value={merchant.id}>
-                      {merchant.name} - {merchant.phone}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="status">Status</Label>
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="READY">Ready</SelectItem>
-                  <SelectItem value="RECEIVED">Received</SelectItem>
-                  <SelectItem value="PREPARING">Preparing</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <FieldSet>
+            <FieldGroup className="grid grid-cols-3 gap-4">
+              <Field>
+                <FieldLabel htmlFor="merchant">
+                  Merchant <span className="text-red-500">*</span>
+                </FieldLabel>
+                <Select value={merchantId} onValueChange={handleMerchantChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select merchant" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {merchantsData?.merchants.map((merchant) => (
+                      <SelectItem key={merchant.id} value={merchant.id}>
+                        {merchant.name} - {merchant.phone}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="driver">Driver (Optional)</FieldLabel>
+                <Select value={driverId} onValueChange={setDriverId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select driver" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No driver assigned</SelectItem>
+                    {driversData?.drivers.map((driver) => (
+                      <SelectItem key={driver.id} value={driver.id}>
+                        {driver.name} - {driver.phone}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="status">Status</FieldLabel>
+                <Select value={status} onValueChange={setStatus}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="READY">Ready</SelectItem>
+                    <SelectItem value="RECEIVED">Received</SelectItem>
+                    <SelectItem value="PREPARING">Preparing</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+            </FieldGroup>
+          </FieldSet>
         </CardContent>
       </Card>
 
@@ -257,9 +298,9 @@ export function BulkCreatePackageForm({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Customer Name *</TableHead>
-                  <TableHead>Phone *</TableHead>
-                  <TableHead>Address *</TableHead>
+                  <TableHead>Customer Name <span className="text-red-500">*</span></TableHead>
+                  <TableHead>Phone <span className="text-red-500">*</span></TableHead>
+                  <TableHead>Address <span className="text-red-500">*</span></TableHead>
                   <TableHead>COD Amount</TableHead>
                   <TableHead>Delivery Fee</TableHead>
                   <TableHead className="w-[80px]">Actions</TableHead>
@@ -353,14 +394,15 @@ export function BulkCreatePackageForm({
 
       {/* Actions */}
       <div className="flex flex-col gap-4 pt-4 border-t">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
           <Checkbox
             id="print-labels"
             checked={shouldPrint}
-            onCheckedChange={(checked) => setShouldPrint(checked as boolean)}
+            onCheckedChange={(checked) => handlePrintToggle(checked as boolean)}
+            className="h-5 w-5"
           />
-          <Label htmlFor="print-labels" className="font-normal cursor-pointer flex items-center gap-2">
-            <Printer className="h-4 w-4" />
+          <Label htmlFor="print-labels" className="font-normal cursor-pointer flex items-center gap-2 text-base">
+            <Printer className="h-5 w-5" />
             Print labels after creating packages
           </Label>
         </div>

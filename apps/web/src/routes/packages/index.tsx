@@ -23,21 +23,14 @@ function PackagesPage() {
     setViewDialogOpen(true)
   }
 
-  const handleCreatePackage = () => {
-    // TODO: Implement create package modal
-    console.log('Create package')
-  }
-
   return (
     <MainLayout>
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold">Packages</h1>
+          <p className="text-sm text-muted-foreground">Manage packages and their details</p>
         </div>
         <PackagesTable
-          onCreatePackage={handleCreatePackage}
-          onBulkCreatePackages={() => {}}
-          onEditPackage={handleEditPackage}
           onViewPackage={handleViewPackage}
         />
 

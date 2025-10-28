@@ -4,7 +4,6 @@ import { settingsApi } from "../api/settings";
 export interface PrintLabelPackage {
   id: string;
   packageNumber: string;
-  name: string;
   customerName: string;
   customerPhone: string;
   customerAddress: string;
