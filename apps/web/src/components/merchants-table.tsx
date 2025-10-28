@@ -1,7 +1,31 @@
-import { CreateMerchantModal } from "@/components/create-merchant-modal";
-import { EditMerchantModal } from "@/components/edit-merchant-modal";
-import { Badge } from "@/components/ui/badge";
+"use client"
+
+import * as React from "react";
+import {
+  type ColumnDef,
+  type ColumnFiltersState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  type SortingState,
+  useReactTable,
+  type VisibilityState,
+} from "@tanstack/react-table";
+import { ArrowUpDown, ChevronDown, MoreHorizontal, Plus, RefreshCw } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -11,29 +35,37 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useDeleteMerchant, useMerchants } from "@/hooks/useMerchants";
+import { Badge } from "@/components/ui/badge";
+import { useMerchants, useDeleteMerchant } from "@/hooks/useMerchants";
 import type { Merchant } from "@/lib/api/merchants";
-import {
-  Edit,
-  Plus,
-  RefreshCw,
-  Search,
-  Trash2
-} from "lucide-react";
-import { useState } from "react";
+import { CreateMerchantModal } from "@/components/create-merchant-modal";
+import { EditMerchantModal } from "@/components/edit-merchant-modal";
+import { toast } from "sonner";
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "ACTIVE":
+      return "default";
+    case "INACTIVE":
+      return "destructive";
+    default:
+      return "outline";
+  }
+};
 
 export function MerchantsTable() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10);
-  const [searchText, setSearchText] = useState("");
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(null);
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = React.useState({});
+  const [createModalOpen, setCreateModalOpen] = React.useState(false);
+  const [editModalOpen, setEditModalOpen] = React.useState(false);
+  const [selectedMerchant, setSelectedMerchant] = React.useState<Merchant | null>(null);
+  const [globalFilter, setGlobalFilter] = React.useState("");
 
   const { data, isLoading, refetch } = useMerchants({
-    page: currentPage,
-    limit: pageSize,
-    search: searchText || undefined,
+    page: 1,
+    limit: 1000, // Get all merchants for client-side filtering
   });
 
   const deleteMerchantMutation = useDeleteMerchant();
@@ -42,8 +74,10 @@ export function MerchantsTable() {
     if (window.confirm("Are you sure you want to delete this merchant?")) {
       try {
         await deleteMerchantMutation.mutateAsync(id);
+        toast.success("Merchant deleted successfully");
+        refetch();
       } catch (error) {
-        // Error handled by mutation
+        toast.error("Failed to delete merchant");
       }
     }
   };
@@ -53,140 +87,277 @@ export function MerchantsTable() {
     setEditModalOpen(true);
   };
 
-  const handleSearch = (value: string) => {
-    setSearchText(value);
-    setCurrentPage(1);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "ACTIVE":
-        return "default";
-      case "INACTIVE":
-        return "destructive";
-      default:
-        return "outline";
-    }
-  };
-
   const merchants = data?.merchants || [];
-  const pagination = data?.pagination;
+
+  const columns: ColumnDef<Merchant>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "name",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Name
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
+      cell: ({ row }) => <div className="font-medium">{row.getValue("name")}</div>,
+      enableColumnFilter: true,
+    },
+    {
+      accessorKey: "phone",
+      header: "Phone",
+      cell: ({ row }) => <div>{row.getValue("phone")}</div>,
+    },
+    {
+      accessorKey: "email",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Email
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
+      cell: ({ row }) => <div className="lowercase">{row.getValue("email") || "-"}</div>,
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        <Badge variant={getStatusColor(row.getValue("status")) as any}>
+          {row.getValue("status")}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: "address",
+      header: "Address",
+      cell: ({ row }) => <div>{row.getValue("address")}</div>,
+    },
+    {
+      accessorKey: "deliverFee",
+      header: () => <div className="text-right">Fee</div>,
+      cell: ({ row }) => {
+        const amount = parseFloat(row.getValue("deliverFee"));
+        const formatted = new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+        }).format(amount);
+        return <div className="text-right font-medium">{formatted}</div>;
+      },
+    },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({ row }) => {
+        const merchant = row.original;
+
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() => navigator.clipboard.writeText(merchant.id)}
+              >
+                Copy merchant ID
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => handleEdit(merchant)}>
+                Edit merchant
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDelete(merchant.id)}>
+                Delete merchant
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
+
+  const table = useReactTable({
+    data: merchants,
+    columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: "includesString",
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+      globalFilter,
+    },
+  });
 
   return (
-    <div className="space-y-4">
-      {/* Search and Actions */}
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search merchants..."
-            value={searchText}
-            onChange={(e) => handleSearch(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-        <Button onClick={() => refetch()} variant="outline" size="icon">
-          <RefreshCw className="h-4 w-4" />
-        </Button>
-        <Button onClick={() => setCreateModalOpen(true)}>
+    <div className="w-full">
+      <div className="flex items-center py-4">
+        <Input
+          placeholder="Filter merchants..."
+          value={globalFilter ?? ""}
+          onChange={(event) => setGlobalFilter(event.target.value)}
+          className="max-w-sm"
+        />
+        <Button onClick={() => setCreateModalOpen(true)} className="ml-auto">
           <Plus className="h-4 w-4 mr-2" />
           Add Merchant
         </Button>
+        <Button onClick={() => refetch()} variant="outline" className="ml-2">
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Refresh
+        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="ml-2">
+              Columns <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {table
+              .getAllColumns()
+              .filter((column) => column.getCanHide())
+              .map((column) => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-
-      {/* Table */}
-      <div className="border rounded-md">
+      <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Address</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Fee</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   Loading...
                 </TableCell>
               </TableRow>
-            ) : merchants.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
-                  No merchants found
-                </TableCell>
-              </TableRow>
-            ) : (
-              merchants.map((merchant) => (
-                <TableRow key={merchant.id}>
-                  <TableCell className="font-medium">{merchant.name}</TableCell>
-                  <TableCell>{merchant.phone}</TableCell>
-                  <TableCell>{merchant.email || "-"}</TableCell>
-                  <TableCell>{merchant.address}</TableCell>
-                  <TableCell>
-                    <Badge variant={getStatusColor(merchant.status) as any}>
-                      {merchant.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>${merchant.deliverFee}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEdit(merchant)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(merchant.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+            ) : table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
                 </TableRow>
               ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No merchants found.
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
-
-      {/* Pagination */}
-      {pagination && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            Showing {((currentPage - 1) * pageSize) + 1} to{" "}
-            {Math.min(currentPage * pageSize, pagination.total)} of{" "}
-            {pagination.total} merchants
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((p) => p + 1)}
-              disabled={currentPage >= pagination.totalPages}
-            >
-              Next
-            </Button>
-          </div>
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <div className="text-muted-foreground flex-1 text-sm">
+          {table.getFilteredSelectedRowModel().rows.length} of{" "}
+          {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>
-      )}
+        <div className="space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
 
       {/* Modals */}
       <CreateMerchantModal open={createModalOpen} onOpenChange={setCreateModalOpen} />
