@@ -160,6 +160,14 @@ export class ReportsService {
     };
   }
 
+  async getDriverReports(query: ReportsQueryDto): Promise<ReportsResponseDto> {
+    return this.getReports({ ...query, type: ReportType.DRIVER });
+  }
+
+  async getMerchantReports(query: ReportsQueryDto): Promise<ReportsResponseDto> {
+    return this.getReports({ ...query, type: ReportType.MERCHANT });
+  }
+
   private async calculateAnalytics(
     where: Record<string, any>,
   ): Promise<PackageAnalyticsDto> {

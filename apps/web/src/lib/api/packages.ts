@@ -137,4 +137,19 @@ export const packagesApi = {
     const response = await api.delete(`/packages/${id}`);
     return response.data;
   },
+
+  // Get reports
+  getReports: async (params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    merchantId?: string;
+    driverId?: string;
+    startDate?: string;
+    endDate?: string;
+    type?: string;
+  }): Promise<any> => {
+    const response = await api.get("/reports", { params });
+    return response.data;
+  },
 };

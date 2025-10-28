@@ -14,7 +14,7 @@ import { ReportsService } from './reports.service';
 import { ReportsQueryDto, ReportType } from './dto/reports-query.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { DriverReportDto, MerchantReportDto } from './dto/reports-response.dto';
-import * as XLSX from 'xlsx';
+import * as ExcelJS from 'exceljs';
 
 @Controller('reports')
 @UseGuards(JwtAuthGuard)
@@ -174,7 +174,7 @@ export class ReportsController {
     'Content-Type',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   )
-  @Header('Content-Disposition', 'attachment; filename="delivery_report.xlsx"')
+  @Header('Content-Disposition', 'attachment; filename="DeliveryReport.xlsx"')
   async exportToExcel(
     @Query(new ValidationPipe({ transform: true })) query: ReportsQueryDto,
     @Res() res: Response,
@@ -198,11 +198,38 @@ export class ReportsController {
         return `${dd}-${mm}-${yy} ${hh}:${minutes} ${ampm}`;
       };
 
-      // Create a new workbook
-      const workbook = XLSX.utils.book_new();
+      // Helper to format date like DD-MMM-YY
+      const formatDateShort = (isoDate?: string | Date) => {
+        if (!isoDate) return '';
+        const d = new Date(isoDate);
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const yy = String(d.getFullYear()).slice(-2);
+        const mm = months[d.getMonth()];
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${dd}-${mm}-${yy}`;
+      };
 
-      // Minimal headers as requested
-      const headers = [
+      // Helper to format date like MM/DD/YYYY
+      const formatDateUS = (isoDate?: string | Date) => {
+        if (!isoDate) return '';
+        const d = new Date(isoDate);
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const yyyy = d.getFullYear();
+        return `${mm}/${dd}/${yyyy}`;
+      };
+
+      // Create ExcelJS workbook
+      const workbook = new ExcelJS.Workbook();
+      const today = new Date();
+      const todayStr = formatDateShort(today);
+
+      // === SHEET 1: Pick up [DD-MMM-YY] ===
+      const pickupSheetName = `Pick up ${todayStr}`;
+      const pickupSheet = workbook.addWorksheet(pickupSheetName);
+
+      // Headers for pickup sheet
+      const pickupHeaders = [
         'ID',
         'Shipment Create Date',
         'Shipment Delivery Date',
@@ -213,139 +240,410 @@ export class ReportsController {
         'Cash Collection Amount',
       ];
 
-      const dataRows = reports.data.map(
-        (item: DriverReportDto | MerchantReportDto, index: number) => {
-          const deliveryDate = item.shipmentDeliveryDate
-            ? formatDateTime(item.shipmentDeliveryDate)
-            : 'Not Delivered';
+      // Add headers with styling
+      const headerRow = pickupSheet.addRow(pickupHeaders);
+      headerRow.eachCell((cell, colNumber) => {
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FF1E3A8A' } // Dark blue
+        };
+        cell.font = {
+          color: { argb: 'FFFFFFFF' }, // White
+          bold: true
+        };
+        cell.alignment = {
+          horizontal: 'center',
+          vertical: 'middle'
+        };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFFFFFFF' } },
+          bottom: { style: 'thin', color: { argb: 'FFFFFFFF' } },
+          left: { style: 'thin', color: { argb: 'FFFFFFFF' } },
+          right: { style: 'thin', color: { argb: 'FFFFFFFF' } }
+        };
+      });
 
-          return [
-            index + 1,
-            formatDateTime(item.shipmentCreateDate),
-            deliveryDate,
-            item.receiverName,
-            item.address,
-            item.contact,
-            item.trackingNumber,
-            item.cashCollectionAmount,
-          ];
-        },
-      );
+      // Add data rows with alternating colors
+      reports.data.forEach((item: DriverReportDto | MerchantReportDto, index: number) => {
+        const deliveryDate = item.shipmentDeliveryDate
+          ? formatDateTime(item.shipmentDeliveryDate)
+          : '';
 
-      // Create worksheet just with the table (no top summary)
-      const allData = [headers, ...dataRows];
-      const worksheet = XLSX.utils.aoa_to_sheet(allData);
+        const dataRow = pickupSheet.addRow([
+          index + 1,
+          formatDateTime(item.shipmentCreateDate),
+          deliveryDate,
+          item.receiverName,
+          item.address,
+          item.contact,
+          item.trackingNumber,
+          item.cashCollectionAmount || '',
+        ]);
+
+        const isEvenRow = (index + 2) % 2 === 0; // +2 because header is row 1
+        const fillColor = isEvenRow ? 'FFFFFFFF' : 'FFF8F9FA'; // White or light gray
+
+        dataRow.eachCell((cell, colNumber) => {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: fillColor }
+          };
+          cell.font = {
+            color: { argb: 'FF000000' } // Black
+          };
+          cell.alignment = {
+            horizontal: 'left',
+            vertical: 'middle'
+          };
+          cell.border = {
+            top: { style: 'thin', color: { argb: 'FFDEE2E6' } },
+            bottom: { style: 'thin', color: { argb: 'FFDEE2E6' } },
+            left: { style: 'thin', color: { argb: 'FFDEE2E6' } },
+            right: { style: 'thin', color: { argb: 'FFDEE2E6' } }
+          };
+        });
+      });
+
+      // Add totals rows
+      const totalPackageRow = pickupSheet.addRow(['', '', '', '', '', '', 'Total Package', reports.analytics.totalPackages]);
+      const totalAmountRow = pickupSheet.addRow(['', '', '', '', '', '', 'Total Amount', Number(reports.analytics.totalCOD.toFixed(2))]);
+
+      // Style totals rows with yellow background
+      [totalPackageRow, totalAmountRow].forEach(row => {
+        row.eachCell((cell, colNumber) => {
+          if (colNumber >= 7) { // Only style columns G and H
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFFEF3C7' } // Yellow
+            };
+            cell.font = {
+              color: { argb: 'FF000000' }, // Black
+              bold: true
+            };
+            cell.alignment = {
+              horizontal: 'center',
+              vertical: 'middle'
+            };
+            cell.border = {
+              top: { style: 'thin', color: { argb: 'FFBDBDBD' } },
+              bottom: { style: 'thin', color: { argb: 'FFBDBDBD' } },
+              left: { style: 'thin', color: { argb: 'FFBDBDBD' } },
+              right: { style: 'thin', color: { argb: 'FFBDBDBD' } }
+            };
+          }
+        });
+      });
 
       // Set column widths
-      const columnWidths = [
-        { wch: 5 }, // ID
-        { wch: 20 }, // Shipment Create Date
-        { wch: 20 }, // Shipment Delivery Date
-        { wch: 18 }, // Receiver Name
-        { wch: 30 }, // Address
-        { wch: 16 }, // Contact
-        { wch: 22 }, // Tracking#
-        { wch: 20 }, // Cash Collection Amount
+      pickupSheet.columns = [
+        { width: 5 }, // ID
+        { width: 20 }, // Shipment Create Date
+        { width: 20 }, // Shipment Delivery Date
+        { width: 18 }, // Receiver Name
+        { width: 30 }, // Address
+        { width: 16 }, // Contact
+        { width: 22 }, // Tracking#
+        { width: 20 }, // Cash Collection Amount
       ];
-      worksheet['!cols'] = columnWidths;
 
-      // Add styling and totals similar to screenshot
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-      const range = XLSX.utils.decode_range((worksheet as any)['!ref'] || 'A1');
+      // === SHEET 2: Delivery report [DD-MMM-YY] ===
+      const deliverySheetName = `Delivery report ${todayStr}`;
+      const deliverySheet = workbook.addWorksheet(deliverySheetName);
 
-      // Style column headers
-      const headerRow = 1; // first row
-      for (let col = 0; col < headers.length; col++) {
-        const cellRef = XLSX.utils.encode_cell({ r: headerRow - 1, c: col });
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-        (worksheet[cellRef] as any).s = {
-          font: { bold: true, color: { rgb: 'FFFFFF' } },
-          fill: { fgColor: { rgb: '495057' } },
-          alignment: { horizontal: 'center', vertical: 'center' },
-        };
-      }
-
-      // Style data rows with alternating colors
-      for (let row = headerRow + 1; row <= range.e.r; row++) {
-        const isEvenRow = (row - headerRow) % 2 === 0;
-        const fillColor = isEvenRow ? 'FFFFFF' : 'F8F9FA';
-
-        for (let col = 0; col <= range.e.c; col++) {
-          const cellRef = XLSX.utils.encode_cell({ r: row, c: col });
-          if (!worksheet[cellRef]) continue;
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-          (worksheet[cellRef] as any).s = {
-            fill: { fgColor: { rgb: fillColor } },
-            border: {
-              top: { style: 'thin', color: { rgb: 'DEE2E6' } },
-              bottom: { style: 'thin', color: { rgb: 'DEE2E6' } },
-              left: { style: 'thin', color: { rgb: 'DEE2E6' } },
-              right: { style: 'thin', color: { rgb: 'DEE2E6' } },
-            },
-          };
-        }
-      }
-
-      // Add totals at the bottom like the screenshot (in G/H columns)
-      const totalsRowStart = range.e.r + 2; // one blank row after data
-      const totalPackageCellLabel = `G${totalsRowStart}`;
-      const totalPackageCellValue = `H${totalsRowStart}`;
-      const totalAmountCellLabel = `G${totalsRowStart + 1}`;
-      const totalAmountCellValue = `H${totalsRowStart + 1}`;
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (worksheet as any)[totalPackageCellLabel] = { v: 'Total Package' };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (worksheet as any)[totalPackageCellValue] = {
-        v: reports.analytics.totalPackages,
-      };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (worksheet as any)[totalAmountCellLabel] = { v: 'Total Amount' };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (worksheet as any)[totalAmountCellValue] = {
-        v: Number(reports.analytics.totalCOD.toFixed(2)),
+      // Helper function to style cells
+      const styleCell = (row: number, col: number, style: any) => {
+        const cell = deliverySheet.getCell(row, col);
+        if (style.fill) cell.fill = style.fill;
+        if (style.font) cell.font = style.font;
+        if (style.alignment) cell.alignment = style.alignment;
+        if (style.border) cell.border = style.border;
       };
 
-      // Apply styles (yellow background)
-      const totalsCells = [
-        totalPackageCellLabel,
-        totalPackageCellValue,
-        totalAmountCellLabel,
-        totalAmountCellValue,
+      // Row 1: Shop name
+      deliverySheet.getCell(1, 1).value = 'ឈ្មោះហាង ៖';
+      deliverySheet.getCell(1, 3).value = 'Pink Please';
+      styleCell(1, 1, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } },
+        font: { color: { argb: 'FFFFFFFF' }, bold: true },
+        alignment: { horizontal: 'left', vertical: 'middle' }
+      });
+      styleCell(1, 3, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } },
+        font: { color: { argb: 'FF000000' }, bold: true },
+        alignment: { horizontal: 'left', vertical: 'middle' }
+      });
+
+      // Row 2: Bank info
+      deliverySheet.getCell(2, 1).value = 'ឈ្មោះធនាគារ ៖';
+      deliverySheet.getCell(2, 3).value = '099 888 852 sarychanminea';
+      styleCell(2, 1, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } },
+        font: { color: { argb: 'FFFFFFFF' }, bold: true },
+        alignment: { horizontal: 'left', vertical: 'middle' }
+      });
+      styleCell(2, 3, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } },
+        font: { color: { argb: 'FF000000' }, bold: true },
+        alignment: { horizontal: 'left', vertical: 'middle' }
+      });
+
+      // Row 3: Report date
+      deliverySheet.getCell(3, 1).value = 'កាលបរិច្ឆេទរបាយការណ៍ ៖';
+      deliverySheet.getCell(3, 3).value = formatDateUS(today);
+      styleCell(3, 1, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } },
+        font: { color: { argb: 'FFFFFFFF' }, bold: true },
+        alignment: { horizontal: 'left', vertical: 'middle' }
+      });
+      styleCell(3, 3, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } },
+        font: { color: { argb: 'FF000000' }, bold: true },
+        alignment: { horizontal: 'left', vertical: 'middle' }
+      });
+
+      // Row 6: Package status summary headers
+      deliverySheet.getCell(6, 1).value = 'ចំនួនកញ្ចប់សរុប';
+      deliverySheet.getCell(6, 3).value = 'បានបញ្ចប់';
+      deliverySheet.getCell(6, 4).value = 'មិនទាន់បញ្ចប់';
+      styleCell(6, 1, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF000000' } },
+        font: { color: { argb: 'FFFFFFFF' }, bold: true },
+        alignment: { horizontal: 'center', vertical: 'middle' }
+      });
+      styleCell(6, 3, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF166534' } },
+        font: { color: { argb: 'FFFFFFFF' }, bold: true },
+        alignment: { horizontal: 'center', vertical: 'middle' }
+      });
+      styleCell(6, 4, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDC2626' } },
+        font: { color: { argb: 'FFFFFFFF' }, bold: true },
+        alignment: { horizontal: 'center', vertical: 'middle' }
+      });
+
+      // Row 7: Package status values
+      deliverySheet.getCell(7, 1).value = reports.analytics.totalPackages;
+      deliverySheet.getCell(7, 3).value = reports.analytics.totalPackages - 1;
+      deliverySheet.getCell(7, 4).value = 1;
+      styleCell(7, 1, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } },
+        font: { color: { argb: 'FF000000' }, bold: true },
+        alignment: { horizontal: 'center', vertical: 'middle' }
+      });
+      styleCell(7, 3, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } },
+        font: { color: { argb: 'FF000000' }, bold: true },
+        alignment: { horizontal: 'center', vertical: 'middle' }
+      });
+      styleCell(7, 4, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } },
+        font: { color: { argb: 'FF000000' }, bold: true },
+        alignment: { horizontal: 'center', vertical: 'middle' }
+      });
+
+      // Row 10: Financial summary headers
+      const financialHeaders = [
+        'តម្លៃទំនិញទាំងអស់',
+        'ទឹកប្រាក់ប្រមូលបានសរុប',
+        'ទឹកប្រាក់ដែរត្រូវទូរទាត់',
+        'ថ្លៃដឹកជញ្ជូន',
+        'ថ្លៃដឹកជញ្ជូនដែរត្រូវទូរទាត់',
+        'ទឹកប្រាក់ដែរត្រូវទូរទាត់'
       ];
-      for (const ref of totalsCells) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-        (worksheet[ref] as any).s = {
-          fill: { fgColor: { rgb: 'FFF59D' } },
-          font: { bold: true },
-          border: {
-            top: { style: 'thin', color: { rgb: 'BDBDBD' } },
-            bottom: { style: 'thin', color: { rgb: 'BDBDBD' } },
-            left: { style: 'thin', color: { rgb: 'BDBDBD' } },
-            right: { style: 'thin', color: { rgb: 'BDBDBD' } },
-          },
-        };
-      }
-
-      // Ensure totals are inside the worksheet range/ref so they appear in the file
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (worksheet as any)['!ref'] = XLSX.utils.encode_range({
-        s: { r: 0, c: 0 },
-        e: { r: totalsRowStart + 1, c: headers.length - 1 },
+      financialHeaders.forEach((header, index) => {
+        deliverySheet.getCell(10, index + 1).value = header;
+        const colors = ['FF86EFAC', 'FF86EFAC', 'FF86EFAC', 'FFFED7AA', 'FFFED7AA', 'FF7C2D12'];
+        styleCell(10, index + 1, {
+          fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: colors[index] } },
+          font: { color: { argb: index === 5 ? 'FFFFFFFF' : 'FF000000' }, bold: true },
+          alignment: { horizontal: 'center', vertical: 'middle' }
+        });
       });
 
-      // Add the worksheet to workbook
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Delivery Report');
-
-      // Generate Excel file buffer
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const excelBuffer = XLSX.write(workbook, {
-        type: 'buffer',
-        bookType: 'xlsx',
+      // Row 11: Financial summary values
+      const financialValues = [
+        `$${Number(reports.analytics.totalCOD.toFixed(2)) + 20}`,
+        `$${Number(reports.analytics.totalCOD.toFixed(2))}`,
+        '$20',
+        '$15',
+        '$0',
+        `$${Number(reports.analytics.totalCOD.toFixed(2)) - 15}`
+      ];
+      financialValues.forEach((value, index) => {
+        deliverySheet.getCell(11, index + 1).value = value;
+        styleCell(11, index + 1, {
+          fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } },
+          font: { color: { argb: 'FF000000' }, bold: true },
+          alignment: { horizontal: 'center', vertical: 'middle' }
+        });
       });
 
-      res.send(excelBuffer);
+      // Row 14: Detailed headers
+      const detailHeaders = [
+        'No', 'Shipment Create Date', 'Receiver Name', 'Address', 'Contact', 
+        'Tracking#', 'Status', 'COD', 'Pick Fee', 'Taxi Fee', 'Delivery Fee', 
+        'Packaging Fee', 'Remark', ''
+      ];
+      detailHeaders.forEach((header, index) => {
+        deliverySheet.getCell(14, index + 1).value = header;
+        styleCell(14, index + 1, {
+          fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDBEAFE' } },
+          font: { color: { argb: 'FF000000' }, bold: true },
+          alignment: { horizontal: 'center', vertical: 'middle' }
+        });
+      });
+
+      // Data rows (15+): Add package data
+      reports.data.forEach((item: DriverReportDto | MerchantReportDto, index: number) => {
+        const rowNum = 15 + index;
+        const rowData = [
+          index + 1,
+          formatDateTime(item.shipmentCreateDate),
+          item.receiverName,
+          item.address,
+          item.contact,
+          item.trackingNumber,
+          item.shipmentDeliveryDate ? 'Delivered' : 'In Central Warehouse',
+          item.cashCollectionAmount || '',
+          '$0',
+          '$0',
+          '$15',
+          '$0',
+          '',
+          ''
+        ];
+        
+        rowData.forEach((value, colIndex) => {
+          deliverySheet.getCell(rowNum, colIndex + 1).value = value;
+          styleCell(rowNum, colIndex + 1, {
+            fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } },
+            font: { color: { argb: 'FF000000' } },
+            alignment: { horizontal: 'left', vertical: 'middle' }
+          });
+        });
+      });
+
+      // Bottom summary rows
+      const summaryRow = 15 + reports.data.length;
+      
+      // Total Cash
+      deliverySheet.getCell(summaryRow, 3).value = 'Total Cash';
+      deliverySheet.getCell(summaryRow, 7).value = `$${Number(reports.analytics.totalCOD.toFixed(2))}`;
+      styleCell(summaryRow, 3, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } },
+        font: { color: { argb: 'FF000000' }, bold: true },
+        alignment: { horizontal: 'left', vertical: 'middle' }
+      });
+      styleCell(summaryRow, 7, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF3C7' } },
+        font: { color: { argb: 'FF000000' }, bold: true },
+        alignment: { horizontal: 'center', vertical: 'middle' }
+      });
+
+      // Total Expenses Entry
+      deliverySheet.getCell(summaryRow + 2, 3).value = 'Total Expenses Entry';
+      deliverySheet.getCell(summaryRow + 2, 7).value = '$15';
+      styleCell(summaryRow + 2, 3, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } },
+        font: { color: { argb: 'FF000000' }, bold: true },
+        alignment: { horizontal: 'left', vertical: 'middle' }
+      });
+      styleCell(summaryRow + 2, 7, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF3C7' } },
+        font: { color: { argb: 'FF000000' }, bold: true },
+        alignment: { horizontal: 'center', vertical: 'middle' }
+      });
+
+      // Total Expenses
+      deliverySheet.getCell(summaryRow + 3, 3).value = 'Total Expenses';
+      deliverySheet.getCell(summaryRow + 3, 4).value = '$15';
+      styleCell(summaryRow + 3, 3, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } },
+        font: { color: { argb: 'FF000000' }, bold: true },
+        alignment: { horizontal: 'left', vertical: 'middle' }
+      });
+      styleCell(summaryRow + 3, 4, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF3C7' } },
+        font: { color: { argb: 'FF000000' }, bold: true },
+        alignment: { horizontal: 'center', vertical: 'middle' }
+      });
+
+      // Deduct Fee After Expenses
+      deliverySheet.getCell(summaryRow + 4, 3).value = 'Deduct Fee After Expenses';
+      deliverySheet.getCell(summaryRow + 4, 4).value = `$${Number(reports.analytics.totalCOD.toFixed(2)) - 15}`;
+      styleCell(summaryRow + 4, 3, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDBEAFE' } },
+        font: { color: { argb: 'FF000000' }, bold: true },
+        alignment: { horizontal: 'left', vertical: 'middle' }
+      });
+      styleCell(summaryRow + 4, 4, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDBEAFE' } },
+        font: { color: { argb: 'FF000000' }, bold: true },
+        alignment: { horizontal: 'center', vertical: 'middle' }
+      });
+
+      // Outstanding Detail section
+      const outstandingRow = summaryRow + 7;
+      deliverySheet.getCell(outstandingRow, 1).value = 'Outstanding Detail';
+      styleCell(outstandingRow, 1, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFED7AA' } },
+        font: { color: { argb: 'FF000000' }, bold: true },
+        alignment: { horizontal: 'left', vertical: 'middle' }
+      });
+
+      deliverySheet.getCell(outstandingRow + 1, 1).value = 'Outstanding Date';
+      deliverySheet.getCell(outstandingRow + 1, 2).value = 'Outstanding Balance';
+      styleCell(outstandingRow + 1, 1, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } },
+        font: { color: { argb: 'FF000000' }, bold: true },
+        alignment: { horizontal: 'left', vertical: 'middle' }
+      });
+      styleCell(outstandingRow + 1, 2, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } },
+        font: { color: { argb: 'FF000000' }, bold: true },
+        alignment: { horizontal: 'left', vertical: 'middle' }
+      });
+
+      deliverySheet.getCell(outstandingRow + 2, 1).value = 'Total';
+      deliverySheet.getCell(outstandingRow + 2, 2).value = '$0';
+      styleCell(outstandingRow + 2, 1, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } },
+        font: { color: { argb: 'FF000000' }, bold: true },
+        alignment: { horizontal: 'left', vertical: 'middle' }
+      });
+      styleCell(outstandingRow + 2, 2, {
+        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } },
+        font: { color: { argb: 'FF000000' }, bold: true },
+        alignment: { horizontal: 'center', vertical: 'middle' }
+      });
+
+      // Set column widths for delivery sheet
+      deliverySheet.columns = [
+        { width: 8 }, // No
+        { width: 20 }, // Shipment Create Date
+        { width: 18 }, // Receiver Name
+        { width: 30 }, // Address
+        { width: 16 }, // Contact
+        { width: 22 }, // Tracking#
+        { width: 20 }, // Status
+        { width: 12 }, // COD
+        { width: 12 }, // Pick Fee
+        { width: 12 }, // Taxi Fee
+        { width: 12 }, // Delivery Fee
+        { width: 12 }, // Packaging Fee
+        { width: 15 }, // Remark
+        { width: 8 }, // Empty
+      ];
+
+      // Generate Excel buffer
+      const buffer = await workbook.xlsx.writeBuffer();
+      
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename="DeliveryReport.xlsx"');
+      res.send(buffer);
     } catch (error) {
       console.error('Excel Export Error:', error);
       const errorMessage =

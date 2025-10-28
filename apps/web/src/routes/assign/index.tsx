@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { PackageScanForm } from '@/components/package-scan-form'
 import { ScannedPackagesList } from '@/components/scanned-packages-list'
 import { useBulkAssignPackages } from '@/hooks/usePackages'
-import { QrCode, CheckCircle } from 'lucide-react'
+import { CheckCircle } from 'lucide-react'
 import type { Package } from '@/lib/api/packages'
 
 export const Route = createFileRoute('/assign/')({
@@ -70,7 +70,6 @@ function AssignPackagesPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
-            <QrCode className="h-8 w-8" />
             Assign Packages
           </h1>
           <p className="text-muted-foreground">
