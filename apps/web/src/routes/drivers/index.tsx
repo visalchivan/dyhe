@@ -9,9 +9,10 @@ export const Route = createFileRoute('/drivers/')({
 function DriversPage() {
   return (
     <MainLayout>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
+      <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold">Drivers</h1>
+          <p className="text-sm text-muted-foreground">Manage your drivers and their statuses</p>
         </div>
         <DriversTable />
       </div>
