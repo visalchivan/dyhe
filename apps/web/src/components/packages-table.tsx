@@ -27,6 +27,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -75,6 +85,8 @@ export function PackagesTable({ onViewPackage }: PackagesTableProps) {
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [editModalOpen, setEditModalOpen] = React.useState(false);
   const [selectedPackage, setSelectedPackage] = React.useState<Package | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [packageToDelete, setPackageToDelete] = React.useState<Package | null>(null);
 
   const { data, isLoading, refetch } = usePackages({
     page: 1,
@@ -83,15 +95,23 @@ export function PackagesTable({ onViewPackage }: PackagesTableProps) {
 
   const deletePackageMutation = useDeletePackage();
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this package?")) {
-      try {
-        await deletePackageMutation.mutateAsync(id);
-        toast.success("Package deleted successfully");
-        refetch();
-      } catch (error) {
-        toast.error("Failed to delete package");
-      }
+  const handleDelete = async (packageData: Package) => {
+    setPackageToDelete(packageData);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!packageToDelete) return;
+    
+    try {
+      await deletePackageMutation.mutateAsync(packageToDelete.id);
+      toast.success("Package deleted successfully");
+      refetch();
+    } catch (error) {
+      toast.error("Failed to delete package");
+    } finally {
+      setDeleteDialogOpen(false);
+      setPackageToDelete(null);
     }
   };
 
@@ -268,7 +288,7 @@ export function PackagesTable({ onViewPackage }: PackagesTableProps) {
               <DropdownMenuItem onClick={() => handleEdit(packageData)}>
                 Edit package
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleDelete(packageData.id)}>
+              <DropdownMenuItem onClick={() => handleDelete(packageData)}>
                 Delete package
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -438,6 +458,23 @@ export function PackagesTable({ onViewPackage }: PackagesTableProps) {
           packageData={selectedPackage}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the package
+              <strong> {packageToDelete?.packageNumber}</strong> and remove all its data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Delete Package</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

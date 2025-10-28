@@ -26,6 +26,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -61,6 +71,8 @@ export function MerchantsTable() {
   const [createModalOpen, setCreateModalOpen] = React.useState(false);
   const [editModalOpen, setEditModalOpen] = React.useState(false);
   const [selectedMerchant, setSelectedMerchant] = React.useState<Merchant | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [merchantToDelete, setMerchantToDelete] = React.useState<Merchant | null>(null);
   const [globalFilter, setGlobalFilter] = React.useState("");
 
   const { data, isLoading, refetch } = useMerchants({
@@ -70,15 +82,23 @@ export function MerchantsTable() {
 
   const deleteMerchantMutation = useDeleteMerchant();
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this merchant?")) {
-      try {
-        await deleteMerchantMutation.mutateAsync(id);
-        toast.success("Merchant deleted successfully");
-        refetch();
-      } catch (error) {
-        toast.error("Failed to delete merchant");
-      }
+  const handleDelete = async (merchant: Merchant) => {
+    setMerchantToDelete(merchant);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!merchantToDelete) return;
+    
+    try {
+      await deleteMerchantMutation.mutateAsync(merchantToDelete.id);
+      toast.success("Merchant deleted successfully");
+      refetch();
+    } catch (error) {
+      toast.error("Failed to delete merchant");
+    } finally {
+      setDeleteDialogOpen(false);
+      setMerchantToDelete(null);
     }
   };
 
@@ -199,7 +219,7 @@ export function MerchantsTable() {
               <DropdownMenuItem onClick={() => handleEdit(merchant)}>
                 Edit merchant
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleDelete(merchant.id)}>
+              <DropdownMenuItem onClick={() => handleDelete(merchant)}>
                 Delete merchant
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -368,6 +388,23 @@ export function MerchantsTable() {
           merchant={selectedMerchant}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the merchant
+              <strong> {merchantToDelete?.name}</strong> and remove all their data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Delete Merchant</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

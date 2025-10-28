@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import MainLayout from '@/layouts/MainLayout'
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { PackageScanForm } from '@/components/package-scan-form'
 import { ScannedPackagesList } from '@/components/scanned-packages-list'
@@ -79,22 +78,18 @@ function AssignPackagesPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Manual Entry Section */}
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle>Manual Entry</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PackageScanForm onPackageScanned={handlePackageScanned} />
-            </CardContent>
-          </Card>
+          <div className="lg:col-span-1">
+            <h2 className="text-lg font-semibold">Manual Entry</h2>
+            <PackageScanForm onPackageScanned={handlePackageScanned} />
+          </div>
 
           {/* Scanned Packages Section */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
+          <div className="lg:col-span-2">
+            <div>
               <div className="flex justify-between items-center">
-                <CardTitle>
+                <h2 className="text-lg font-semibold">
                   Scanned Packages ({scannedPackages.length})
-                </CardTitle>
+                </h2>
                 {scannedPackages.length > 0 && (
                   <Button
                     onClick={handleBulkAssign}
@@ -108,8 +103,8 @@ function AssignPackagesPage() {
                   </Button>
                 )}
               </div>
-            </CardHeader>
-            <CardContent>
+            </div>
+            <div>
               {scannedPackages.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <p className="font-semibold mb-2">No packages scanned yet</p>
@@ -126,31 +121,9 @@ function AssignPackagesPage() {
                   onDriverSelect={setSelectedDriver}
                 />
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
-
-        {scannedPackages.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Assignment Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <p>
-                  <strong>Total Packages:</strong> {scannedPackages.length}
-                </p>
-                <p>
-                  <strong>Selected Driver:</strong>{" "}
-                  {selectedDriver ? "Driver Selected" : "No Driver Selected"}
-                </p>
-                <p>
-                  <strong>Status:</strong> Ready for assignment
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </MainLayout>
   )

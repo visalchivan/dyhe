@@ -214,7 +214,7 @@ export class PackagesService {
           },
         },
         {
-          name: { contains: search, mode: 'insensitive' as const },
+          customerName: { contains: search, mode: 'insensitive' as const },
         },
         {
           customerPhone: { contains: search, mode: 'insensitive' as const },

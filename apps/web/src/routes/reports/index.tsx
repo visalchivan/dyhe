@@ -20,7 +20,7 @@ import {
   FieldLabel,
   FieldSet,
 } from "@/components/ui/field";
-import { CalendarIcon, Download, FileSpreadsheet } from "lucide-react";
+import { CalendarIcon, FileSpreadsheet } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useMerchants } from "@/hooks/useMerchants";
@@ -145,13 +145,17 @@ function ReportsPage() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `DeliveryReport_${format(new Date(), "yyyy-MM-dd")}.xlsx`;
+      
+      // Dynamic filename based on report type
+      const reportTypeName = reportType.charAt(0).toUpperCase() + reportType.slice(1);
+      link.download = `${reportTypeName}Report_${format(new Date(), "yyyy-MM-dd")}.xlsx`;
+      
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      toast.success("Report exported successfully!");
+      toast.success(`${reportTypeName} report exported successfully!`);
     } catch (error) {
       console.error("Export error:", error);
       toast.error("Failed to export report");
@@ -160,326 +164,175 @@ function ReportsPage() {
     }
   };
 
-  const handleMerchantExport = async () => {
-    try {
-      setIsExporting(true);
-      
-      const { startDate, endDate } = getDateRange();
-      
-      const params = new URLSearchParams({
-        startDate,
-        endDate,
-        type: "merchants",
-      });
-
-      if (selectedMerchantId && selectedMerchantId !== "all") {
-        params.append("merchantId", selectedMerchantId);
-      }
-
-      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
-      const downloadUrl = `${baseUrl}/reports/export/excel?${params.toString()}`;
-
-      // Download with authentication
-      const token = Cookies.get("accessToken");
-      if (!token) {
-        toast.error("Please log in to export reports");
-        return;
-      }
-
-      // Use fetch with authentication headers
-      const response = await fetch(downloadUrl, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      // Create blob and download
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `MerchantReport_${format(new Date(), "yyyy-MM-dd")}.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
-      toast.success("Merchant report exported successfully!");
-    } catch (error) {
-      console.error("Merchant export error:", error);
-      toast.error("Failed to export merchant report");
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  const handleDriverExport = async () => {
-    try {
-      setIsExporting(true);
-      
-      const { startDate, endDate } = getDateRange();
-      
-      const params = new URLSearchParams({
-        startDate,
-        endDate,
-        type: "drivers",
-      });
-
-      if (selectedDriverId && selectedDriverId !== "all") {
-        params.append("driverId", selectedDriverId);
-      }
-
-      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
-      const downloadUrl = `${baseUrl}/reports/export/excel?${params.toString()}`;
-
-      // Download with authentication
-      const token = Cookies.get("accessToken");
-      if (!token) {
-        toast.error("Please log in to export reports");
-        return;
-      }
-
-      // Use fetch with authentication headers
-      const response = await fetch(downloadUrl, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      // Create blob and download
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `DriverReport_${format(new Date(), "yyyy-MM-dd")}.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
-      toast.success("Driver report exported successfully!");
-    } catch (error) {
-      console.error("Driver export error:", error);
-      toast.error("Failed to export driver report");
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
   return (
     <MainLayout>
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 max-w-2xl mx-auto py-20 w-full">
+      <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold">Reports</h1>
+        <p className="text-sm text-muted-foreground">Generate reports for your packages, merchants, and drivers</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="space-y-4">
         {/* Report Configuration */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Report Configuration</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <FieldSet>
-              <FieldGroup className="space-y-4">
-                {/* Report Type */}
+        <FieldSet>
+          <FieldGroup>
+            {/* Report Type */}
+            <Field>
+              <FieldLabel htmlFor="reportType">Report Type</FieldLabel>
+              <Select value={reportType} onValueChange={setReportType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select report type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="packages">Package Reports</SelectItem>
+                  <SelectItem value="merchants">Merchant Reports</SelectItem>
+                  <SelectItem value="drivers">Driver Reports</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+
+            {/* Date Range */}
+            <Field>
+              <FieldLabel htmlFor="dateRange">Date Range</FieldLabel>
+              <Select value={dateRange} onValueChange={setDateRange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select date range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="yesterday">Yesterday</SelectItem>
+                  <SelectItem value="thisWeek">This Week</SelectItem>
+                  <SelectItem value="thisMonth">This Month</SelectItem>
+                  <SelectItem value="custom">Custom Range</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+
+            {/* Custom Date Range */}
+            {dateRange === "custom" && (
+              <FieldGroup className="grid grid-cols-2 gap-4">
                 <Field>
-                  <FieldLabel htmlFor="reportType">Report Type</FieldLabel>
-                  <Select value={reportType} onValueChange={setReportType}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select report type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="packages">Package Reports</SelectItem>
-                      <SelectItem value="merchants">Merchant Reports</SelectItem>
-                      <SelectItem value="drivers">Driver Reports</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FieldLabel>Start Date</FieldLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !customStartDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {customStartDate ? (
+                          format(customStartDate, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={customStartDate}
+                        onSelect={setCustomStartDate}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </Field>
-
-                {/* Date Range */}
                 <Field>
-                  <FieldLabel htmlFor="dateRange">Date Range</FieldLabel>
-                  <Select value={dateRange} onValueChange={setDateRange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select date range" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="today">Today</SelectItem>
-                      <SelectItem value="yesterday">Yesterday</SelectItem>
-                      <SelectItem value="thisWeek">This Week</SelectItem>
-                      <SelectItem value="thisMonth">This Month</SelectItem>
-                      <SelectItem value="custom">Custom Range</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FieldLabel>End Date</FieldLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !customEndDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {customEndDate ? (
+                          format(customEndDate, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={customEndDate}
+                        onSelect={setCustomEndDate}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </Field>
-
-                {/* Custom Date Range */}
-                {dateRange === "custom" && (
-                  <FieldGroup className="grid grid-cols-2 gap-4">
-                    <Field>
-                      <FieldLabel>Start Date</FieldLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-start text-left font-normal",
-                              !customStartDate && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {customStartDate ? (
-                              format(customStartDate, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            selected={customStartDate}
-                            onSelect={setCustomStartDate}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </Field>
-                    <Field>
-                      <FieldLabel>End Date</FieldLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-start text-left font-normal",
-                              !customEndDate && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {customEndDate ? (
-                              format(customEndDate, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            selected={customEndDate}
-                            onSelect={setCustomEndDate}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </Field>
-                  </FieldGroup>
-                )}
-
-                {/* Merchant Filter */}
-                {reportType === "packages" && (
-                  <Field>
-                    <FieldLabel htmlFor="merchant">Filter by Merchant (Optional)</FieldLabel>
-                    <Select value={selectedMerchantId} onValueChange={setSelectedMerchantId}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select merchant" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Merchants</SelectItem>
-                        {merchantsData?.merchants.map((merchant) => (
-                          <SelectItem key={merchant.id} value={merchant.id}>
-                            {merchant.name} - {merchant.phone}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </Field>
-                )}
-
-                {/* Driver Filter */}
-                {(reportType === "packages" || reportType === "drivers") && (
-                  <Field>
-                    <FieldLabel htmlFor="driver">Filter by Driver (Optional)</FieldLabel>
-                    <Select value={selectedDriverId} onValueChange={setSelectedDriverId}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select driver" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Drivers</SelectItem>
-                        {driversData?.drivers.map((driver) => (
-                          <SelectItem key={driver.id} value={driver.id}>
-                            {driver.name} - {driver.phone}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </Field>
-                )}
               </FieldGroup>
-            </FieldSet>
-          </CardContent>
-        </Card>
+            )}
+
+            {/* Merchant Filter */}
+            {reportType === "packages" && (
+              <Field>
+                <FieldLabel htmlFor="merchant">Filter by Merchant (Optional)</FieldLabel>
+                <Select value={selectedMerchantId} onValueChange={setSelectedMerchantId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select merchant" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Merchants</SelectItem>
+                    {merchantsData?.merchants.map((merchant) => (
+                      <SelectItem key={merchant.id} value={merchant.id}>
+                        {merchant.name} - {merchant.phone}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
+
+            {/* Driver Filter */}
+            {(reportType === "packages" || reportType === "drivers") && (
+              <Field>
+                <FieldLabel htmlFor="driver">Filter by Driver (Optional)</FieldLabel>
+                <Select value={selectedDriverId} onValueChange={setSelectedDriverId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select driver" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Drivers</SelectItem>
+                    {driversData?.drivers.map((driver) => (
+                      <SelectItem key={driver.id} value={driver.id}>
+                        {driver.name} - {driver.phone}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
+          </FieldGroup>
+        </FieldSet>
 
         {/* Export Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Export Reports</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              {/* Main Export Button */}
-              <Button
-                onClick={handleExport}
-                disabled={isExporting}
-                className="w-full"
-                size="lg"
-              >
-                <FileSpreadsheet className="mr-2 h-5 w-5" />
-                {isExporting ? "Exporting..." : `Export ${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Report`}
-              </Button>
+        <div className="space-y-3">
+          {/* Single Export Button */}
+          <Button
+            onClick={handleExport}
+            disabled={isExporting}
+            className="w-full"
+            size="lg"
+          >
+            <FileSpreadsheet className="mr-2 h-5 w-5" />
+            {isExporting ? "Exporting..." : `Export ${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Report`}
+          </Button>
+        </div>
 
-              {/* Merchant Export */}
-              <Button
-                onClick={handleMerchantExport}
-                disabled={isExporting}
-                variant="outline"
-                className="w-full"
-              >
-                <Download className="mr-2 h-4 w-4" />
-                Export Merchant Report
-              </Button>
-
-              {/* Driver Export */}
-              <Button
-                onClick={handleDriverExport}
-                disabled={isExporting}
-                variant="outline"
-                className="w-full"
-              >
-                <Download className="mr-2 h-4 w-4" />
-                Export Driver Report
-              </Button>
-            </div>
-
-            <div className="text-sm text-muted-foreground">
-              <p>• Reports will be exported as Excel (.xlsx) files</p>
-              <p>• Files include detailed package information</p>
-              <p>• Khmer text is supported in exports</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="text-sm text-muted-foreground">
+          <p>• Reports will be exported as Excel (.xlsx) files</p>
+          <p>• Files include detailed package information</p>
+          <p>• Khmer text is supported in exports</p>
+        </div>
       </div>
     </div>
     </MainLayout>

@@ -65,7 +65,7 @@ export function PackageScanForm({ onPackageScanned }: PackageScanFormProps) {
         </p>
       </div>
 
-      <div className="flex gap-2">
+      <div className="space-y-2">
         <Input
           placeholder="Enter package number (e.g., DYHE123456ABC)"
           value={scanResult}
@@ -76,7 +76,7 @@ export function PackageScanForm({ onPackageScanned }: PackageScanFormProps) {
           onKeyPress={handleKeyPress}
           className="flex-1"
         />
-        <Button onClick={handleManualScan}>
+        <Button className="w-full" onClick={handleManualScan}>
           <Plus className="h-4 w-4 mr-2" />
           Add Package
         </Button>

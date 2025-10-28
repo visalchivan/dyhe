@@ -65,7 +65,7 @@ export function ScannedPackagesList({
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">#{index + 1}</span>
-                    <code className="text-sm bg-gray-100 px-2 py-1 rounded">
+                    <code className="text-sm bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
                       {pkg.packageNumber}
                     </code>
                     <Badge variant="default">{pkg.status}</Badge>
@@ -86,23 +86,6 @@ export function ScannedPackagesList({
           ))}
         </div>
       </div>
-
-      {packages.length > 0 && (
-        <Card className="bg-green-50 border-green-200">
-          <CardContent className="pt-6">
-            <div className="space-y-1">
-              <h4 className="font-semibold text-green-700">
-                Ready for Assignment
-              </h4>
-              <p className="text-sm text-green-600">
-                {packages.length} package{packages.length !== 1 ? "s" : ""}{" "}
-                ready to be assigned to{" "}
-                {selectedDriver ? "selected driver" : "a driver"}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

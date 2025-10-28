@@ -42,18 +42,6 @@ const data = {
       isActive: true,
     },
     {
-      title: "Drivers",
-      url: "/drivers",
-      icon: Users,
-      isActive: true,
-    },
-    {
-      title: "Merchants",
-      url: "/merchants",
-      icon: Store,
-      isActive: true,
-    },
-    {
       title: "Packages",
       url: "/packages",
       icon: Package,
@@ -69,6 +57,18 @@ const data = {
       title: "Assign Packages",
       url: "/assign",
       icon: Scan,
+      isActive: true,
+    },
+    {
+      title: "Drivers",
+      url: "/drivers",
+      icon: Users,
+      isActive: true,
+    },
+    {
+      title: "Merchants",
+      url: "/merchants",
+      icon: Store,
       isActive: true,
     },
     {

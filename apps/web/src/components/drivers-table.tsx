@@ -26,6 +26,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -76,6 +86,8 @@ export function DriversTable() {
   const [createModalOpen, setCreateModalOpen] = React.useState(false);
   const [editModalOpen, setEditModalOpen] = React.useState(false);
   const [selectedDriver, setSelectedDriver] = React.useState<Driver | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [driverToDelete, setDriverToDelete] = React.useState<Driver | null>(null);
   const [globalFilter, setGlobalFilter] = React.useState("");
 
   const { data, isLoading, refetch } = useDrivers({
@@ -85,15 +97,23 @@ export function DriversTable() {
 
   const deleteDriverMutation = useDeleteDriver();
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this driver?")) {
-      try {
-        await deleteDriverMutation.mutateAsync(id);
-        toast.success("Driver deleted successfully");
-        refetch();
-      } catch (error) {
-        toast.error("Failed to delete driver");
-      }
+  const handleDelete = async (driver: Driver) => {
+    setDriverToDelete(driver);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!driverToDelete) return;
+    
+    try {
+      await deleteDriverMutation.mutateAsync(driverToDelete.id);
+      toast.success("Driver deleted successfully");
+      refetch();
+    } catch (error) {
+      toast.error("Failed to delete driver");
+    } finally {
+      setDeleteDialogOpen(false);
+      setDriverToDelete(null);
     }
   };
 
@@ -218,7 +238,7 @@ export function DriversTable() {
               <DropdownMenuItem onClick={() => handleEdit(driver)}>
                 Edit driver
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleDelete(driver.id)}>
+              <DropdownMenuItem onClick={() => handleDelete(driver)}>
                 Delete driver
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -387,6 +407,23 @@ export function DriversTable() {
           driver={selectedDriver}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the driver
+              <strong> {driverToDelete?.name}</strong> and remove all their data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Delete Driver</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
