@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import "./globals-mobile.css";
@@ -20,18 +20,19 @@ export const metadata: Metadata = {
   description:
     "Manage your deliveries on the go with DYHE Delivery Driver Portal",
   manifest: "/manifest.json",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
-  themeColor: "#1890ff",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "DYHE Driver",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: "#1890ff",
 };
 
 export default function RootLayout({
