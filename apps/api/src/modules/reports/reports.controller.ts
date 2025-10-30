@@ -16,6 +16,25 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { DriverReportDto, MerchantReportDto } from './dto/reports-response.dto';
 import * as ExcelJS from 'exceljs';
 
+function getDisplayStatus(status: string): string {
+  switch (status) {
+    case 'PENDING':
+    case 'IN_WAREHOUSE':
+      return 'Pending';
+    case 'ON_DELIVERY':
+      return 'On Delivery';
+    case 'DELIVERED':
+    case 'RECEIVED':
+      return 'Delivered';
+    case 'FAILED':
+      return 'Failed';
+    case 'RETURNED':
+      return 'Returned';
+    default:
+      return status;
+  }
+}
+
 @Controller('reports')
 @UseGuards(JwtAuthGuard)
 export class ReportsController {
@@ -743,11 +762,11 @@ export class ReportsController {
         const cash = Number(pkg.codAmount) || 0;
         totalAmount += cash;
         // Summary by status
-        if (!statusMap[pkg.status]) {
-          statusMap[pkg.status] = { count: 0, amount: 0 };
+        if (!statusMap[getDisplayStatus(pkg.status)]) {
+          statusMap[getDisplayStatus(pkg.status)] = { count: 0, amount: 0 };
         }
-        statusMap[pkg.status].count += 1;
-        statusMap[pkg.status].amount += cash;
+        statusMap[getDisplayStatus(pkg.status)].count += 1;
+        statusMap[getDisplayStatus(pkg.status)].amount += cash;
         pickupSheet.addRow([
           index + 1,
           formatDateTime(pkg.createdAt),
@@ -923,7 +942,7 @@ export class ReportsController {
         deliverySheet.getCell(rowPtr, 4).value = pkg.customerAddress;
         deliverySheet.getCell(rowPtr, 5).value = pkg.customerPhone;
         deliverySheet.getCell(rowPtr, 6).value = pkg.packageNumber;
-        deliverySheet.getCell(rowPtr, 7).value = isDelivered ? 'Delivered' : 'In Central Warehouse';
+        deliverySheet.getCell(rowPtr, 7).value = getDisplayStatus(pkg.status);
         deliverySheet.getCell(rowPtr, 8).value = Number(pkg.codAmount) || '';
         deliverySheet.getCell(rowPtr, 9).value = '$0'; // Pick Fee
         deliverySheet.getCell(rowPtr, 10).value = '$0'; // Taxi Fee
