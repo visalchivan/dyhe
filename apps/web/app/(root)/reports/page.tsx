@@ -41,7 +41,7 @@ const { Option } = Select;
 
 const ReportsPage = () => {
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
-  const [selectedMerchant, setSelectedMerchant] = useState<string | null>(null);
+  const [selectedMerchant, setSelectedMerchant] = useState<string[] | null>(null);
   const [dateRange, setDateRange] = useState<
     [dayjs.Dayjs | null, dayjs.Dayjs | null] | null
   >(null);
@@ -103,17 +103,21 @@ const ReportsPage = () => {
   const pendingPackages = analytics?.pendingPackages || 0;
 
   // Export: one XLSX per merchant (selected date or today)
-  const exportToExcel = async () => {
+  const [exporting, setExporting] = useState(false);
+  const exportExcelSmart = async () => {
     try {
+      setExporting(true);
       const date = dayjs().format("YYYY-MM-DD");
       const selectedDate = dateRange && dateRange[0] ? dateRange[0].format("YYYY-MM-DD") : date;
-
-      if (!merchantsData?.merchants?.length) {
+      const merchants: Array<{ id: string; name: string }> = merchantsData?.merchants || [];
+      const targetMerchants = (!selectedMerchant || selectedMerchant.length === 0)
+        ? merchants
+        : merchants.filter((m) => selectedMerchant!.includes(m.id));
+      if (!targetMerchants.length) {
         message.warning("No merchants to export");
         return;
       }
-
-      for (const m of merchantsData.merchants as Array<{ id: string; name: string }>) {
+      for (const m of targetMerchants) {
         const blob = await reportsApi.exportMerchantExcel(m.id, selectedDate);
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
@@ -123,13 +127,18 @@ const ReportsPage = () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        await new Promise((r) => setTimeout(r, 250)); // small delay between downloads
+        await new Promise((r) => setTimeout(r, 250));
       }
-
-      message.success(`Started downloads for ${merchantsData.merchants.length} merchants`);
+      if (targetMerchants.length === merchants.length) {
+        message.success(`Started downloads for all ${merchants.length} merchants`);
+      } else {
+        message.success(`Started downloads for ${targetMerchants.length} selected merchants`);
+      }
     } catch (e) {
       console.error(e);
-      message.error("Failed to export reports");
+      message.error("Failed to export merchant reports");
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -303,20 +312,19 @@ const ReportsPage = () => {
           <Col span={6}>
             <Text strong>Merchant:</Text>
             <Select
+              mode="multiple"
               size="large"
-              placeholder="Select Merchant"
+              placeholder="Select Merchant(s)"
               value={selectedMerchant}
               onChange={setSelectedMerchant}
               style={{ width: "100%", marginTop: 4 }}
               allowClear
             >
-              {merchantsData?.merchants.map(
-                (merchant: { id: string; name: string }) => (
-                  <Option key={merchant.id} value={merchant.id}>
-                    {merchant.name}
-                  </Option>
-                )
-              )}
+              {merchantsData?.merchants.map((merchant: { id: string; name: string }) => (
+                <Option key={merchant.id} value={merchant.id}>
+                  {merchant.name}
+                </Option>
+              ))}
             </Select>
           </Col>
           <Col span={6}>
@@ -334,10 +342,12 @@ const ReportsPage = () => {
                 type="primary"
                 size="large"
                 icon={<FileExcelOutlined />}
-                onClick={exportToExcel}
-                loading={currentLoading}
+                onClick={exportExcelSmart}
+                loading={exporting}
               >
-                Export Excel
+                {selectedMerchant && selectedMerchant.length > 0
+                  ? `Export (Selected: ${selectedMerchant.length})`
+                  : `Export (All: ${merchantsData?.merchants?.length || 0})`}
               </Button>
               <Button
                 size="large"
