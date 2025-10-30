@@ -27,13 +27,11 @@ interface PackageFormProps {
   onCancel: () => void;
 }
 
-const statusOptions = [
-  { value: "RECEIVED", label: "Received" },
-  { value: "PREPARING", label: "Preparing" },
-  { value: "READY", label: "Ready" },
-  { value: "DELIVERING", label: "Delivering" },
+const STATUS_OPTIONS = [
+  { value: "PENDING", label: "Pending (In Central Warehouse)" },
+  { value: "ON_DELIVERY", label: "On Delivery" },
   { value: "DELIVERED", label: "Delivered" },
-  { value: "CANCELLED", label: "Cancelled" },
+  { value: "FAILED", label: "Failed" },
   { value: "RETURNED", label: "Returned" },
 ];
 
@@ -80,7 +78,7 @@ export const PackageForm: React.FC<PackageFormProps> = ({
       layout="vertical"
       onFinish={handleSubmit}
       initialValues={{
-        status: "RECEIVED",
+        status: "PENDING",
         codAmount: 0,
         deliveryFee: 0,
       }}
@@ -123,7 +121,7 @@ export const PackageForm: React.FC<PackageFormProps> = ({
             rules={[{ required: true, message: "Please select status" }]}
           >
             <Select placeholder="Select status">
-              {statusOptions.map((status) => (
+              {STATUS_OPTIONS.map((status) => (
                 <Option key={status.value} value={status.value}>
                   {status.label}
                 </Option>

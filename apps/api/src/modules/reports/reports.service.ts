@@ -270,13 +270,12 @@ export class ReportsService {
     ).length;
     const pendingPackages = allPackages.filter((pkg) =>
       [
-        PackageStatus.READY,
-        PackageStatus.DELIVERING,
-        PackageStatus.PREPARING,
+        PackageStatus.PENDING,
+        PackageStatus.ON_DELIVERY,
       ].includes(pkg.status as any),
     ).length;
-    const cancelledPackages = allPackages.filter(
-      (pkg) => pkg.status === PackageStatus.CANCELLED,
+    const failedPackages = allPackages.filter(
+      (pkg) => pkg.status === PackageStatus.FAILED,
     ).length;
     const returnedPackages = allPackages.filter(
       (pkg) => pkg.status === PackageStatus.RETURNED,
@@ -302,7 +301,8 @@ export class ReportsService {
       totalDeliveryFee,
       deliveredPackages,
       pendingPackages,
-      cancelledPackages,
+      failedPackages,
+      cancelledPackages: 0, // Not used in new flow
       returnedPackages,
       averageDeliveryTime,
     };

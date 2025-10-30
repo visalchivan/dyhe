@@ -28,13 +28,11 @@ enum Status {
 }
 
 enum PackageStatus {
-  RECEIVED
-  PREPARING
-  READY
-  DELIVERING
-  DELIVERED
-  CANCELLED
-  RETURNED
+  PENDING // Created/unassigned (In Central Warehouse)
+  ON_DELIVERY // Assigned to driver
+  DELIVERED // Success
+  FAILED // Delivery failed
+  RETURNED // Customer returns
 }
 
 enum Gender {
@@ -125,7 +123,7 @@ model Package {
   price Decimal  @default(0) 
   codAmount Decimal  @default(0) @map("cod_amount")
   deliveryFee Decimal  @default(0) @map("delivery_fee")
-  status PackageStatus @default(RECEIVED)
+  status PackageStatus @default(PENDING)
   customerName String
   customerPhone String
   customerAddress String

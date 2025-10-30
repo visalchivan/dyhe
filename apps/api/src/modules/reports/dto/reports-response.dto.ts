@@ -39,6 +39,7 @@ export class PackageAnalyticsDto {
   pendingPackages: number;
   cancelledPackages: number;
   returnedPackages: number;
+  failedPackages: number;
   averageDeliveryTime?: number; // in hours
 }
 

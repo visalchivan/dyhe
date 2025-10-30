@@ -49,24 +49,34 @@ export interface TopDriver {
 
 export const dashboardApi = {
   // Get dashboard statistics
-  getDashboardStats: async (): Promise<DashboardStats> => {
-    const response = await api.get("/dashboard/stats");
-    return response.data;
-  },
-
-  // Get recent packages
-  getRecentPackages: async (limit?: number): Promise<RecentPackage[]> => {
-    const response = await api.get("/dashboard/recent-packages", {
-      params: { limit },
+  getDashboardStats: async (startDate?: string, endDate?: string): Promise<DashboardStats> => {
+    const response = await api.get("/dashboard/stats", {
+      params: {
+        ...(startDate ? { startDate } : {}),
+        ...(endDate ? { endDate } : {}),
+      },
     });
     return response.data;
   },
 
+  // Get recent packages
+  getRecentPackages: async (limit?: number, startDate?: string, endDate?: string): Promise<RecentPackage[]> => {
+    const params: any = {};
+    if (limit != null) params.limit = limit;
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    const response = await api.get("/dashboard/recent-packages", { params });
+    return response.data;
+  },
+
   // Get package status distribution
-  getPackageStatusDistribution: async (): Promise<
-    PackageStatusDistribution[]
-  > => {
-    const response = await api.get("/dashboard/package-status-distribution");
+  getPackageStatusDistribution: async (startDate?: string, endDate?: string): Promise<PackageStatusDistribution[]> => {
+    const response = await api.get("/dashboard/package-status-distribution", {
+      params: {
+        ...(startDate ? { startDate } : {}),
+        ...(endDate ? { endDate } : {}),
+      },
+    });
     return response.data;
   },
 

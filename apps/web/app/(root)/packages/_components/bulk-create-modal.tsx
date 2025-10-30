@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Drawer, Typography, Modal } from "antd";
 import { PrinterOutlined } from "@ant-design/icons";
 import { BulkPackageForm } from "./bulk-package-form";
-import { BulkCreatePackagesDto, Package } from "../../../../lib/api/packages";
+import { BulkCreatePackagesDto, Package, PackageDataDto } from "../../../../lib/api/packages";
 import { useBulkCreatePackages } from "../../../../hooks/usePackages";
 import { printBulkLabels } from "../../../../lib/utils/directPrint";
 
@@ -14,7 +14,8 @@ interface BulkCreatePackageModalProps {
   visible: boolean;
   onClose: () => void;
 }
-
+const allowedStatus = ["PENDING", "ON_DELIVERY", "DELIVERED", "FAILED", "RETURNED"];
+const defaultStatus = "PENDING";
 export const BulkCreatePackageModal: React.FC<BulkCreatePackageModalProps> = ({
   visible,
   onClose,
@@ -25,6 +26,12 @@ export const BulkCreatePackageModal: React.FC<BulkCreatePackageModalProps> = ({
 
   const handleSubmit = async (values: BulkCreatePackagesDto) => {
     try {
+      // Always enforce allowed status for bulk create
+      values.status = allowedStatus.includes(values.status || "") ? values.status || "" : defaultStatus;
+      values.packages = values.packages.map((pkg: any) => {
+        const { status, ...rest } = pkg;
+        return rest;
+      });
       const result = await bulkCreatePackagesMutation.mutateAsync(values);
 
       // Store created packages and show print option

@@ -59,7 +59,7 @@ export class PackagesService {
         customerAddress: createPackageDto.customerAddress,
         codAmount: createPackageDto.codAmount || 0,
         deliveryFee: createPackageDto.deliveryFee || 0,
-        status: createPackageDto.status || PackageStatus.RECEIVED,
+        status: createPackageDto.status || PackageStatus.PENDING,
         merchant: {
           connect: { id: createPackageDto.merchantId },
         },
@@ -152,7 +152,7 @@ export class PackagesService {
             customerAddress: packageData.customerAddress,
             codAmount: packageData.codAmount || 0,
             deliveryFee: packageData.deliveryFee || 0,
-            status: bulkCreateDto.status || PackageStatus.RECEIVED,
+            status: bulkCreateDto.status || PackageStatus.PENDING,
             merchant: {
               connect: { id: bulkCreateDto.merchantId },
             },
@@ -467,7 +467,7 @@ export class PackagesService {
           where: { packageNumber },
           data: {
             driverId: bulkAssignDto.driverId,
-            status: bulkAssignDto.status || PackageStatus.READY,
+            status: bulkAssignDto.status || PackageStatus.ON_DELIVERY,
           },
           include: {
             merchant: {
@@ -665,13 +665,13 @@ export class PackagesService {
       await Promise.all([
         this.prisma.package.count({ where: { driverId } }),
         this.prisma.package.count({
-          where: { driverId, status: PackageStatus.DELIVERING },
+          where: { driverId, status: PackageStatus.ON_DELIVERY },
         }),
         this.prisma.package.count({
           where: { driverId, status: PackageStatus.DELIVERED },
         }),
         this.prisma.package.count({
-          where: { driverId, status: PackageStatus.CANCELLED },
+          where: { driverId, status: PackageStatus.FAILED },
         }),
         this.prisma.package.count({
           where: { driverId, status: PackageStatus.RETURNED },

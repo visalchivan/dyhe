@@ -116,24 +116,19 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
     refetch();
   };
 
-  const statusColorMap = useMemo(
-    () => ({
-      DELIVERED: "green",
-      DELIVERING: "blue",
-      PREPARING: "orange",
-      READY: "cyan",
-      RECEIVED: "default",
-      CANCELLED: "red",
-      RETURNED: "purple",
-    }),
-    []
-  );
+  const STATUS_COLORS = {
+    PENDING: "default",
+    ON_DELIVERY: "blue",
+    DELIVERED: "green",
+    FAILED: "red",
+    RETURNED: "purple",
+  };
 
   const getStatusColor = useCallback(
     (status: string) => {
-      return statusColorMap[status as keyof typeof statusColorMap] || "default";
+      return STATUS_COLORS[status as keyof typeof STATUS_COLORS] || "default";
     },
-    [statusColorMap]
+    []
   );
 
   const columns = useMemo(
@@ -228,12 +223,10 @@ export const PackagesTable: React.FC<PackagesTableProps> = ({
           return <Tag color={color}>{status}</Tag>;
         },
         filters: [
-          { text: "Received", value: "RECEIVED" },
-          { text: "Preparing", value: "PREPARING" },
-          { text: "Ready", value: "READY" },
-          { text: "Delivering", value: "DELIVERING" },
+          { text: "Pending", value: "PENDING" },
+          { text: "On Delivery", value: "ON_DELIVERY" },
           { text: "Delivered", value: "DELIVERED" },
-          { text: "Cancelled", value: "CANCELLED" },
+          { text: "Failed", value: "FAILED" },
           { text: "Returned", value: "RETURNED" },
         ],
         onFilter: (value: string, record: Package) => record.status === value,

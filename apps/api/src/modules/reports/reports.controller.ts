@@ -705,6 +705,20 @@ export class ReportsController {
         return `${d}-${monthNames[parseInt(m, 10) - 1]}-${String(parseInt(y, 10)).slice(-2)}`;
       })();
 
+      // === BEGIN Sheet 2/Delivery Report stats and metrics ===
+      const packages = inputPackages; // for the day
+      const totalCount = packages.length;
+      const deliveredCount = packages.filter(p => p.status === 'DELIVERED').length;
+      const pendingCount = packages.filter(p => p.status !== 'DELIVERED').length;
+      // Sums:
+      const totalCOD = packages.reduce((sum, p) => sum + Number(p.codAmount), 0);
+      const collectedCOD = packages.filter(p => p.status === 'DELIVERED').reduce((sum, p) => sum + Number(p.codAmount), 0);
+      const uncollectedCOD = packages.filter(p => p.status !== 'DELIVERED').reduce((sum, p) => sum + Number(p.codAmount), 0);
+      const totalDeliveryFee = packages.reduce((sum, p) => sum + Number(p.deliveryFee), 0);
+      const outstanding = uncollectedCOD;
+      const toSettle = collectedCOD - 15;
+      // === END Sheet 2/Delivery Report stats and metrics ===
+
       // Sheet 1: Input Packages (selected date)
       const pickupSheet = workbook.addWorksheet(`Pick up ${labelShort}`);
       const pickupHeaders = [
@@ -722,11 +736,18 @@ export class ReportsController {
         cell.font = { bold: true } as any;
       });
       let totalAmount = 0;
+      const statusMap = {};
       inputPackages.forEach((pkg, index) => {
-        // Calculate delivered date if delivered, otherwise blank
+        // Include ALL statuses
         const deliveredDate = pkg.status === 'DELIVERED' && pkg.updatedAt ? formatDateTime(pkg.updatedAt) : '';
         const cash = Number(pkg.codAmount) || 0;
         totalAmount += cash;
+        // Summary by status
+        if (!statusMap[pkg.status]) {
+          statusMap[pkg.status] = { count: 0, amount: 0 };
+        }
+        statusMap[pkg.status].count += 1;
+        statusMap[pkg.status].amount += cash;
         pickupSheet.addRow([
           index + 1,
           formatDateTime(pkg.createdAt),
@@ -765,36 +786,205 @@ export class ReportsController {
           }
         });
       });
+      // Summary by status
+      pickupSheet.addRow([]); // Blank row
+      const sbHeader = pickupSheet.addRow(['', '', '', '', '', '', 'Summary by Status']);
+      sbHeader.eachCell((cell, colNumber) => {
+        if (colNumber >= 7) {
+          cell.font = { bold: true };
+          cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        }
+      });
+      const sbTableHeader = pickupSheet.addRow(['', '', '', '', '', '', 'Status', 'Count', 'Amount']);
+      sbTableHeader.eachCell((cell, colNumber) => {
+        if (colNumber >= 7) {
+          cell.font = { bold: true };
+          cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        }
+      });
+      Object.entries(statusMap).forEach(([status, info]) => {
+        pickupSheet.addRow(['', '', '', '', '', '', status, (info as { count: number }).count, (info as { amount: number }).amount]);
+      });
 
-      // Sheet 2: Historical Records (before selected date)
-      const historySheet = workbook.addWorksheet(`Delivery report ${labelShort}`);
-      const historyHeaders = [
-        'No', 'Shipment Create Date', 'Receiver Name', 'Address', 'Contact',
-        'Tracking#', 'Status', 'COD', 'Pick Fee', 'Taxi Fee', 'Delivery Fee', 'Packaging Fee', 'Remark'
-      ];
-      const historyHeaderRow = historySheet.addRow(historyHeaders);
-      historyHeaderRow.eachCell((cell) => {
-        cell.font = { bold: true } as any;
+      // Sheet 2: Delivery report (new improved layout + COLORS)
+      const deliverySheet = workbook.addWorksheet(`Delivery report ${labelShort}`);
+      let rowPtr = 1;
+      // HEADER ROWS
+      // 1. Shop Name (blue background, white bold)
+      deliverySheet.getCell(rowPtr, 1).value = 'ឈ្មោះហាង ៖';
+      deliverySheet.getCell(rowPtr, 1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } };
+      deliverySheet.getCell(rowPtr, 1).font = { color: { argb: 'FFFFFFFF' }, bold: true };
+      deliverySheet.getCell(rowPtr, 1).alignment = { vertical: 'middle', horizontal: 'left' };
+      deliverySheet.getCell(rowPtr, 3).value = merchant.name;
+      deliverySheet.getCell(rowPtr, 3).font = { bold: true };
+      rowPtr++;
+      // 2. Bank info (blue background, white bold)
+      deliverySheet.getCell(rowPtr, 1).value = 'ឈ្មោះធនាគារ ៖';
+      deliverySheet.getCell(rowPtr, 1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } };
+      deliverySheet.getCell(rowPtr, 1).font = { color: { argb: 'FFFFFFFF' }, bold: true };
+      deliverySheet.getCell(rowPtr, 1).alignment = { vertical: 'middle', horizontal: 'left' };
+      deliverySheet.getCell(rowPtr, 3).value = merchant.bankAccountName || merchant.bank || '';
+      deliverySheet.getCell(rowPtr, 3).font = { bold: true };
+      rowPtr++;
+      // 3. Report date (blue background, white bold)
+      deliverySheet.getCell(rowPtr, 1).value = 'កាលបរិច្ឆេទរបាយការណ៍ ៖';
+      deliverySheet.getCell(rowPtr, 1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } };
+      deliverySheet.getCell(rowPtr, 1).font = { color: { argb: 'FFFFFFFF' }, bold: true };
+      deliverySheet.getCell(rowPtr, 1).alignment = { vertical: 'middle', horizontal: 'left' };
+      deliverySheet.getCell(rowPtr, 3).value = label;
+      deliverySheet.getCell(rowPtr, 3).font = { bold: true };
+      rowPtr += 2;
+      // COLOR SUMMARY METRIC HEADERS
+      // Black header cells, green, orange, blue backgrounds
+      deliverySheet.getCell(rowPtr, 2).value = 'ចំនួនកញ្ចប់សរុប';
+      deliverySheet.getCell(rowPtr, 2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF000000' } };
+      deliverySheet.getCell(rowPtr, 2).font = { color: { argb: 'FFFFFFFF' }, bold: true };
+      deliverySheet.getCell(rowPtr, 3).value = totalCount;
+      deliverySheet.getCell(rowPtr, 3).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF22223B' } };
+      deliverySheet.getCell(rowPtr, 3).font = { color: { argb: 'FFFFFFFF' }, bold: true };
+      deliverySheet.getCell(rowPtr, 5).value = 'បានបញ្ចប់';
+      deliverySheet.getCell(rowPtr, 5).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF166534' } };
+      deliverySheet.getCell(rowPtr, 5).font = { color: { argb: 'FFFFFFFF' }, bold: true };
+      deliverySheet.getCell(rowPtr, 6).value = deliveredCount;
+      deliverySheet.getCell(rowPtr, 6).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC3F1D6' } };
+      deliverySheet.getCell(rowPtr, 6).font = { color: { argb: 'FF000000' }, bold: true };
+      deliverySheet.getCell(rowPtr, 8).value = 'មិនទាន់បញ្ចប់';
+      deliverySheet.getCell(rowPtr, 8).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFBD59' } };
+      deliverySheet.getCell(rowPtr, 8).font = { color: { argb: 'FF000000' }, bold: true };
+      deliverySheet.getCell(rowPtr, 9).value = pendingCount;
+      deliverySheet.getCell(rowPtr, 9).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF7DE' } };
+      deliverySheet.getCell(rowPtr, 9).font = { color: { argb: 'FF000000' }, bold: true };
+      rowPtr++;
+      // COLOR FINANCIAL METRICS
+      deliverySheet.getCell(rowPtr, 2).value = 'តម្លៃទំនិញទាំងអស់';
+      deliverySheet.getCell(rowPtr, 2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDCFCE7' } };
+      deliverySheet.getCell(rowPtr, 2).font = { color: { argb: 'FF000000' }, bold: true };
+      deliverySheet.getCell(rowPtr, 3).value = `$${totalCOD}`;
+      deliverySheet.getCell(rowPtr, 3).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDCFFF9' } };
+      deliverySheet.getCell(rowPtr, 3).font = { color: { argb: 'FF064E3B' }, bold: true };
+
+      deliverySheet.getCell(rowPtr, 5).value = 'ទឹកប្រាក់ប្រមូលបានសរុប';
+      deliverySheet.getCell(rowPtr, 5).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFBBF7D0' } };
+      deliverySheet.getCell(rowPtr, 5).font = { color: { argb: 'FF166534' }, bold: true };
+      deliverySheet.getCell(rowPtr, 6).value = `$${collectedCOD}`;
+      deliverySheet.getCell(rowPtr, 6).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD1FAE5' } };
+      deliverySheet.getCell(rowPtr, 6).font = { color: { argb: 'FF166534' }, bold: true };
+
+      deliverySheet.getCell(rowPtr, 8).value = 'ទឹកប្រាក់មិនទាន់ប្រមូល';
+      deliverySheet.getCell(rowPtr, 8).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFDE68A' } };
+      deliverySheet.getCell(rowPtr, 8).font = { color: { argb: 'FFD97706' }, bold: true };
+      deliverySheet.getCell(rowPtr, 9).value = `$${uncollectedCOD}`;
+      deliverySheet.getCell(rowPtr, 9).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF9C3' } };
+      deliverySheet.getCell(rowPtr, 9).font = { color: { argb: 'FFD97706' }, bold: true };
+
+      deliverySheet.getCell(rowPtr, 11).value = 'ថ្លៃដឹកសរុប';
+      deliverySheet.getCell(rowPtr, 11).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDBEAFE' } };
+      deliverySheet.getCell(rowPtr, 11).font = { color: { argb: 'FF2563EB' }, bold: true };
+      deliverySheet.getCell(rowPtr, 12).value = `$${totalDeliveryFee}`;
+      deliverySheet.getCell(rowPtr, 12).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF9C3' } };
+      deliverySheet.getCell(rowPtr, 12).font = { color: { argb: 'FF2563EB' }, bold: true };
+
+      deliverySheet.getCell(rowPtr, 14).value = 'ទឹកប្រាក់ជំពាក់';
+      deliverySheet.getCell(rowPtr, 14).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDC2626' } };
+      deliverySheet.getCell(rowPtr, 14).font = { color: { argb: 'FFFFFFFF' }, bold: true };
+      deliverySheet.getCell(rowPtr, 15).value = `$${outstanding}`;
+      deliverySheet.getCell(rowPtr, 15).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFE5E5' } };
+      deliverySheet.getCell(rowPtr, 15).font = { color: { argb: 'FFDC2626' }, bold: true };
+      // Next row: strong blue
+      deliverySheet.getCell(rowPtr, 17).value = 'ទឹកប្រាក់ដែរត្រូវទូរទាត់';
+      deliverySheet.getCell(rowPtr, 17).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2563EB' } };
+      deliverySheet.getCell(rowPtr, 17).font = { color: { argb: 'FFFFFFFF' }, bold: true };
+      deliverySheet.getCell(rowPtr, 18).value = `$${toSettle}`;
+      deliverySheet.getCell(rowPtr, 18).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD5FAFC' } };
+      deliverySheet.getCell(rowPtr, 18).font = { color: { argb: 'FF2563EB' }, bold: true };
+      rowPtr+=2;
+      // TABLE HEADER for details (light blue, bold)
+      const detailHeaders = ['No', 'Shipment Create Date', 'Receiver Name', 'Address', 'Contact', 'Tracking#', 'Status', 'COD', 'Pick Fee', 'Taxi Fee', 'Delivery Fee', 'Packaging Fee', 'Remark'];
+      detailHeaders.forEach((header, i) => {
+        const c = deliverySheet.getCell(rowPtr, i+1);
+        c.value = header;
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDBEAFE' } };
+        c.font = { bold: true, color: { argb: 'FF000000' } };
+        c.alignment = { vertical: 'middle', horizontal: 'center' };
       });
-      historicalPackages.forEach((pkg, index) => {
-        historySheet.addRow([
-          index + 1,
-          formatDateTime(pkg.createdAt),
-          pkg.customerName,
-          pkg.customerAddress,
-          pkg.customerPhone,
-          pkg.packageNumber,
-          pkg.status === 'DELIVERED' ? 'Delivered' : 'In Central Warehouse',
-          Number(pkg.codAmount) || '',
-          '$0',
-          '$0',
-          `$${Number(pkg.deliveryFee || 0)}`,
-          '$0',
-          '',
-        ]);
+      rowPtr++;
+      // Detail rows (no color, just alternating light gray)
+      packages.forEach((pkg, idx) => {
+        const isDelivered = pkg.status === 'DELIVERED';
+        for (let col = 1; col <= detailHeaders.length; col++) {
+          let cell = deliverySheet.getCell(rowPtr, col);
+          if (idx % 2 === 0) {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8F9FA' } };
+          }
+        }
+        deliverySheet.getCell(rowPtr, 1).value = idx+1;
+        deliverySheet.getCell(rowPtr, 2).value = formatDateTime(pkg.createdAt);
+        deliverySheet.getCell(rowPtr, 3).value = pkg.customerName;
+        deliverySheet.getCell(rowPtr, 4).value = pkg.customerAddress;
+        deliverySheet.getCell(rowPtr, 5).value = pkg.customerPhone;
+        deliverySheet.getCell(rowPtr, 6).value = pkg.packageNumber;
+        deliverySheet.getCell(rowPtr, 7).value = isDelivered ? 'Delivered' : 'In Central Warehouse';
+        deliverySheet.getCell(rowPtr, 8).value = Number(pkg.codAmount) || '';
+        deliverySheet.getCell(rowPtr, 9).value = '$0'; // Pick Fee
+        deliverySheet.getCell(rowPtr, 10).value = '$0'; // Taxi Fee
+        deliverySheet.getCell(rowPtr, 11).value = pkg.deliveryFee ? `$${pkg.deliveryFee}` : ''; // Delivery Fee
+        deliverySheet.getCell(rowPtr, 12).value = '$0'; // Packaging Fee
+        deliverySheet.getCell(rowPtr, 13).value = '';
+        rowPtr++;
       });
-      historySheet.columns = [
-        { width: 8 }, { width: 20 }, { width: 22 }, { width: 35 }, { width: 18 }, { width: 22 }, { width: 18 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 14 }, { width: 14 }, { width: 16 }
+      // TOTAL/FEE SUMMARY ROWS (yellow highlight for labels and figures)
+      [
+        { label: 'Total Cash', col: 4, val: `$${collectedCOD}` },
+        { label: 'Total Expenses Entry', col: 4, val: '$0' },
+        { label: 'Total Expenses', col: 4, val: '$15' },
+        { label: 'Total Outstanding Balance', col: 4, val: `$${outstanding}` },
+        { label: 'Deduct Fee After Expenses', col: 4, val: `$${toSettle}` },
+      ].forEach((row, i) => {
+        deliverySheet.getCell(rowPtr, row.col).value = row.label;
+        deliverySheet.getCell(rowPtr, row.col).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF3C7' } };
+        deliverySheet.getCell(rowPtr, row.col).font = { bold: true, color: { argb: 'FF000000' } };
+        deliverySheet.getCell(rowPtr, row.col+4).value = row.val;
+        deliverySheet.getCell(rowPtr, row.col+4).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF3C7' } };
+        deliverySheet.getCell(rowPtr, row.col+4).font = { bold: true, color: { argb: 'FF000000' } };
+        rowPtr++;
+      });
+      rowPtr+=1;
+      // OUTSTANDING DETAIL (orange/yellow bg, then white rows)
+      deliverySheet.getCell(rowPtr, 2).value = 'Outstanding Detail';
+      deliverySheet.getCell(rowPtr, 2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFED7AA' } };
+      deliverySheet.getCell(rowPtr, 2).font = { color: { argb: 'FF000000' }, bold: true };
+      rowPtr++;
+      deliverySheet.getCell(rowPtr, 2).value = 'Outstanding Date';
+      deliverySheet.getCell(rowPtr, 3).value = 'Outstanding Balance';
+      deliverySheet.getCell(rowPtr, 2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+      deliverySheet.getCell(rowPtr, 3).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+      deliverySheet.getCell(rowPtr, 2).font = { bold: true };
+      deliverySheet.getCell(rowPtr, 3).font = { bold: true };
+      rowPtr++;
+      deliverySheet.getCell(rowPtr, 2).value = 'Total';
+      deliverySheet.getCell(rowPtr, 3).value = '$0';
+      deliverySheet.getCell(rowPtr, 2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+      deliverySheet.getCell(rowPtr, 3).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+      deliverySheet.getCell(rowPtr, 2).font = { bold: true };
+      deliverySheet.getCell(rowPtr, 3).font = { bold: true };
+      rowPtr++;
+
+      // Set column widths for delivery sheet
+      deliverySheet.columns = [
+        { width: 8 }, // No
+        { width: 20 }, // Shipment Create Date
+        { width: 18 }, // Receiver Name
+        { width: 30 }, // Address
+        { width: 16 }, // Contact
+        { width: 22 }, // Tracking#
+        { width: 20 }, // Status
+        { width: 12 }, // COD
+        { width: 12 }, // Pick Fee
+        { width: 12 }, // Taxi Fee
+        { width: 12 }, // Delivery Fee
+        { width: 12 }, // Packaging Fee
+        { width: 15 }, // Remark
+        { width: 8 }, // Empty
       ];
 
       const buffer = await workbook.xlsx.writeBuffer();

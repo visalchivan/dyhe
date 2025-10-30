@@ -19,10 +19,10 @@ export const RecentPackages: React.FC<RecentPackagesProps> = ({
     switch (status) {
       case "DELIVERED":
         return "green";
-      case "IN_TRANSIT":
+      case "ON_DELIVERY":
         return "blue";
       case "PENDING":
-        return "orange";
+        return "default";
       case "FAILED":
         return "red";
       case "RETURNED":

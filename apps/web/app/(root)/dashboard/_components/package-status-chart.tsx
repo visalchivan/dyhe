@@ -17,29 +17,29 @@ export const PackageStatusChart: React.FC<PackageStatusChartProps> = ({
 }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "DELIVERED":
-        return "#52c41a";
-      case "IN_TRANSIT":
-        return "#1890ff";
       case "PENDING":
-        return "#faad14";
+        return "gray";
+      case "ON_DELIVERY":
+        return "blue";
+      case "DELIVERED":
+        return "green";
       case "FAILED":
-        return "#ff4d4f";
+        return "red";
       case "RETURNED":
-        return "#722ed1";
+        return "purple";
       default:
-        return "#d9d9d9";
+        return "gray";
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case "DELIVERED":
-        return "Delivered";
-      case "IN_TRANSIT":
-        return "In Transit";
       case "PENDING":
         return "Pending";
+      case "ON_DELIVERY":
+        return "In Transit";
+      case "DELIVERED":
+        return "Delivered";
       case "FAILED":
         return "Failed";
       case "RETURNED":

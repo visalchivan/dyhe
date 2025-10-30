@@ -1,87 +1,79 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { PackageStatus } from '../../../generated/client';
 
 @Injectable()
 export class DashboardService {
   constructor(private prisma: PrismaService) {}
 
-  async getDashboardStats() {
+  async getDashboardStats(startDate?: string, endDate?: string) {
+    let dateFilter = {};
+    if (startDate || endDate) {
+      dateFilter = {
+        createdAt: {
+          ...(startDate ? { gte: new Date(startDate) } : {}),
+          ...(endDate ? { lte: new Date(endDate) } : {}),
+        },
+      };
+    }
     const [
-      totalReceived,
-      totalDelivered,
       totalPending,
-      onDelivery,
+      totalOnDelivery,
+      totalDelivered,
       totalFailed,
       totalReturned,
     ] = await Promise.all([
-      // Total Received - all packages created
-      this.prisma.package.count(),
-
-      // Total Delivered - packages with DELIVERED status
-      this.prisma.package.count({
-        where: { status: 'DELIVERED' },
-      }),
-
-      // Total Pending - packages awaiting pickup
-      this.prisma.package.count({
-        where: { status: 'RECEIVED' },
-      }),
-
-      // On Delivery - packages currently in transit
-      this.prisma.package.count({
-        where: { status: 'DELIVERING' },
-      }),
-
-      // Total Failed - packages with failed status
-      this.prisma.package.count({
-        where: { status: 'CANCELLED' },
-      }),
-
-      // Total Returned - packages that were returned
-      this.prisma.package.count({
-        where: { status: 'RETURNED' },
-      }),
+      this.prisma.package.count({ where: { status: PackageStatus.PENDING, ...dateFilter } }),
+      this.prisma.package.count({ where: { status: PackageStatus.ON_DELIVERY, ...dateFilter } }),
+      this.prisma.package.count({ where: { status: PackageStatus.DELIVERED, ...dateFilter } }),
+      this.prisma.package.count({ where: { status: PackageStatus.FAILED, ...dateFilter } }),
+      this.prisma.package.count({ where: { status: PackageStatus.RETURNED, ...dateFilter } }),
     ]);
-
     return {
-      totalReceived,
-      totalDelivered,
       totalPending,
-      onDelivery,
+      totalOnDelivery,
+      totalDelivered,
       totalFailed,
       totalReturned,
     };
   }
 
-  async getRecentPackages(limit: number = 10) {
+  async getRecentPackages(limit: number = 10, startDate?: string, endDate?: string) {
+    let dateFilter = {};
+    if (startDate || endDate) {
+      dateFilter = {
+        createdAt: {
+          ...(startDate ? { gte: new Date(startDate) } : {}),
+          ...(endDate ? { lte: new Date(endDate) } : {}),
+        },
+      };
+    }
     return this.prisma.package.findMany({
       take: limit,
       orderBy: { createdAt: 'desc' },
+      where: { ...dateFilter },
       include: {
-        merchant: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-        driver: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
+        merchant: { select: { name: true, email: true } },
+        driver: { select: { name: true, email: true } },
       },
     });
   }
 
-  async getPackageStatusDistribution() {
+  async getPackageStatusDistribution(startDate?: string, endDate?: string) {
+    let dateFilter = {};
+    if (startDate || endDate) {
+      dateFilter = {
+        createdAt: {
+          ...(startDate ? { gte: new Date(startDate) } : {}),
+          ...(endDate ? { lte: new Date(endDate) } : {}),
+        },
+      };
+    }
     const statusCounts = await this.prisma.package.groupBy({
       by: ['status'],
-      _count: {
-        status: true,
-      },
+      _count: { status: true },
+      where: { ...dateFilter },
     });
-
     return statusCounts.map((item) => ({
       status: item.status,
       count: item._count.status,

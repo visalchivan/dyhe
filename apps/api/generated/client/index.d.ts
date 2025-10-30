@@ -63,12 +63,10 @@ export type Status = (typeof Status)[keyof typeof Status]
 
 
 export const PackageStatus: {
-  RECEIVED: 'RECEIVED',
-  PREPARING: 'PREPARING',
-  READY: 'READY',
-  DELIVERING: 'DELIVERING',
+  PENDING: 'PENDING',
+  ON_DELIVERY: 'ON_DELIVERY',
   DELIVERED: 'DELIVERED',
-  CANCELLED: 'CANCELLED',
+  FAILED: 'FAILED',
   RETURNED: 'RETURNED'
 };
 

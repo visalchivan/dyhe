@@ -18,14 +18,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "db:seed": "ts-node prisma/seed.ts",
-    "db:seed-settings": "ts-node src/seed-settings.ts",
-    "db:seed-superadmin": "ts-node src/seed-superadmin.ts",
-    "db:seed-all": "npm run db:seed-settings && npm run db:seed-superadmin",
-    "setup": "ts-node src/setup.ts",
-    "db:generate": "prisma generate",
-    "db:push": "prisma db push",
-    "db:migrate": "prisma migrate dev"
+    "db:seed": "ts-node src/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

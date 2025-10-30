@@ -14,20 +14,22 @@ export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
   @Get('stats')
-  getDashboardStats() {
-    return this.dashboardService.getDashboardStats();
+  getDashboardStats(@Query('startDate') startDate?: string, @Query('endDate') endDate?: string) {
+    return this.dashboardService.getDashboardStats(startDate, endDate);
   }
 
   @Get('recent-packages')
   getRecentPackages(
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string
   ) {
-    return this.dashboardService.getRecentPackages(limit || 10);
+    return this.dashboardService.getRecentPackages(limit || 10, startDate, endDate);
   }
 
   @Get('package-status-distribution')
-  getPackageStatusDistribution() {
-    return this.dashboardService.getPackageStatusDistribution();
+  getPackageStatusDistribution(@Query('startDate') startDate?: string, @Query('endDate') endDate?: string) {
+    return this.dashboardService.getPackageStatusDistribution(startDate, endDate);
   }
 
   @Get('top-merchants')

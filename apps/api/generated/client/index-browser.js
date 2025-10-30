@@ -247,12 +247,10 @@ exports.Bank = exports.$Enums.Bank = {
 };
 
 exports.PackageStatus = exports.$Enums.PackageStatus = {
-  RECEIVED: 'RECEIVED',
-  PREPARING: 'PREPARING',
-  READY: 'READY',
-  DELIVERING: 'DELIVERING',
+  PENDING: 'PENDING',
+  ON_DELIVERY: 'ON_DELIVERY',
   DELIVERED: 'DELIVERED',
-  CANCELLED: 'CANCELLED',
+  FAILED: 'FAILED',
   RETURNED: 'RETURNED'
 };
 
