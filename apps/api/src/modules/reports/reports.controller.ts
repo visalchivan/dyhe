@@ -274,11 +274,13 @@ export class ReportsController {
           index + 1,
           formatDateTime(item.shipmentCreateDate),
           deliveryDate,
-          item.receiverName,
-          item.address,
-          item.contact,
-          item.trackingNumber,
-          item.cashCollectionAmount || '',
+          `"${item.receiverName}"`,
+          `"${item.address}"`,
+          `"${item.contact}"`,
+          `"${item.trackingNumber}"`,
+          item.cashCollectionAmount > 0
+            ? `$${item.cashCollectionAmount.toFixed(2)}`
+            : '$0.00',
         ]);
 
         const isEvenRow = (index + 2) % 2 === 0; // +2 because header is row 1
@@ -649,6 +651,161 @@ export class ReportsController {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       throw new BadRequestException(`Failed to export Excel: ${errorMessage}`);
+    }
+  }
+
+  @Get('export/excel-per-merchant')
+  @Header(
+    'Content-Type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
+  async exportExcelPerMerchant(
+    @Query('merchantId') merchantId: string,
+    @Res() res: Response,
+    @Query('date') date?: string, // YYYY-MM-DD in Asia/Phnom_Penh
+  ) {
+    try {
+      if (!merchantId) {
+        throw new BadRequestException('merchantId is required');
+      }
+
+      const { merchant, label, inputPackages, historicalPackages } =
+        await this.reportsService.buildMerchantWorkbook(merchantId, date);
+
+      const workbook = new ExcelJS.Workbook();
+
+      const formatDateTime = (isoDate?: string | Date) => {
+        if (!isoDate) return '';
+        const d = new Date(isoDate);
+        const yy = String(d.getFullYear()).slice(-2);
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        let hours = d.getHours();
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        if (hours === 0) hours = 12;
+        const hh = String(hours).padStart(2, '0');
+        return `${dd}-${mm}-${yy} ${hh}:${minutes} ${ampm}`;
+      };
+
+      const formatDateShort = (isoDate?: string | Date) => {
+        if (!isoDate) return '';
+        const d = new Date(isoDate);
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const yy = String(d.getFullYear()).slice(-2);
+        const mm = months[d.getMonth()];
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${dd}-${mm}-${yy}`;
+      };
+
+      const labelShort = (() => {
+        const [y, m, d] = label.split('-');
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return `${d}-${monthNames[parseInt(m, 10) - 1]}-${String(parseInt(y, 10)).slice(-2)}`;
+      })();
+
+      // Sheet 1: Input Packages (selected date)
+      const pickupSheet = workbook.addWorksheet(`Pick up ${labelShort}`);
+      const pickupHeaders = [
+        'ID',
+        'Shipment Create Date',
+        'Shipment Delivery Date',
+        'Receiver Name',
+        'Address',
+        'Contact',
+        'Tracking#',
+        'Cash Collection Amount',
+      ];
+      const pickupHeaderRow = pickupSheet.addRow(pickupHeaders);
+      pickupHeaderRow.eachCell((cell) => {
+        cell.font = { bold: true } as any;
+      });
+      let totalAmount = 0;
+      inputPackages.forEach((pkg, index) => {
+        // Calculate delivered date if delivered, otherwise blank
+        const deliveredDate = pkg.status === 'DELIVERED' && pkg.updatedAt ? formatDateTime(pkg.updatedAt) : '';
+        const cash = Number(pkg.codAmount) || 0;
+        totalAmount += cash;
+        pickupSheet.addRow([
+          index + 1,
+          formatDateTime(pkg.createdAt),
+          deliveredDate,
+          pkg.customerName,
+          pkg.customerAddress,
+          pkg.customerPhone,
+          pkg.packageNumber,
+          cash,
+        ]);
+      });
+      pickupSheet.columns = [
+        { width: 6 },  // ID
+        { width: 20 }, // Shipment Create Date
+        { width: 20 }, // Shipment Delivery Date
+        { width: 20 }, // Receiver Name
+        { width: 35 }, // Address
+        { width: 18 }, // Contact
+        { width: 22 }, // Tracking#
+        { width: 18 }, // Cash Collection Amount
+      ];
+      // Total rows
+      const totalPackageRow = pickupSheet.addRow([ '', '', '', '', '', '', 'Total Package', inputPackages.length ]);
+      const totalAmountRow = pickupSheet.addRow([ '', '', '', '', '', '', 'Total Amount', totalAmount ]);
+      // Style bottom rows (yellow background like example)
+      [totalPackageRow, totalAmountRow].forEach(row => {
+        row.eachCell((cell, colNumber) => {
+          if (colNumber >= 7) {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFFEF3C7' } // yellow
+            };
+            cell.font = { color: { argb: 'FF000000' }, bold: true };
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+          }
+        });
+      });
+
+      // Sheet 2: Historical Records (before selected date)
+      const historySheet = workbook.addWorksheet(`Delivery report ${labelShort}`);
+      const historyHeaders = [
+        'No', 'Shipment Create Date', 'Receiver Name', 'Address', 'Contact',
+        'Tracking#', 'Status', 'COD', 'Pick Fee', 'Taxi Fee', 'Delivery Fee', 'Packaging Fee', 'Remark'
+      ];
+      const historyHeaderRow = historySheet.addRow(historyHeaders);
+      historyHeaderRow.eachCell((cell) => {
+        cell.font = { bold: true } as any;
+      });
+      historicalPackages.forEach((pkg, index) => {
+        historySheet.addRow([
+          index + 1,
+          formatDateTime(pkg.createdAt),
+          pkg.customerName,
+          pkg.customerAddress,
+          pkg.customerPhone,
+          pkg.packageNumber,
+          pkg.status === 'DELIVERED' ? 'Delivered' : 'In Central Warehouse',
+          Number(pkg.codAmount) || '',
+          '$0',
+          '$0',
+          `$${Number(pkg.deliveryFee || 0)}`,
+          '$0',
+          '',
+        ]);
+      });
+      historySheet.columns = [
+        { width: 8 }, { width: 20 }, { width: 22 }, { width: 35 }, { width: 18 }, { width: 22 }, { width: 18 }, { width: 12 }, { width: 12 }, { width: 12 }, { width: 14 }, { width: 14 }, { width: 16 }
+      ];
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const safeName = merchant.name.replace(/[^A-Za-z0-9 _-]+/g, '').replace(/\s+/g, '_');
+      const filename = `DYHE_Report_${safeName}_${label}.xlsx`;
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(buffer);
+    } catch (error) {
+      console.error('Excel Per-Merchant Export Error:', error);
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      throw new BadRequestException(`Failed to export per-merchant Excel: ${msg}`);
     }
   }
 }

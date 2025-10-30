@@ -89,10 +89,10 @@ const SettingsPage = () => {
   }
 
   return (
-    <div style={{ padding: 24, maxWidth: 1200, margin: "0 auto" }}>
+    <div style={{ padding: '4px 22px' }}>
       <div style={{ marginBottom: 24 }}>
         <Title level={2}>
-          <SettingOutlined /> System Settings
+          System Settings
         </Title>
         <Text type="secondary">
           Manage your company information and system preferences
@@ -116,7 +116,7 @@ const SettingsPage = () => {
                   { required: true, message: "Please enter company name" },
                 ]}
               >
-                <Input placeholder="Enter company name" />
+                <Input size="large" placeholder="Enter company name" />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -127,7 +127,7 @@ const SettingsPage = () => {
                   { required: true, message: "Please enter company phone" },
                 ]}
               >
-                <Input placeholder="Enter company phone" />
+                <Input size="large" placeholder="Enter company phone" />
               </Form.Item>
             </Col>
           </Row>
@@ -139,7 +139,7 @@ const SettingsPage = () => {
               { required: true, message: "Please enter company address" },
             ]}
           >
-            <Input.TextArea rows={3} placeholder="Enter company address" />
+            <Input.TextArea size="large"  rows={3} placeholder="Enter company address" />
           </Form.Item>
         </Card>
 
@@ -151,6 +151,7 @@ const SettingsPage = () => {
             rules={[{ required: true, message: "Please enter label remarks" }]}
           >
             <Input.TextArea
+              size="large"
               rows={4}
               placeholder="Enter remarks that appear on package labels"
             />
@@ -168,7 +169,7 @@ const SettingsPage = () => {
                   },
                 ]}
               >
-                <Input placeholder="Company name on labels" />
+                <Input size="large" placeholder="Company name on labels" />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -182,7 +183,7 @@ const SettingsPage = () => {
                   },
                 ]}
               >
-                <Input placeholder="Company phone on labels" />
+                <Input size="large" placeholder="Company phone on labels" />
               </Form.Item>
             </Col>
           </Row>
@@ -194,7 +195,7 @@ const SettingsPage = () => {
               { required: true, message: "Please enter label company address" },
             ]}
           >
-            <Input placeholder="Company address on labels" />
+            <Input size="large" placeholder="Company address on labels" />
           </Form.Item>
         </Card>
 
@@ -216,7 +217,7 @@ const SettingsPage = () => {
                   },
                 ]}
               >
-                <Input placeholder="0.00" />
+                <Input size="large" placeholder="0.00" />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -234,7 +235,7 @@ const SettingsPage = () => {
                   },
                 ]}
               >
-                <Input placeholder="0.00" />
+                <Input size="large" placeholder="0.00" />
               </Form.Item>
             </Col>
           </Row>
@@ -244,7 +245,7 @@ const SettingsPage = () => {
             label="Timezone"
             rules={[{ required: true, message: "Please enter timezone" }]}
           >
-            <Input placeholder="Asia/Phnom_Penh" />
+            <Input size="large" placeholder="Asia/Phnom_Penh" />
           </Form.Item>
         </Card>
 
@@ -255,11 +256,11 @@ const SettingsPage = () => {
             label="Notification Email"
             rules={[{ type: "email", message: "Please enter a valid email" }]}
           >
-            <Input placeholder="admin@company.com" />
+            <Input size="large" placeholder="admin@company.com" />
           </Form.Item>
 
           <Form.Item name="notification_phone" label="Notification Phone">
-            <Input placeholder="+855 12 345 678" />
+            <Input size="large" placeholder="+855 12 345 678" />
           </Form.Item>
         </Card>
 
@@ -267,7 +268,7 @@ const SettingsPage = () => {
 
         <Form.Item style={{ textAlign: "right" }}>
           <Space>
-            <Button onClick={() => form.resetFields()}>Reset</Button>
+            <Button size="large" onClick={() => form.resetFields()}>Reset</Button>
             <Button
               type="primary"
               htmlType="submit"

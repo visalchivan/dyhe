@@ -168,6 +168,71 @@ export class ReportsService {
     return this.getReports({ ...query, type: ReportType.MERCHANT });
   }
 
+  // Compute start and end of day for Asia/Phnom_Penh (UTC+07:00)
+  private getPhnomPenhDayRange(dateStr?: string): { start: Date; end: Date; label: string } {
+    const toYmd = (d: Date) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${dd}`;
+    };
+
+    let ymd: string;
+    if (dateStr) {
+      ymd = dateStr;
+    } else {
+      const fmt = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Phnom_Penh', year: 'numeric', month: '2-digit', day: '2-digit' });
+      // en-CA yields YYYY-MM-DD
+      ymd = fmt.format(new Date());
+    }
+
+    // Build ISO with fixed +07:00 offset
+    const start = new Date(`${ymd}T00:00:00+07:00`);
+    const end = new Date(`${ymd}T23:59:59.999+07:00`);
+    return { start, end, label: ymd };
+  }
+
+  async buildMerchantWorkbook(merchantId: string, dateStr?: string) {
+    const merchant = await this.prisma.merchant.findUnique({ where: { id: merchantId } });
+    if (!merchant) {
+      throw new Error('Merchant not found');
+    }
+
+    const { start, end, label } = this.getPhnomPenhDayRange(dateStr);
+
+    // Sheet 1: packages created within the selected day (Asia/Phnom_Penh)
+    const inputPackages = await this.prisma.package.findMany({
+      where: {
+        merchantId,
+        createdAt: { gte: start, lte: end },
+      },
+      include: {
+        driver: { select: { name: true } },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    // Sheet 2: historical packages strictly before the selected day
+    const historicalPackages = await this.prisma.package.findMany({
+      where: {
+        merchantId,
+        createdAt: { lt: start },
+      },
+      include: {
+        driver: { select: { name: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Build workbook using exceljs (imported by controller), return data model
+    return {
+      merchant,
+      label,
+      inputPackages,
+      historicalPackages,
+    };
+  }
+
   private async calculateAnalytics(
     where: Record<string, any>,
   ): Promise<PackageAnalyticsDto> {

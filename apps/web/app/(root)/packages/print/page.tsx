@@ -140,10 +140,10 @@ const PackagePrintPage = () => {
   // generatePrintContent, generateBulkPrintContent remain for preview UI text; PDF path is used for actual prints
 
   return (
-    <div style={{ padding: 24, maxWidth: 1600, margin: "0 auto" }}>
+    <div style={{ padding: '4px 22px' }}>
       <div style={{ marginBottom: 24 }}>
         <Title level={2}>
-          <PrinterOutlined /> Package Label Printer
+          Package Label Printer
         </Title>
         <Text type="secondary">
           Print package labels directly - 80mm x 100mm labels with QR codes
@@ -281,7 +281,7 @@ const PackagePrintPage = () => {
                       <List.Item.Meta
                         title={
                           <Text strong style={{ fontSize: 15 }}>
-                            {pkg.packageNumber} - {pkg.name}
+                            {pkg.packageNumber}
                           </Text>
                         }
                         description={

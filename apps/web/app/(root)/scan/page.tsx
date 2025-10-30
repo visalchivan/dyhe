@@ -70,10 +70,10 @@ const ScanPackagePage = () => {
   };
 
   return (
-    <div style={{ padding: 24, maxWidth: 1600, margin: "0 auto" }}>
+    <div style={{ padding: '4px 22px' }}>
       <div style={{ marginBottom: 24 }}>
         <Title level={2}>
-          <QrcodeOutlined /> Assign Packages
+          Assign Packages
         </Title>
         <Text type="secondary">
           Manually enter package numbers to assign them to drivers in bulk

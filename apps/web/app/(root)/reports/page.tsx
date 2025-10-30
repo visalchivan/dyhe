@@ -102,33 +102,34 @@ const ReportsPage = () => {
   const deliveredPackages = analytics?.deliveredPackages || 0;
   const pendingPackages = analytics?.pendingPackages || 0;
 
-  // Export to Excel function
+  // Export: one XLSX per merchant (selected date or today)
   const exportToExcel = async () => {
-    if (!currentData || currentData.data.length === 0) {
-      message.warning("No data to export");
-      return;
-    }
-
     try {
-      const blob = await reportsApi.exportToExcel(reportsQuery as ReportsQuery);
+      const date = dayjs().format("YYYY-MM-DD");
+      const selectedDate = dateRange && dateRange[0] ? dateRange[0].format("YYYY-MM-DD") : date;
 
-      // Create and download file
-      const link = document.createElement("a");
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute(
-        "download",
-        `delivery_report_${dayjs().format("YYYY-MM-DD")}.xlsx`
-      );
-      link.style.visibility = "hidden";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      if (!merchantsData?.merchants?.length) {
+        message.warning("No merchants to export");
+        return;
+      }
 
-      message.success(`Exported ${currentData.data.length} records to Excel`);
-    } catch (error) {
-      console.error("Export failed:", error);
-      message.error("Failed to export data");
+      for (const m of merchantsData.merchants as Array<{ id: string; name: string }>) {
+        const blob = await reportsApi.exportMerchantExcel(m.id, selectedDate);
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `DYHE_Report_${m.name.replace(/\s+/g, '_')}_${selectedDate}.xlsx`);
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        await new Promise((r) => setTimeout(r, 250)); // small delay between downloads
+      }
+
+      message.success(`Started downloads for ${merchantsData.merchants.length} merchants`);
+    } catch (e) {
+      console.error(e);
+      message.error("Failed to export reports");
     }
   };
 
@@ -222,10 +223,10 @@ const ReportsPage = () => {
   ];
 
   return (
-    <div style={{ padding: 24, maxWidth: 1600, margin: "0 auto" }}>
+    <div style={{ padding: '4px 22px' }}>
       <div style={{ marginBottom: 24 }}>
         <Title level={2} style={{ margin: 0 }}>
-          Reports & Analytics
+          Reports
         </Title>
         <Text type="secondary">
           Generate comprehensive reports for drivers, merchants, and packages
@@ -372,7 +373,6 @@ const ReportsPage = () => {
               key: "drivers",
               label: (
                 <>
-                  <UserOutlined />
                   Driver Reports
                 </>
               ),
@@ -398,7 +398,6 @@ const ReportsPage = () => {
               key: "merchants",
               label: (
                 <>
-                  <ShopOutlined />
                   Merchant Reports
                 </>
               ),
@@ -424,7 +423,6 @@ const ReportsPage = () => {
               key: "packages",
               label: (
                 <>
-                  <QrcodeOutlined />
                   Package Analytics
                 </>
               ),
