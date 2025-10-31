@@ -10,6 +10,7 @@ import {
   Space,
   Row,
   Col,
+  Checkbox,
 } from "antd";
 import {
   CreatePackageDto,
@@ -81,6 +82,9 @@ export const PackageForm: React.FC<PackageFormProps> = ({
         status: "PENDING",
         codAmount: 0,
         deliveryFee: 0,
+        hasIssue: packageData?.hasIssue || false,
+        extraDeliveryFee: Number(packageData?.extraDeliveryFee || 0),
+        issueNote: packageData?.issueNote || "",
       }}
     >
       <Row gutter={16}>
@@ -209,6 +213,57 @@ export const PackageForm: React.FC<PackageFormProps> = ({
                 </Option>
               ))}
             </Select>
+          </Form.Item>
+        </Col>
+      </Row>
+
+      {/* Issue Section */}
+      <Row gutter={16}>
+        <Col span={12}>
+          <Form.Item name="hasIssue" valuePropName="checked">
+            <Checkbox>Add issue / extra delivery fee</Checkbox>
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Row gutter={16}>
+        <Col span={12}>
+          <Form.Item
+            noStyle
+            shouldUpdate={(prev, curr) => prev.hasIssue !== curr.hasIssue}
+          >
+            {({ getFieldValue }) =>
+              getFieldValue("hasIssue") ? (
+                <Form.Item
+                  name="extraDeliveryFee"
+                  label="Extra Delivery Fee ($)"
+                  rules={[
+                    { type: "number", min: 0, message: "Must be positive" },
+                  ]}
+                >
+                  <InputNumber
+                    style={{ width: "100%" }}
+                    placeholder="Enter extra fee"
+                    precision={2}
+                    min={0}
+                  />
+                </Form.Item>
+              ) : null
+            }
+          </Form.Item>
+        </Col>
+        <Col span={12}>
+          <Form.Item
+            noStyle
+            shouldUpdate={(prev, curr) => prev.hasIssue !== curr.hasIssue}
+          >
+            {({ getFieldValue }) =>
+              getFieldValue("hasIssue") ? (
+                <Form.Item name="issueNote" label="Issue Note">
+                  <Input.TextArea rows={3} placeholder="Describe the issue" />
+                </Form.Item>
+              ) : null
+            }
           </Form.Item>
         </Col>
       </Row>

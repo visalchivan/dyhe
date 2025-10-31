@@ -4998,6 +4998,7 @@ export namespace Prisma {
     price: Decimal | null
     codAmount: Decimal | null
     deliveryFee: Decimal | null
+    extraDeliveryFee: Decimal | null
     customerLatitude: number | null
     customerLongitude: number | null
   }
@@ -5006,6 +5007,7 @@ export namespace Prisma {
     price: Decimal | null
     codAmount: Decimal | null
     deliveryFee: Decimal | null
+    extraDeliveryFee: Decimal | null
     customerLatitude: number | null
     customerLongitude: number | null
   }
@@ -5016,6 +5018,9 @@ export namespace Prisma {
     price: Decimal | null
     codAmount: Decimal | null
     deliveryFee: Decimal | null
+    hasIssue: boolean | null
+    issueNote: string | null
+    extraDeliveryFee: Decimal | null
     status: $Enums.PackageStatus | null
     customerName: string | null
     customerPhone: string | null
@@ -5035,6 +5040,9 @@ export namespace Prisma {
     price: Decimal | null
     codAmount: Decimal | null
     deliveryFee: Decimal | null
+    hasIssue: boolean | null
+    issueNote: string | null
+    extraDeliveryFee: Decimal | null
     status: $Enums.PackageStatus | null
     customerName: string | null
     customerPhone: string | null
@@ -5054,6 +5062,9 @@ export namespace Prisma {
     price: number
     codAmount: number
     deliveryFee: number
+    hasIssue: number
+    issueNote: number
+    extraDeliveryFee: number
     status: number
     customerName: number
     customerPhone: number
@@ -5073,6 +5084,7 @@ export namespace Prisma {
     price?: true
     codAmount?: true
     deliveryFee?: true
+    extraDeliveryFee?: true
     customerLatitude?: true
     customerLongitude?: true
   }
@@ -5081,6 +5093,7 @@ export namespace Prisma {
     price?: true
     codAmount?: true
     deliveryFee?: true
+    extraDeliveryFee?: true
     customerLatitude?: true
     customerLongitude?: true
   }
@@ -5091,6 +5104,9 @@ export namespace Prisma {
     price?: true
     codAmount?: true
     deliveryFee?: true
+    hasIssue?: true
+    issueNote?: true
+    extraDeliveryFee?: true
     status?: true
     customerName?: true
     customerPhone?: true
@@ -5110,6 +5126,9 @@ export namespace Prisma {
     price?: true
     codAmount?: true
     deliveryFee?: true
+    hasIssue?: true
+    issueNote?: true
+    extraDeliveryFee?: true
     status?: true
     customerName?: true
     customerPhone?: true
@@ -5129,6 +5148,9 @@ export namespace Prisma {
     price?: true
     codAmount?: true
     deliveryFee?: true
+    hasIssue?: true
+    issueNote?: true
+    extraDeliveryFee?: true
     status?: true
     customerName?: true
     customerPhone?: true
@@ -5235,6 +5257,9 @@ export namespace Prisma {
     price: Decimal
     codAmount: Decimal
     deliveryFee: Decimal
+    hasIssue: boolean
+    issueNote: string | null
+    extraDeliveryFee: Decimal
     status: $Enums.PackageStatus
     customerName: string
     customerPhone: string
@@ -5273,6 +5298,9 @@ export namespace Prisma {
     price?: boolean
     codAmount?: boolean
     deliveryFee?: boolean
+    hasIssue?: boolean
+    issueNote?: boolean
+    extraDeliveryFee?: boolean
     status?: boolean
     customerName?: boolean
     customerPhone?: boolean
@@ -5294,6 +5322,9 @@ export namespace Prisma {
     price?: boolean
     codAmount?: boolean
     deliveryFee?: boolean
+    hasIssue?: boolean
+    issueNote?: boolean
+    extraDeliveryFee?: boolean
     status?: boolean
     customerName?: boolean
     customerPhone?: boolean
@@ -5315,6 +5346,9 @@ export namespace Prisma {
     price?: boolean
     codAmount?: boolean
     deliveryFee?: boolean
+    hasIssue?: boolean
+    issueNote?: boolean
+    extraDeliveryFee?: boolean
     status?: boolean
     customerName?: boolean
     customerPhone?: boolean
@@ -5336,6 +5370,9 @@ export namespace Prisma {
     price?: boolean
     codAmount?: boolean
     deliveryFee?: boolean
+    hasIssue?: boolean
+    issueNote?: boolean
+    extraDeliveryFee?: boolean
     status?: boolean
     customerName?: boolean
     customerPhone?: boolean
@@ -5349,7 +5386,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type PackageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "packageNumber" | "price" | "codAmount" | "deliveryFee" | "status" | "customerName" | "customerPhone" | "customerAddress" | "customerLatitude" | "customerLongitude" | "customerGoogleMapsUrl" | "merchantId" | "driverId" | "createdAt" | "updatedAt", ExtArgs["result"]["package"]>
+  export type PackageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "packageNumber" | "price" | "codAmount" | "deliveryFee" | "hasIssue" | "issueNote" | "extraDeliveryFee" | "status" | "customerName" | "customerPhone" | "customerAddress" | "customerLatitude" | "customerLongitude" | "customerGoogleMapsUrl" | "merchantId" | "driverId" | "createdAt" | "updatedAt", ExtArgs["result"]["package"]>
   export type PackageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     merchant?: boolean | MerchantDefaultArgs<ExtArgs>
     driver?: boolean | Package$driverArgs<ExtArgs>
@@ -5375,6 +5412,9 @@ export namespace Prisma {
       price: Prisma.Decimal
       codAmount: Prisma.Decimal
       deliveryFee: Prisma.Decimal
+      hasIssue: boolean
+      issueNote: string | null
+      extraDeliveryFee: Prisma.Decimal
       status: $Enums.PackageStatus
       customerName: string
       customerPhone: string
@@ -5816,6 +5856,9 @@ export namespace Prisma {
     readonly price: FieldRef<"Package", 'Decimal'>
     readonly codAmount: FieldRef<"Package", 'Decimal'>
     readonly deliveryFee: FieldRef<"Package", 'Decimal'>
+    readonly hasIssue: FieldRef<"Package", 'Boolean'>
+    readonly issueNote: FieldRef<"Package", 'String'>
+    readonly extraDeliveryFee: FieldRef<"Package", 'Decimal'>
     readonly status: FieldRef<"Package", 'PackageStatus'>
     readonly customerName: FieldRef<"Package", 'String'>
     readonly customerPhone: FieldRef<"Package", 'String'>
@@ -7370,6 +7413,9 @@ export namespace Prisma {
     price: 'price',
     codAmount: 'codAmount',
     deliveryFee: 'deliveryFee',
+    hasIssue: 'hasIssue',
+    issueNote: 'issueNote',
+    extraDeliveryFee: 'extraDeliveryFee',
     status: 'status',
     customerName: 'customerName',
     customerPhone: 'customerPhone',
@@ -7542,6 +7588,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
    * Reference to a field of type 'PackageStatus'
    */
   export type EnumPackageStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PackageStatus'>
@@ -7566,13 +7619,6 @@ export namespace Prisma {
    * Reference to a field of type 'Float[]'
    */
   export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Boolean'
-   */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -7889,6 +7935,9 @@ export namespace Prisma {
     price?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
+    hasIssue?: BoolFilter<"Package"> | boolean
+    issueNote?: StringNullableFilter<"Package"> | string | null
+    extraDeliveryFee?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
     status?: EnumPackageStatusFilter<"Package"> | $Enums.PackageStatus
     customerName?: StringFilter<"Package"> | string
     customerPhone?: StringFilter<"Package"> | string
@@ -7910,6 +7959,9 @@ export namespace Prisma {
     price?: SortOrder
     codAmount?: SortOrder
     deliveryFee?: SortOrder
+    hasIssue?: SortOrder
+    issueNote?: SortOrderInput | SortOrder
+    extraDeliveryFee?: SortOrder
     status?: SortOrder
     customerName?: SortOrder
     customerPhone?: SortOrder
@@ -7934,6 +7986,9 @@ export namespace Prisma {
     price?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
+    hasIssue?: BoolFilter<"Package"> | boolean
+    issueNote?: StringNullableFilter<"Package"> | string | null
+    extraDeliveryFee?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
     status?: EnumPackageStatusFilter<"Package"> | $Enums.PackageStatus
     customerName?: StringFilter<"Package"> | string
     customerPhone?: StringFilter<"Package"> | string
@@ -7955,6 +8010,9 @@ export namespace Prisma {
     price?: SortOrder
     codAmount?: SortOrder
     deliveryFee?: SortOrder
+    hasIssue?: SortOrder
+    issueNote?: SortOrderInput | SortOrder
+    extraDeliveryFee?: SortOrder
     status?: SortOrder
     customerName?: SortOrder
     customerPhone?: SortOrder
@@ -7982,6 +8040,9 @@ export namespace Prisma {
     price?: DecimalWithAggregatesFilter<"Package"> | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalWithAggregatesFilter<"Package"> | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalWithAggregatesFilter<"Package"> | Decimal | DecimalJsLike | number | string
+    hasIssue?: BoolWithAggregatesFilter<"Package"> | boolean
+    issueNote?: StringNullableWithAggregatesFilter<"Package"> | string | null
+    extraDeliveryFee?: DecimalWithAggregatesFilter<"Package"> | Decimal | DecimalJsLike | number | string
     status?: EnumPackageStatusWithAggregatesFilter<"Package"> | $Enums.PackageStatus
     customerName?: StringWithAggregatesFilter<"Package"> | string
     customerPhone?: StringWithAggregatesFilter<"Package"> | string
@@ -8408,6 +8469,9 @@ export namespace Prisma {
     price?: Decimal | DecimalJsLike | number | string
     codAmount?: Decimal | DecimalJsLike | number | string
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    hasIssue?: boolean
+    issueNote?: string | null
+    extraDeliveryFee?: Decimal | DecimalJsLike | number | string
     status?: $Enums.PackageStatus
     customerName: string
     customerPhone: string
@@ -8427,6 +8491,9 @@ export namespace Prisma {
     price?: Decimal | DecimalJsLike | number | string
     codAmount?: Decimal | DecimalJsLike | number | string
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    hasIssue?: boolean
+    issueNote?: string | null
+    extraDeliveryFee?: Decimal | DecimalJsLike | number | string
     status?: $Enums.PackageStatus
     customerName: string
     customerPhone: string
@@ -8446,6 +8513,9 @@ export namespace Prisma {
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasIssue?: BoolFieldUpdateOperationsInput | boolean
+    issueNote?: NullableStringFieldUpdateOperationsInput | string | null
+    extraDeliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     status?: EnumPackageStatusFieldUpdateOperationsInput | $Enums.PackageStatus
     customerName?: StringFieldUpdateOperationsInput | string
     customerPhone?: StringFieldUpdateOperationsInput | string
@@ -8465,6 +8535,9 @@ export namespace Prisma {
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasIssue?: BoolFieldUpdateOperationsInput | boolean
+    issueNote?: NullableStringFieldUpdateOperationsInput | string | null
+    extraDeliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     status?: EnumPackageStatusFieldUpdateOperationsInput | $Enums.PackageStatus
     customerName?: StringFieldUpdateOperationsInput | string
     customerPhone?: StringFieldUpdateOperationsInput | string
@@ -8484,6 +8557,9 @@ export namespace Prisma {
     price?: Decimal | DecimalJsLike | number | string
     codAmount?: Decimal | DecimalJsLike | number | string
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    hasIssue?: boolean
+    issueNote?: string | null
+    extraDeliveryFee?: Decimal | DecimalJsLike | number | string
     status?: $Enums.PackageStatus
     customerName: string
     customerPhone: string
@@ -8503,6 +8579,9 @@ export namespace Prisma {
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasIssue?: BoolFieldUpdateOperationsInput | boolean
+    issueNote?: NullableStringFieldUpdateOperationsInput | string | null
+    extraDeliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     status?: EnumPackageStatusFieldUpdateOperationsInput | $Enums.PackageStatus
     customerName?: StringFieldUpdateOperationsInput | string
     customerPhone?: StringFieldUpdateOperationsInput | string
@@ -8520,6 +8599,9 @@ export namespace Prisma {
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasIssue?: BoolFieldUpdateOperationsInput | boolean
+    issueNote?: NullableStringFieldUpdateOperationsInput | string | null
+    extraDeliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     status?: EnumPackageStatusFieldUpdateOperationsInput | $Enums.PackageStatus
     customerName?: StringFieldUpdateOperationsInput | string
     customerPhone?: StringFieldUpdateOperationsInput | string
@@ -8995,6 +9077,11 @@ export namespace Prisma {
     deliverFee?: SortOrder
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type EnumPackageStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.PackageStatus | EnumPackageStatusFieldRefInput<$PrismaModel>
     in?: $Enums.PackageStatus[] | ListEnumPackageStatusFieldRefInput<$PrismaModel>
@@ -9024,6 +9111,9 @@ export namespace Prisma {
     price?: SortOrder
     codAmount?: SortOrder
     deliveryFee?: SortOrder
+    hasIssue?: SortOrder
+    issueNote?: SortOrder
+    extraDeliveryFee?: SortOrder
     status?: SortOrder
     customerName?: SortOrder
     customerPhone?: SortOrder
@@ -9041,6 +9131,7 @@ export namespace Prisma {
     price?: SortOrder
     codAmount?: SortOrder
     deliveryFee?: SortOrder
+    extraDeliveryFee?: SortOrder
     customerLatitude?: SortOrder
     customerLongitude?: SortOrder
   }
@@ -9051,6 +9142,9 @@ export namespace Prisma {
     price?: SortOrder
     codAmount?: SortOrder
     deliveryFee?: SortOrder
+    hasIssue?: SortOrder
+    issueNote?: SortOrder
+    extraDeliveryFee?: SortOrder
     status?: SortOrder
     customerName?: SortOrder
     customerPhone?: SortOrder
@@ -9070,6 +9164,9 @@ export namespace Prisma {
     price?: SortOrder
     codAmount?: SortOrder
     deliveryFee?: SortOrder
+    hasIssue?: SortOrder
+    issueNote?: SortOrder
+    extraDeliveryFee?: SortOrder
     status?: SortOrder
     customerName?: SortOrder
     customerPhone?: SortOrder
@@ -9087,8 +9184,17 @@ export namespace Prisma {
     price?: SortOrder
     codAmount?: SortOrder
     deliveryFee?: SortOrder
+    extraDeliveryFee?: SortOrder
     customerLatitude?: SortOrder
     customerLongitude?: SortOrder
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type EnumPackageStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -9115,11 +9221,6 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
-  }
-
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
   export type SettingsCountOrderByAggregateInput = {
@@ -9153,14 +9254,6 @@ export namespace Prisma {
     isPublic?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-  }
-
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type DriverCreateNestedOneWithoutUserInput = {
@@ -9347,6 +9440,10 @@ export namespace Prisma {
     connect?: DriverWhereUniqueInput
   }
 
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
   export type EnumPackageStatusFieldUpdateOperationsInput = {
     set?: $Enums.PackageStatus
   }
@@ -9375,10 +9472,6 @@ export namespace Prisma {
     delete?: DriverWhereInput | boolean
     connect?: DriverWhereUniqueInput
     update?: XOR<XOR<DriverUpdateToOneWithWhereWithoutPackagesInput, DriverUpdateWithoutPackagesInput>, DriverUncheckedUpdateWithoutPackagesInput>
-  }
-
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -9602,6 +9695,11 @@ export namespace Prisma {
     _max?: NestedEnumBankFilter<$PrismaModel>
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type NestedEnumPackageStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.PackageStatus | EnumPackageStatusFieldRefInput<$PrismaModel>
     in?: $Enums.PackageStatus[] | ListEnumPackageStatusFieldRefInput<$PrismaModel>
@@ -9618,6 +9716,14 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedEnumPackageStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -9644,19 +9750,6 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
-  }
-
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type DriverCreateWithoutUserInput = {
@@ -9782,6 +9875,9 @@ export namespace Prisma {
     price?: Decimal | DecimalJsLike | number | string
     codAmount?: Decimal | DecimalJsLike | number | string
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    hasIssue?: boolean
+    issueNote?: string | null
+    extraDeliveryFee?: Decimal | DecimalJsLike | number | string
     status?: $Enums.PackageStatus
     customerName: string
     customerPhone: string
@@ -9800,6 +9896,9 @@ export namespace Prisma {
     price?: Decimal | DecimalJsLike | number | string
     codAmount?: Decimal | DecimalJsLike | number | string
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    hasIssue?: boolean
+    issueNote?: string | null
+    extraDeliveryFee?: Decimal | DecimalJsLike | number | string
     status?: $Enums.PackageStatus
     customerName: string
     customerPhone: string
@@ -9886,6 +9985,9 @@ export namespace Prisma {
     price?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
+    hasIssue?: BoolFilter<"Package"> | boolean
+    issueNote?: StringNullableFilter<"Package"> | string | null
+    extraDeliveryFee?: DecimalFilter<"Package"> | Decimal | DecimalJsLike | number | string
     status?: EnumPackageStatusFilter<"Package"> | $Enums.PackageStatus
     customerName?: StringFilter<"Package"> | string
     customerPhone?: StringFilter<"Package"> | string
@@ -9905,6 +10007,9 @@ export namespace Prisma {
     price?: Decimal | DecimalJsLike | number | string
     codAmount?: Decimal | DecimalJsLike | number | string
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    hasIssue?: boolean
+    issueNote?: string | null
+    extraDeliveryFee?: Decimal | DecimalJsLike | number | string
     status?: $Enums.PackageStatus
     customerName: string
     customerPhone: string
@@ -9923,6 +10028,9 @@ export namespace Prisma {
     price?: Decimal | DecimalJsLike | number | string
     codAmount?: Decimal | DecimalJsLike | number | string
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    hasIssue?: boolean
+    issueNote?: string | null
+    extraDeliveryFee?: Decimal | DecimalJsLike | number | string
     status?: $Enums.PackageStatus
     customerName: string
     customerPhone: string
@@ -10131,6 +10239,9 @@ export namespace Prisma {
     price?: Decimal | DecimalJsLike | number | string
     codAmount?: Decimal | DecimalJsLike | number | string
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    hasIssue?: boolean
+    issueNote?: string | null
+    extraDeliveryFee?: Decimal | DecimalJsLike | number | string
     status?: $Enums.PackageStatus
     customerName: string
     customerPhone: string
@@ -10149,6 +10260,9 @@ export namespace Prisma {
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasIssue?: BoolFieldUpdateOperationsInput | boolean
+    issueNote?: NullableStringFieldUpdateOperationsInput | string | null
+    extraDeliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     status?: EnumPackageStatusFieldUpdateOperationsInput | $Enums.PackageStatus
     customerName?: StringFieldUpdateOperationsInput | string
     customerPhone?: StringFieldUpdateOperationsInput | string
@@ -10167,6 +10281,9 @@ export namespace Prisma {
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasIssue?: BoolFieldUpdateOperationsInput | boolean
+    issueNote?: NullableStringFieldUpdateOperationsInput | string | null
+    extraDeliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     status?: EnumPackageStatusFieldUpdateOperationsInput | $Enums.PackageStatus
     customerName?: StringFieldUpdateOperationsInput | string
     customerPhone?: StringFieldUpdateOperationsInput | string
@@ -10185,6 +10302,9 @@ export namespace Prisma {
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasIssue?: BoolFieldUpdateOperationsInput | boolean
+    issueNote?: NullableStringFieldUpdateOperationsInput | string | null
+    extraDeliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     status?: EnumPackageStatusFieldUpdateOperationsInput | $Enums.PackageStatus
     customerName?: StringFieldUpdateOperationsInput | string
     customerPhone?: StringFieldUpdateOperationsInput | string
@@ -10203,6 +10323,9 @@ export namespace Prisma {
     price?: Decimal | DecimalJsLike | number | string
     codAmount?: Decimal | DecimalJsLike | number | string
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    hasIssue?: boolean
+    issueNote?: string | null
+    extraDeliveryFee?: Decimal | DecimalJsLike | number | string
     status?: $Enums.PackageStatus
     customerName: string
     customerPhone: string
@@ -10221,6 +10344,9 @@ export namespace Prisma {
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasIssue?: BoolFieldUpdateOperationsInput | boolean
+    issueNote?: NullableStringFieldUpdateOperationsInput | string | null
+    extraDeliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     status?: EnumPackageStatusFieldUpdateOperationsInput | $Enums.PackageStatus
     customerName?: StringFieldUpdateOperationsInput | string
     customerPhone?: StringFieldUpdateOperationsInput | string
@@ -10239,6 +10365,9 @@ export namespace Prisma {
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasIssue?: BoolFieldUpdateOperationsInput | boolean
+    issueNote?: NullableStringFieldUpdateOperationsInput | string | null
+    extraDeliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     status?: EnumPackageStatusFieldUpdateOperationsInput | $Enums.PackageStatus
     customerName?: StringFieldUpdateOperationsInput | string
     customerPhone?: StringFieldUpdateOperationsInput | string
@@ -10257,6 +10386,9 @@ export namespace Prisma {
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     codAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasIssue?: BoolFieldUpdateOperationsInput | boolean
+    issueNote?: NullableStringFieldUpdateOperationsInput | string | null
+    extraDeliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     status?: EnumPackageStatusFieldUpdateOperationsInput | $Enums.PackageStatus
     customerName?: StringFieldUpdateOperationsInput | string
     customerPhone?: StringFieldUpdateOperationsInput | string

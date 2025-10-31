@@ -11,6 +11,7 @@ import {
   BarChartOutlined,
   SettingOutlined,
   PrinterOutlined,
+  WarningOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import {
@@ -63,6 +64,7 @@ const allMenuItems = [
   ),
   getItem("Assign Packages", "/scan", <ScanOutlined />, undefined, "packages"),
   getItem("Merchants", "/merchants", <ShopOutlined />, undefined, "merchants"),
+  getItem("Issue Packages", "/issue-packages", <WarningOutlined />, undefined, "issue-packages"),
   getItem("Drivers", "/drivers", <CarOutlined />, undefined, "drivers"),
   getItem("Team", "/team", <TeamOutlined />, undefined, "team"),
   getItem("Reports", "/reports", <BarChartOutlined />, undefined, "reports"),
@@ -106,6 +108,7 @@ const breadcrumbMap: Record<string, string[]> = {
   "/packages": ["Home", "Packages"],
   "/packages/print": ["Home", "Print Packages"],
   "/scan": ["Home", "Assign Packages"],
+  "/issue-packages": ["Home", "Issue Packages"],
   "/merchants": ["Home", "Merchants"],
   "/drivers": ["Home", "Drivers"],
   "/team": ["Home", "Team"],

@@ -125,7 +125,7 @@ export class ReportsService {
           contact: pkg.customerPhone,
           trackingNumber: pkg.packageNumber,
           cashCollectionAmount: Number(pkg.codAmount),
-          deliveryFee: Number(pkg.deliveryFee),
+          deliveryFee: Number(pkg.deliveryFee || 0) + Number(pkg.extraDeliveryFee || 0),
           driverName: pkg.driver?.name,
           merchantName: pkg.merchant.name,
           status: pkg.status,
@@ -342,7 +342,7 @@ export class ReportsService {
       0,
     );
     const totalDeliveryFee = allPackages.reduce(
-      (sum, pkg) => sum + Number(pkg.deliveryFee),
+      (sum, pkg) => sum + Number(pkg.deliveryFee || 0) + Number(pkg.extraDeliveryFee || 0),
       0,
     );
 
@@ -441,7 +441,7 @@ export class ReportsService {
         0,
       );
       const totalDeliveryFee = packages.reduce(
-        (sum, pkg) => sum + Number(pkg.deliveryFee),
+        (sum, pkg) => sum + Number(pkg.deliveryFee || 0) + Number(pkg.extraDeliveryFee || 0),
         0,
       );
       const deliveryRate =
@@ -462,7 +462,7 @@ export class ReportsService {
           customerName: pkg.customerName,
           status: pkg.status,
           codAmount: Number(pkg.codAmount),
-          deliveryFee: Number(pkg.deliveryFee),
+          deliveryFee: Number(pkg.deliveryFee || 0) + Number(pkg.extraDeliveryFee || 0),
           createdAt: pkg.createdAt,
           updatedAt: pkg.updatedAt,
         })),
@@ -522,7 +522,7 @@ export class ReportsService {
         0,
       );
       const totalDeliveryFee = packages.reduce(
-        (sum, pkg) => sum + Number(pkg.deliveryFee),
+        (sum, pkg) => sum + Number(pkg.deliveryFee || 0) + Number(pkg.extraDeliveryFee || 0),
         0,
       );
       const deliveryRate =
@@ -543,7 +543,7 @@ export class ReportsService {
           customerName: pkg.customerName,
           status: pkg.status,
           codAmount: Number(pkg.codAmount),
-          deliveryFee: Number(pkg.deliveryFee),
+          deliveryFee: Number(pkg.deliveryFee || 0) + Number(pkg.extraDeliveryFee || 0),
           createdAt: pkg.createdAt,
           updatedAt: pkg.updatedAt,
         })),

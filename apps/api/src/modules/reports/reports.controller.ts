@@ -303,7 +303,10 @@ export class ReportsController {
       const totalCOD = sum(deliveryPackages, 'codAmount');
       const collectedCOD = sum(delivered, 'codAmount');
       const uncollectedCOD = sum(pending, 'codAmount');
-      const totalDeliveryFee = sum(delivered, 'deliveryFee');
+      // Calculate total delivery fee including extra fees
+      const totalDeliveryFee = delivered.reduce((acc, p) => 
+        acc + Number(p.deliveryFee || 0) + Number(p.extraDeliveryFee || 0), 0
+      );
       const outstanding = 0;
       const toSettle = collectedCOD - totalDeliveryFee;
       
@@ -487,7 +490,7 @@ export class ReportsController {
           pkg.packageNumber,
           pkg.status,
           Number(pkg.codAmount) || 0,
-          Number(pkg.deliveryFee) || 0,
+          Number(pkg.deliveryFee || 0) + Number(pkg.extraDeliveryFee || 0),
           '',
         ]);
         deliverySheet.mergeCells(row.number, 10, row.number, 11);

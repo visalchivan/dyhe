@@ -16,6 +16,7 @@ import { BulkCreatePackagesDto } from './dto/bulk-create-packages.dto';
 import { BulkAssignPackagesDto } from './dto/bulk-assign-packages.dto';
 import { UpdatePackageDto } from './dto/update-package.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UpdatePackageIssueDto } from './dto/update-package-issue.dto';
 
 @Controller('packages')
 @UseGuards(JwtAuthGuard)
@@ -64,6 +65,23 @@ export class PackagesController {
     );
   }
 
+  @Get('issues')
+  findIssuePackages(
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('search') search?: string,
+    @Query('merchantId') merchantId?: string,
+    @Query('driverId') driverId?: string,
+  ) {
+    return this.packagesService.findIssuePackages(
+      page || 1,
+      limit || 10,
+      search,
+      merchantId,
+      driverId,
+    );
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.packagesService.findOne(id);
@@ -72,6 +90,14 @@ export class PackagesController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePackageDto: UpdatePackageDto) {
     return this.packagesService.update(id, updatePackageDto);
+  }
+
+  @Patch(':id/issue')
+  updateIssue(
+    @Param('id') id: string,
+    @Body() updateIssueDto: UpdatePackageIssueDto,
+  ) {
+    return this.packagesService.updateIssue(id, updateIssueDto);
   }
 
   @Delete(':id')

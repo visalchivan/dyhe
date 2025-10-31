@@ -9,6 +9,9 @@ export interface Package {
   customerAddress: string;
   codAmount: number;
   deliveryFee: number;
+  hasIssue?: boolean;
+  issueNote?: string | null;
+  extraDeliveryFee?: number;
   status: string;
   merchantId: string;
   merchant: {
@@ -139,6 +142,34 @@ export const packagesApi = {
   // Delete package
   deletePackage: async (id: string): Promise<{ message: string }> => {
     const response = await api.delete(`/packages/${id}`);
+    return response.data;
+  },
+
+  // List issue packages
+  listIssuePackages: async (params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    merchantId?: string;
+    driverId?: string;
+  }): Promise<PackageListResponse> => {
+    const query = new URLSearchParams();
+    if (params.page) query.append("page", String(params.page));
+    if (params.limit) query.append("limit", String(params.limit));
+    if (params.search) query.append("search", params.search);
+    if (params.merchantId) query.append("merchantId", params.merchantId);
+    if (params.driverId) query.append("driverId", params.driverId);
+    const response = await api.get(`/packages/issues?${query.toString()}`);
+    return response.data;
+  },
+
+  // Update package issue
+  updatePackageIssue: async (id: string, body: {
+    hasIssue?: boolean;
+    issueNote?: string | null;
+    extraDeliveryFee?: number;
+  }): Promise<Package> => {
+    const response = await api.patch(`/packages/${id}/issue`, body);
     return response.data;
   },
 };

@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
-import { Drawer, Typography } from "antd";
+import { Drawer, Typography, message } from "antd";
 import { PackageForm } from "./package-form";
-import { Package, UpdatePackageDto } from "../../../../lib/api/packages";
+import { Package, UpdatePackageDto, packagesApi } from "../../../../lib/api/packages";
 import { useUpdatePackage } from "../../../../hooks/usePackages";
+import { useQueryClient } from "@tanstack/react-query";
 
 const { Title } = Typography;
 
@@ -20,18 +21,49 @@ export const EditPackageModal: React.FC<EditPackageModalProps> = ({
   onClose,
 }) => {
   const updatePackageMutation = useUpdatePackage();
+  const queryClient = useQueryClient();
 
-  const handleSubmit = async (values: UpdatePackageDto) => {
+  const handleSubmit = async (values: UpdatePackageDto & { hasIssue?: boolean; issueNote?: string; extraDeliveryFee?: number; }) => {
     if (!packageData) return;
 
     try {
-      await updatePackageMutation.mutateAsync({
-        id: packageData.id,
-        data: values,
-      });
+      const { hasIssue, issueNote, extraDeliveryFee, ...rest } = values as any;
+
+      // 1) Update the standard package fields
+      await updatePackageMutation.mutateAsync({ id: packageData.id, data: rest });
+
+      // 2) Update issue fields only when toggled on or existing issue fields should change
+      const existingHasIssue = Boolean(packageData.hasIssue);
+      const existingNote = packageData.issueNote ?? "";
+      const existingExtra = Number(packageData.extraDeliveryFee || 0);
+      const nextHasIssue = Boolean(hasIssue);
+      const nextNote = issueNote ?? existingNote;
+      const nextExtra = Number((extraDeliveryFee ?? existingExtra) || 0);
+
+      const shouldUpdateIssue =
+        nextHasIssue ||
+        existingHasIssue !== nextHasIssue ||
+        existingNote !== nextNote ||
+        existingExtra !== nextExtra;
+
+      if (shouldUpdateIssue) {
+        await packagesApi.updatePackageIssue(packageData.id, {
+          hasIssue: nextHasIssue,
+          issueNote: nextNote,
+          extraDeliveryFee: nextExtra,
+        });
+        // Invalidate issue packages query
+        queryClient.invalidateQueries({ queryKey: ["packages", "issues"] });
+      }
+      
+      // Invalidate all package queries to refresh the UI
+      queryClient.invalidateQueries({ queryKey: ["packages"] });
+      queryClient.invalidateQueries({ queryKey: ["package", packageData.id] });
+      
       onClose();
-    } catch {
-      // Error is handled by the mutation
+    } catch (error: any) {
+      message.error(error.response?.data?.message || "Failed to update package");
+      console.error("Error updating package:", error);
     }
   };
 

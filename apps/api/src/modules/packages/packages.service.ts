@@ -12,6 +12,7 @@ import { UpdatePackageDto } from './dto/update-package.dto';
 import { UpdatePackageStatusDto } from './dto/update-package-status.dto';
 import { PackageStatus } from 'generated/client';
 import { getStartOfTodayPhnomPenh } from '../../utils/timezone.util';
+import { UpdatePackageIssueDto } from './dto/update-package-issue.dto';
 
 @Injectable()
 export class PackagesService {
@@ -291,6 +292,54 @@ export class PackagesService {
     };
   }
 
+  async findIssuePackages(
+    page: number = 1,
+    limit: number = 10,
+    search?: string,
+    merchantId?: string,
+    driverId?: string,
+  ) {
+    const skip = (page - 1) * limit;
+
+    const where: any = { hasIssue: true };
+
+    if (search) {
+      where.OR = [
+        { packageNumber: { contains: search, mode: 'insensitive' as const } },
+        { customerName: { contains: search, mode: 'insensitive' as const } },
+        { customerPhone: { contains: search, mode: 'insensitive' as const } },
+        { customerAddress: { contains: search, mode: 'insensitive' as const } },
+      ];
+    }
+
+    if (merchantId) where.merchantId = merchantId;
+    if (driverId) where.driverId = driverId === 'unassigned' ? null : driverId;
+
+    const [packages, total] = await Promise.all([
+      this.prisma.package.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          merchant: { select: { id: true, name: true, email: true, phone: true } },
+          driver: { select: { id: true, name: true, email: true } },
+        },
+      }),
+      this.prisma.package.count({ where }),
+    ]);
+
+    return {
+      packages,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
   async findOne(id: string) {
     const packageData = await this.prisma.package.findUnique({
       where: { id },
@@ -398,6 +447,30 @@ export class PackagesService {
     });
 
     return packageData;
+  }
+
+  async updateIssue(id: string, updateIssueDto: UpdatePackageIssueDto) {
+    const existingPackage = await this.prisma.package.findUnique({ where: { id } });
+    if (!existingPackage) {
+      throw new NotFoundException(`Package with ID ${id} not found`);
+    }
+
+    const { hasIssue, issueNote, extraDeliveryFee } = updateIssueDto;
+
+    const updated = await this.prisma.package.update({
+      where: { id },
+      data: {
+        ...(hasIssue !== undefined ? { hasIssue } : {}),
+        ...(issueNote !== undefined ? { issueNote } : {}),
+        ...(extraDeliveryFee !== undefined ? { extraDeliveryFee } : {}),
+      },
+      include: {
+        merchant: { select: { id: true, name: true, email: true, phone: true } },
+        driver: { select: { id: true, name: true, email: true } },
+      },
+    });
+
+    return updated;
   }
 
   async remove(id: string) {

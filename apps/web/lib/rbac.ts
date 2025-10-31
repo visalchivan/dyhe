@@ -46,6 +46,12 @@ export const rolePermissions: Record<string, Record<string, Permission>> = {
       canEdit: true,
       canDelete: true,
     },
+    "issue-packages": {
+      canView: true,
+      canCreate: true,
+      canEdit: true,
+      canDelete: true,
+    },
   },
 
   // ADMIN has most access except team management
@@ -84,6 +90,12 @@ export const rolePermissions: Record<string, Record<string, Permission>> = {
     settings: {
       canView: true,
       canCreate: false,
+      canEdit: true,
+      canDelete: false,
+    },
+    "issue-packages": {
+      canView: true,
+      canCreate: true,
       canEdit: true,
       canDelete: false,
     },
@@ -131,6 +143,12 @@ export const rolePermissions: Record<string, Record<string, Permission>> = {
       canView: false,
       canCreate: false,
       canEdit: false,
+      canDelete: false,
+    },
+    "issue-packages": {
+      canView: true,
+      canCreate: false,
+      canEdit: true,
       canDelete: false,
     },
   },
