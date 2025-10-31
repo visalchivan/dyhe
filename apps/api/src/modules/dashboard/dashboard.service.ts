@@ -1,21 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PackageStatus } from '../../../generated/client';
+import { parseDateRangeForQuery } from '../../utils/timezone.util';
 
 @Injectable()
 export class DashboardService {
   constructor(private prisma: PrismaService) {}
 
   async getDashboardStats(startDate?: string, endDate?: string) {
-    let dateFilter = {};
-    if (startDate || endDate) {
-      dateFilter = {
-        createdAt: {
-          ...(startDate ? { gte: new Date(startDate) } : {}),
-          ...(endDate ? { lte: new Date(endDate) } : {}),
-        },
-      };
-    }
+    const dateRange = parseDateRangeForQuery(startDate, endDate);
+    const dateFilter = dateRange
+      ? {
+          createdAt: {
+            ...(dateRange.start ? { gte: dateRange.start } : {}),
+            ...(dateRange.end ? { lte: dateRange.end } : {}),
+          },
+        }
+      : {};
     const [
       totalPending,
       totalOnDelivery,
@@ -39,15 +40,15 @@ export class DashboardService {
   }
 
   async getRecentPackages(limit: number = 10, startDate?: string, endDate?: string) {
-    let dateFilter = {};
-    if (startDate || endDate) {
-      dateFilter = {
-        createdAt: {
-          ...(startDate ? { gte: new Date(startDate) } : {}),
-          ...(endDate ? { lte: new Date(endDate) } : {}),
-        },
-      };
-    }
+    const dateRange = parseDateRangeForQuery(startDate, endDate);
+    const dateFilter = dateRange
+      ? {
+          createdAt: {
+            ...(dateRange.start ? { gte: dateRange.start } : {}),
+            ...(dateRange.end ? { lte: dateRange.end } : {}),
+          },
+        }
+      : {};
     return this.prisma.package.findMany({
       take: limit,
       orderBy: { createdAt: 'desc' },
@@ -60,15 +61,15 @@ export class DashboardService {
   }
 
   async getPackageStatusDistribution(startDate?: string, endDate?: string) {
-    let dateFilter = {};
-    if (startDate || endDate) {
-      dateFilter = {
-        createdAt: {
-          ...(startDate ? { gte: new Date(startDate) } : {}),
-          ...(endDate ? { lte: new Date(endDate) } : {}),
-        },
-      };
-    }
+    const dateRange = parseDateRangeForQuery(startDate, endDate);
+    const dateFilter = dateRange
+      ? {
+          createdAt: {
+            ...(dateRange.start ? { gte: dateRange.start } : {}),
+            ...(dateRange.end ? { lte: dateRange.end } : {}),
+          },
+        }
+      : {};
     const statusCounts = await this.prisma.package.groupBy({
       by: ['status'],
       _count: { status: true },

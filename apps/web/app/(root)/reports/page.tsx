@@ -42,6 +42,7 @@ const { Option } = Select;
 const ReportsPage = () => {
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
   const [selectedMerchant, setSelectedMerchant] = useState<string[] | null>(null);
+  // Do not apply a default filter; only show defaults in the picker UI
   const [dateRange, setDateRange] = useState<
     [dayjs.Dayjs | null, dayjs.Dayjs | null] | null
   >(null);
@@ -102,13 +103,19 @@ const ReportsPage = () => {
   const deliveredPackages = analytics?.deliveredPackages || 0;
   const pendingPackages = analytics?.pendingPackages || 0;
 
-  // Export: one XLSX per merchant (selected date or today)
+  // Export: one XLSX per merchant (using date range or default to current date)
   const [exporting, setExporting] = useState(false);
   const exportExcelSmart = async () => {
     try {
       setExporting(true);
-      const date = dayjs().format("YYYY-MM-DD");
-      const selectedDate = dateRange && dateRange[0] ? dateRange[0].format("YYYY-MM-DD") : date;
+      // If no date range selected, use current date as endDate (startDate will be undefined = all past data)
+      const endDate = dateRange && dateRange[1] 
+        ? dateRange[1].format("YYYY-MM-DD") 
+        : dayjs().format("YYYY-MM-DD");
+      const startDate = dateRange && dateRange[0] 
+        ? dateRange[0].format("YYYY-MM-DD") 
+        : undefined;
+      
       const merchants: Array<{ id: string; name: string }> = merchantsData?.merchants || [];
       const targetMerchants = (!selectedMerchant || selectedMerchant.length === 0)
         ? merchants
@@ -118,11 +125,12 @@ const ReportsPage = () => {
         return;
       }
       for (const m of targetMerchants) {
-        const blob = await reportsApi.exportMerchantExcel(m.id, selectedDate);
+        const blob = await reportsApi.exportMerchantExcel(m.id, startDate, endDate);
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
+        const filename = `DYHE_Report_${m.name.replace(/\s+/g, '_')}_${endDate}.xlsx`;
         link.setAttribute("href", url);
-        link.setAttribute("download", `DYHE_Report_${m.name.replace(/\s+/g, '_')}_${selectedDate}.xlsx`);
+        link.setAttribute("download", filename);
         link.style.visibility = "hidden";
         document.body.appendChild(link);
         link.click();
@@ -334,6 +342,13 @@ const ReportsPage = () => {
               style={{ width: "100%", marginTop: 4 }}
               value={dateRange}
               onChange={setDateRange}
+              // Show default selection in the calendar without applying it
+              defaultPickerValue={[dayjs().startOf("month"), dayjs()]}
+              presets={[
+                { label: "Today", value: [dayjs(), dayjs()] },
+                { label: "This Month", value: [dayjs().startOf("month"), dayjs()] },
+                { label: "Last 7 Days", value: [dayjs().subtract(6, "day"), dayjs()] },
+              ]}
             />
           </Col>
           <Col span={6}>

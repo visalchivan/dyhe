@@ -44,10 +44,14 @@ export class ReportsService {
     if (startDate || endDate) {
       where.createdAt = {};
       if (startDate) {
-        where.createdAt.gte = new Date(startDate);
+        // Set to beginning of day in Asia/Phnom_Penh timezone
+        const start = new Date(`${startDate}T00:00:00+07:00`);
+        where.createdAt.gte = start;
       }
       if (endDate) {
-        where.createdAt.lte = new Date(endDate);
+        // Set to end of day in Asia/Phnom_Penh timezone
+        const end = new Date(`${endDate}T23:59:59.999+07:00`);
+        where.createdAt.lte = end;
       }
     }
 
@@ -192,19 +196,77 @@ export class ReportsService {
     return { start, end, label: ymd };
   }
 
-  async buildMerchantWorkbook(merchantId: string, dateStr?: string) {
+  // Compute date range for Asia/Phnom_Penh (UTC+07:00)
+  // Note: Dates in database are stored as UTC, so we need to convert Phnom Penh times to UTC for proper comparison
+  private getPhnomPenhDateRange(startDateStr?: string, endDateStr?: string): { start: Date; end: Date; endDateLabel: string } {
+    const toYmd = (d: Date) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${dd}`;
+    };
+
+    let endYmd: string;
+    if (endDateStr) {
+      endYmd = endDateStr;
+    } else {
+      const fmt = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Phnom_Penh', year: 'numeric', month: '2-digit', day: '2-digit' });
+      endYmd = fmt.format(new Date());
+    }
+
+    // Build end date range (for Sheet 1 - single day)
+    // Create date in Phnom Penh timezone, then get UTC equivalent for database comparison
+    const endDayStartPhnom = new Date(`${endYmd}T00:00:00+07:00`);
+    const endDayEndPhnom = new Date(`${endYmd}T23:59:59.999+07:00`);
+    // These Date objects already represent the correct UTC moment, Prisma will use them correctly
+
+    // Build start date range (for Sheet 2 - from startDate to endDate)
+    let rangeStart: Date;
+    if (startDateStr) {
+      rangeStart = new Date(`${startDateStr}T00:00:00+07:00`);
+    } else {
+      // If no startDate, use a very early date to include all past data
+      // Use a date that's definitely before any package creation (1900-01-01 in UTC)
+      rangeStart = new Date('1900-01-01T00:00:00Z');
+    }
+
+    return { 
+      start: rangeStart, 
+      end: endDayEndPhnom, 
+      endDateLabel: endYmd 
+    };
+  }
+
+  async buildMerchantWorkbook(merchantId: string, startDateStr?: string, endDateStr?: string) {
     const merchant = await this.prisma.merchant.findUnique({ where: { id: merchantId } });
     if (!merchant) {
       throw new Error('Merchant not found');
     }
 
-    const { start, end, label } = this.getPhnomPenhDayRange(dateStr);
+    const { start: rangeStart, end: endDayEnd, endDateLabel } = this.getPhnomPenhDateRange(startDateStr, endDateStr);
+    
+    // Build end date single day range for Sheet 1 (00:00:00 to 23:59:59 on endDate)
+    const endDayStartPhnom = new Date(`${endDateLabel}T00:00:00+07:00`);
 
-    // Sheet 1: packages created within the selected day (Asia/Phnom_Penh)
+    // Debug logging
+    console.log('📊 buildMerchantWorkbook - Date ranges:', {
+      merchantId,
+      startDateStr: startDateStr || '(none - using all past data)',
+      endDateStr: endDateStr || '(none - using current date)',
+      endDateLabel,
+      scenario: startDateStr && endDateStr ? 'SCENARIO 2: Date range selected' : 'SCENARIO 1: No date selected',
+      rangeStart: rangeStart.toISOString(),
+      endDayStartPhnom: endDayStartPhnom.toISOString(),
+      endDayEnd: endDayEnd.toISOString(),
+      sheet1Range: `endDate only: ${endDayStartPhnom.toISOString()} to ${endDayEnd.toISOString()}`,
+      sheet2Range: startDateStr ? `startDate to endDate: ${rangeStart.toISOString()} to ${endDayEnd.toISOString()}` : `all past data: ${rangeStart.toISOString()} to ${endDayEnd.toISOString()}`,
+    });
+
+    // Sheet 1: packages created on endDate only (that single day)
     const inputPackages = await this.prisma.package.findMany({
       where: {
         merchantId,
-        createdAt: { gte: start, lte: end },
+        createdAt: { gte: endDayStartPhnom, lte: endDayEnd },
       },
       include: {
         driver: { select: { name: true } },
@@ -212,11 +274,12 @@ export class ReportsService {
       orderBy: { createdAt: 'asc' },
     });
 
-    // Sheet 2: historical packages strictly before the selected day
+    // Sheet 2: packages from startDate to endDate (inclusive range)
+    // If no startDate provided, rangeStart will be a very early date (1900-01-01) to include all past data
     const historicalPackages = await this.prisma.package.findMany({
       where: {
         merchantId,
-        createdAt: { lt: start },
+        createdAt: { gte: rangeStart, lte: endDayEnd },
       },
       include: {
         driver: { select: { name: true } },
@@ -224,10 +287,28 @@ export class ReportsService {
       orderBy: { createdAt: 'desc' },
     });
 
+    // Get all unique dates from Sheet 2 to verify we're getting past data
+    const sheet2Dates = historicalPackages.map(p => {
+      const date = new Date(p.createdAt);
+      const dateStr = date.toISOString().split('T')[0];
+      const timeStr = date.toISOString().split('T')[1].split('.')[0];
+      return `${dateStr} ${timeStr}`;
+    });
+    const uniqueDates = [...new Set(sheet2Dates.map(d => d.split(' ')[0]))];
+
+    console.log('📊 buildMerchantWorkbook - Results:', {
+      sheet1Count: inputPackages.length,
+      sheet2Count: historicalPackages.length,
+      sheet2UniqueDates: uniqueDates.sort(),
+      sheet2AllDates: sheet2Dates.slice(0, 10), // Show first 10
+      sheet2OldestDate: sheet2Dates[sheet2Dates.length - 1],
+      sheet2NewestDate: sheet2Dates[0],
+    });
+
     // Build workbook using exceljs (imported by controller), return data model
     return {
       merchant,
-      label,
+      label: endDateLabel,
       inputPackages,
       historicalPackages,
     };
@@ -322,10 +403,14 @@ export class ReportsService {
     if (startDate || endDate) {
       where.createdAt = {};
       if (startDate) {
-        where.createdAt.gte = new Date(startDate);
+        // Set to beginning of day in Asia/Phnom_Penh timezone
+        const start = new Date(`${startDate}T00:00:00+07:00`);
+        where.createdAt.gte = start;
       }
       if (endDate) {
-        where.createdAt.lte = new Date(endDate);
+        // Set to end of day in Asia/Phnom_Penh timezone
+        const end = new Date(`${endDate}T23:59:59.999+07:00`);
+        where.createdAt.lte = end;
       }
     }
 
@@ -399,10 +484,14 @@ export class ReportsService {
     if (startDate || endDate) {
       where.createdAt = {};
       if (startDate) {
-        where.createdAt.gte = new Date(startDate);
+        // Set to beginning of day in Asia/Phnom_Penh timezone
+        const start = new Date(`${startDate}T00:00:00+07:00`);
+        where.createdAt.gte = start;
       }
       if (endDate) {
-        where.createdAt.lte = new Date(endDate);
+        // Set to end of day in Asia/Phnom_Penh timezone
+        const end = new Date(`${endDate}T23:59:59.999+07:00`);
+        where.createdAt.lte = end;
       }
     }
 

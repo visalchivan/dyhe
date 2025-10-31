@@ -11,6 +11,7 @@ import { BulkAssignPackagesDto } from './dto/bulk-assign-packages.dto';
 import { UpdatePackageDto } from './dto/update-package.dto';
 import { UpdatePackageStatusDto } from './dto/update-package-status.dto';
 import { PackageStatus } from 'generated/client';
+import { getStartOfTodayPhnomPenh } from '../../utils/timezone.util';
 
 @Injectable()
 export class PackagesService {
@@ -681,7 +682,7 @@ export class PackagesService {
             driverId,
             status: PackageStatus.DELIVERED,
             updatedAt: {
-              gte: new Date(new Date().setHours(0, 0, 0, 0)),
+              gte: getStartOfTodayPhnomPenh(),
             },
           },
         }),

@@ -219,10 +219,11 @@ export const reportsApi = {
     );
     return response.data;
   },
-  exportMerchantExcel: async (merchantId: string, date?: string): Promise<Blob> => {
+  exportMerchantExcel: async (merchantId: string, startDate?: string, endDate?: string): Promise<Blob> => {
     const params = new URLSearchParams();
     params.append("merchantId", merchantId);
-    if (date) params.append("date", date);
+    if (startDate) params.append("startDate", startDate);
+    if (endDate) params.append("endDate", endDate);
     const response = await api.get(
       `/reports/export/excel-per-merchant?${params.toString()}`,
       { responseType: "blob" }
